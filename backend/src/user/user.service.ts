@@ -30,4 +30,33 @@ export class UserService {
         }
         return user;
     }
+
+    async getFriends(id): Promise<UserEntity[]> {
+        return await this.userRepository.query(
+          ` SELECT *
+            FROM "user" U
+            WHERE U.id <> $1
+              AND EXISTS(
+                SELECT 1
+                FROM user_friends_user F
+                WHERE (F."userId_1" = $1 AND F."userId_2" = U.id )
+                OR (F."userId_2" = $1 AND F."userId_1" = U.id )
+                );  `,
+          [id],
+        );
+    }
+
+    async getBlockedUsers(id): Promise<UserEntity[]> {
+        return await this.userRepository.query(
+          ` SELECT *
+            FROM "user" U
+            WHERE U.id <> $1
+              AND EXISTS(
+                SELECT 1
+                FROM user_blocked_users_user F
+                WHERE (F."userId_1" = $1 AND F."userId_2" = U.id )
+                );  `,
+          [id],
+        );
+    }
 }

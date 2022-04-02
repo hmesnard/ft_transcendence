@@ -11,9 +11,25 @@ export class UserController {
 
     @Get('me')
     @UseGuards(JwtGuard)
-    findMe(
+    getProfile(
         @User() user
     ) {
         return this.userService.findOneById(user.id);
+    }
+
+    @Get('friends')
+    @UseGuards(JwtGuard)
+    getFriends(
+        @User() user
+    ) {
+        return this.userService.getFriends(user.id);
+    }
+
+    @Get('blocked')
+    @UseGuards(JwtGuard)
+    getBlockedUsers(
+        @User() user
+    ) {
+        return this.userService.getBlockedUsers(user.id);
     }
 }
