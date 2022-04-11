@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import { User } from 'src/decorators/user.decorator';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/ft.guard';
@@ -18,9 +18,12 @@ export class AuthController {
 
 	@Get('42/return')
 	@UseGuards(FtGuard)
-	ftAuthReturn(
-		@User() user
+	async ftAuthReturn(
+		@User() user42,
+		@Res({passthrough: true}) res
 	) {
-		return this.authService.treatFtOauth(user);
+		const { user, jwt } = await this.authService.treatFtOauth(user42);
+        res.cookie('access_token', jwt);
+		return user;
 	}
 }
