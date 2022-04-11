@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { NewUserDto } from './dto/new-user.dto';
 import { UserEntity } from './entities/user.entity';
 
 @Injectable()
@@ -10,25 +11,18 @@ export class UserService {
         private userRepository: Repository<UserEntity>
     ) {}
 
-    async findOneById(id: number) {
-        return await this.userRepository.findOne({id: id});
+    createUser(newUser: NewUserDto): UserEntity { //console.log ici
+      const user = this.userRepository.create(newUser);
+      try {
+        this.userRepository.save(user);
+      } catch (e) {
+        throw new ConflictException('Username must be unique'); //probably other possible errors
+      }
+      return user;
     }
 
-    //probablement a spliter en plusieurs petites fonctions
-    async findOrCreate42(user42) {
-        let user = await this.findOneById(user42.id);
-        if (!user) {
-            user = this.userRepository.create({
-                id: user42.id,
-                username: user42.username,
-            });
-            try {
-                await this.userRepository.save(user);
-            } catch (e) {
-                throw new ConflictException('Username must be unique');
-            }
-        }
-        return user;
+    async findOneById(id: number): Promise<UserEntity> {
+      return await this.userRepository.findOne({id: id}); //juste id ?
     }
 
     async getFriends(id): Promise<UserEntity[]> {
