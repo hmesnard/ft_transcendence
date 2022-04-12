@@ -11,10 +11,10 @@ export class UserService {
         private userRepository: Repository<UserEntity>
     ) {}
 
-    createUser(newUser: NewUserDto): UserEntity { //console.log ici
-      const user = this.userRepository.create(newUser);
+    async createUser(newUser: NewUserDto): Promise<UserEntity> { //console.log ici
+      let user = this.userRepository.create(newUser);
       try {
-        this.userRepository.save(user);
+        user = await this.userRepository.save(user);
       } catch (e) {
         throw new ConflictException('Username must be unique'); //probably other possible errors
       }
