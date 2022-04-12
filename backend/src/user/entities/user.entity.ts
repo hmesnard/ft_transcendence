@@ -12,6 +12,12 @@ export class UserEntity extends TimestampEntity {
     })
     username: string;
 
+    @Column({ default: false })
+    tfaEnabled: boolean;
+
+    @Column({ nullable: true })
+    tfaSecret?: string;
+
     @ManyToMany(type => UserEntity)
     @JoinTable()
     friends: UserEntity[];

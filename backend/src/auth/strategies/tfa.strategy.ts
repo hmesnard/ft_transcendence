@@ -5,7 +5,7 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { UserService } from "src/user/user.service";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class TfaStrategy extends PassportStrategy(Strategy, 'jwt-tfa') {
   constructor(
       private userService: UserService
   ) {
@@ -31,11 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     console.log(payload);
     const user = await this.userService.findOneById(payload.id);
     if (user) {
-      if (!user.tfaEnabled || payload.tfaOK) {
-        return user
-      } else {
-        throw new UnauthorizedException();
-      }
+      return user;
     } else {
       throw new UnauthorizedException();
     }

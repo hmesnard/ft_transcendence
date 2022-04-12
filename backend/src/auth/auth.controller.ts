@@ -1,12 +1,16 @@
-import { Controller, Get, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 import { User } from 'src/decorators/user.decorator';
+import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/ft.guard';
+import { TfaGuard } from './guards/tfa.guard';
 
 @Controller('auth')
 export class AuthController {
     constructor(
-        private authService: AuthService
+        private authService: AuthService,
+		private userService: UserService
     ) {}
 
     @Get('42')
@@ -26,4 +30,25 @@ export class AuthController {
         res.cookie('access_token', jwt);
 		return user;
 	}
+
+	@Post('tfa')
+	@HttpCode(200)
+	@UseGuards(TfaGuard)
+	async authenticate(
+		@User() user,
+		@Body() { tfaCode },
+		@Res({passthrough: true}) res: Response
+	) {
+    const isCodeValid = this.userService.isTfaCodeValid(tfaCode, user);
+    if (!isCodeValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+
+    const jwt = this.authService.treatTfa(user.id, true);
+
+	res.clearCookie('access_token');
+	res.cookie('access_token', jwt);
+
+    return user;
+  }
 }

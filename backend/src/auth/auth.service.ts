@@ -17,4 +17,8 @@ export class AuthService {
         const jwt = this.jwtService.sign({id: user.id, username: user.username});
         return {user, jwt};
     }
+
+    treatTfa(id: number, tfaOK = false) {
+        return this.jwtService.sign({ id, tfaOK });
+    }
 }
