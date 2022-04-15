@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { Column, Entity, EntitySchema, JoinTable, ManyToMany, PrimaryColumn, Table } from "typeorm";
 
@@ -16,6 +17,7 @@ export class UserEntity extends TimestampEntity {
     tfaEnabled: boolean;
 
     @Column({ nullable: true })
+    @Exclude()
     tfaSecret?: string;
 
     @ManyToMany(type => UserEntity)
