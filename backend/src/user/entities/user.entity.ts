@@ -1,3 +1,5 @@
+import { ChannelService } from "src/channel/channel.service";
+import { ChannelEntity } from "src/channel/entities/channel.entity";
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { Column, Entity, EntitySchema, JoinTable, ManyToMany, PrimaryColumn, PrimaryGeneratedColumn, Table } from "typeorm";
 
@@ -18,8 +20,8 @@ export class UserEntity extends TimestampEntity {
 	})
 	nickname:string;
 
-	// @ManyToMany(() => Channel, (channel) => channel.id)
-	// channel_id: Channel [];
+	@ManyToMany(() => ChannelEntity, (channel) => channel.id)
+	channel_id: ChannelEntity [];
 
 	@Column({ default: false })
     tfaEnabled: boolean;
