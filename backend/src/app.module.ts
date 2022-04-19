@@ -5,6 +5,9 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ChannelModule } from './channel/channel.module';
+import { ChannelController } from './channel/channel.controller';
+import { ChannelModule } from './channel/channel.module';
 
 @Module({
   imports: [
@@ -20,9 +23,10 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: true
     }),
     UserModule,
-    AuthModule
+    AuthModule,
+    ChannelModule
   ],
-  controllers: [AppController],
+  controllers: [AppController, ChannelController],
   providers: [AppService],
 })
 export class AppModule {}
