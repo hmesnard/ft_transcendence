@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+    api:
+        container_name: api
+        image: nahaddac/transcendence
+        build:
+            dockerfile: dockerfile
+            context: .
+            target: development
+        volumes:
+            - .:/usr/src/app
+            - /usr/src/app/node_modules        
+        depends_on:
+            - postgres
+        environment:
+            DATABASE_URL: postgres://dbadmin:dbadmin@postgres:5432/db_transc
+            NODE_ENV: development
+            PORT: 3000
+        ports:
+            - "8080:3000" # for communication
+            - "9229:9229" # for debugging      
+        networks:
+            - nesjs-network
+        restart: unless-stopped
+        command: npm run start:debug    
+        # env_file: # as we're not using any env variables it isn't useful rn
+        #     - .env
+    postgres:
+        container_name: postgres
+        image: postgres:10.4
+        ports:
+            - "35000:5432"
+        environment:
+            POSTGRES_USER: dbadmin
+            POSTGRES_PASSWORD: dbadmin
+            POSTGRES_DB: db_transc
+            PG_DATA: /var/lib/postgresql/data
+        volumes:
+            - pgdata:/var/lib/postgresql/data  
+        networks:
+            - nesjs-network
+        restart: unless-stopped            
+
+networks:
+    nesjs-network:        
+volumes:
+    pgdata:                                  
