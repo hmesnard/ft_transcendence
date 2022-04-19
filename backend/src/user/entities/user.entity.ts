@@ -1,18 +1,27 @@
 import { TimestampEntity } from "src/generics/timestamp.entity";
-import { Column, Entity, EntitySchema, JoinTable, ManyToMany, PrimaryColumn, Table } from "typeorm";
+import { Column, Entity, EntitySchema, JoinTable, ManyToMany, PrimaryColumn, PrimaryGeneratedColumn, Table } from "typeorm";
 
 @Entity('user')
 export class UserEntity extends TimestampEntity {
-    @PrimaryColumn()
-    id: number;
-
-    @Column({
-        length: 50,
+    @PrimaryGeneratedColumn()
+	id: number;
+	
+	@Column({
+		length: 50,
         unique: true
-    })
-    username: string;
+	})
+	username: string;
 
-    @Column({ default: false })
+	@Column({
+		length: 50,
+        unique: true
+	})
+	nickname:string;
+
+	// @ManyToMany(() => Channel, (channel) => channel.id)
+	// channel_id: Channel [];
+
+	@Column({ default: false })
     tfaEnabled: boolean;
 
     @Column({ nullable: true })
