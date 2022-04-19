@@ -17,7 +17,6 @@ import { ChannelController } from './channel/channel.controller';
     entities: ["dist/**/*.entity{.ts,.js}"],
     autoLoadEntities: true,
     synchronize: true,
-    
   }), UserModule, ChannelModule],
   controllers: [AppController,ChannelController],
   providers: [AppService],
