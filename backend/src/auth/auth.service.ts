@@ -14,7 +14,7 @@ export class AuthService {
         if (!user) {
             user = await this.userService.createUser(user42);
         }
-        const jwt = this.jwtService.sign({id: user.id, username: user.username});
+        const jwt = this.jwtService.sign({username: user.username});
         return {user, jwt};
     }
 
