@@ -7,7 +7,7 @@ import { Column, Entity, EntitySchema, JoinTable, ManyToMany, PrimaryColumn, Pri
 export class UserEntity extends TimestampEntity {
     @PrimaryGeneratedColumn()
 	id: number;
-	
+
 	@Column({
 		length: 50,
         unique: true
@@ -36,4 +36,6 @@ export class UserEntity extends TimestampEntity {
     @ManyToMany(type => UserEntity)
     @JoinTable()
     blockedUsers: UserEntity[];
+
+    
 }

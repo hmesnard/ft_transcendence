@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Put, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { User } from 'src/decorators/user.decorator';
@@ -9,6 +9,7 @@ export class UserController {
     constructor(
         private userService: UserService
     ) {}
+    
 
     @Get('me')
     @UseGuards(JwtGuard)
@@ -18,7 +19,7 @@ export class UserController {
         return this.userService.findOneById(user.id);
     }
 
-    @Post('tfa/secret')
+    @Post('/tfa/secret')
     @UseGuards(JwtGuard)
     async register(
         @Res() response: Response,
@@ -29,7 +30,7 @@ export class UserController {
         return this.userService.pipeQrCodeStream(response, otpauthUrl);
     }
 
-    @Post('tfa/turn-on')
+    @Post('/tfa/turn-on')
     @HttpCode(200)
     @UseGuards(JwtGuard)
     async turnOnTfa(
@@ -58,4 +59,13 @@ export class UserController {
     ) {
         return this.userService.getBlockedUsers(user.id);
     }
+
+    // @Put('change')
+    // @UseGuards(JwtGuard)
+    // change_nickname(
+    //     @Body() 
+    //     @User() user
+    // ) {
+    //     return this.ChangeNickname(user);
+    // }
 }

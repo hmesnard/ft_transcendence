@@ -64,6 +64,7 @@ export class UserService {
       })
     }
 
+
     async getFriends(id): Promise<UserEntity[]> {
         return await this.userRepository.query(
           ` SELECT *
