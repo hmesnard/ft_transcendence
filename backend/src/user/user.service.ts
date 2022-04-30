@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
 import { Repository } from 'typeorm';
@@ -24,8 +24,15 @@ export class UserService {
       return user;
     }
 
+    deleteUser(id: number) {
+      return this.userRepository.delete(id);
+    }
+
     async findOneById(id: number): Promise<UserEntity> {
-      return await this.userRepository.findOne({id: id}); //juste id ?
+      const user = await this.userRepository.findOne({id: id}); //juste id ?
+      if (!user)
+        throw new NotFoundException();
+      return user;
     }
 
     async setTfaSecret(secret: string, id: number) {
@@ -64,7 +71,25 @@ export class UserService {
       })
     }
 
-    async getFriends(id): Promise<UserEntity[]> {
+    async requestFriend(user: UserEntity, id: number) {
+      const friend = await this.findOneById(id);
+      user.friends = await this.getFriends(user.id);
+      user.friends.push(friend);
+      return await this.userRepository.save(user);
+    }
+
+    async deleteFriend(user: UserEntity, id: number) {
+      const friendRemove = await this.findOneById(id);
+      friendRemove.friends = await this.getFriends(id);
+      friendRemove.friends = friendRemove.friends.filter((friend) => friend.id !== user.id);
+      await this.userRepository.save(friendRemove);
+
+      user.friends = await this.getFriends(user.id);
+      user.friends = user.friends.filter((friend) => {return friend.id !== id});
+      return await this.userRepository.save(user);
+    }
+
+    async getRequestedUsers(id): Promise<UserEntity[]> {
         return await this.userRepository.query(
           ` SELECT *
             FROM "user" U
@@ -73,10 +98,43 @@ export class UserService {
                 SELECT 1
                 FROM user_friends_user F
                 WHERE (F."userId_1" = $1 AND F."userId_2" = U.id )
-                OR (F."userId_2" = $1 AND F."userId_1" = U.id )
                 );  `,
           [id],
         );
+        //return await this.userRepository.createQueryBuilder('user').leftJoinAndSelect('user.friends', 'user').getMany();
+    }
+
+    async getRequestedByUsers(id): Promise<UserEntity[]> {
+      return await this.userRepository.query(
+        ` SELECT *
+          FROM "user" U
+          WHERE U.id <> $1
+            AND EXISTS(
+              SELECT 1
+              FROM user_friends_user F
+              WHERE (F."userId_1" = U.id AND F."userId_2" = $1 )
+              );  `,
+        [id],
+      );
+  }
+
+    async getFriends(id): Promise<UserEntity[]> {
+      const requests = await this.getRequestedUsers(id);
+      const requestedBy = await this.getRequestedByUsers(id);
+      return requests.filter((user) => requestedBy.some((usr) => user.id === usr.id));
+    }
+
+    async blockUser(user: UserEntity, id: number) {
+      const toBlock = await this.findOneById(id);
+      user.blockedUsers = await this.getBlockedUsers(user.id);
+      user.blockedUsers.push(toBlock);
+      return await this.userRepository.save(user);
+    }
+
+    async unblockUser(user: UserEntity, id: number) {
+      user.blockedUsers = await this.getBlockedUsers(user.id);
+      user.blockedUsers = user.blockedUsers.filter((usr) => {return usr.id !== id});
+      return await this.userRepository.save(user);
     }
 
     async getBlockedUsers(id): Promise<UserEntity[]> {

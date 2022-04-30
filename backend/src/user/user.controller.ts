@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { User } from 'src/decorators/user.decorator';
@@ -10,7 +10,15 @@ export class UserController {
         private userService: UserService
     ) {}
 
-    @Get('me')
+    @Delete()
+    @UseGuards(JwtGuard)
+    deleteUser(
+        @User() user
+    ) {
+        return this.userService.deleteUser(user.id);
+    }
+
+    @Get()
     @UseGuards(JwtGuard)
     getProfile(
         @User() user
@@ -43,7 +51,25 @@ export class UserController {
         await this.userService.turnOnTfa(user.id);
     }
 
-    @Get('friends')
+    @Post('friend/:id')
+    @UseGuards(JwtGuard)
+    requestFriend(
+        @User() user,
+        @Param('id', ParseIntPipe) id
+    ) {
+        return this.userService.requestFriend(user, id);
+    }
+
+    @Delete('friend/:id')
+    @UseGuards(JwtGuard)
+    deleteFriend(
+        @User() user,
+        @Param('id', ParseIntPipe) id
+    ) {
+        return this.userService.deleteFriend(user, id);
+    }
+    
+    @Get('friend')
     @UseGuards(JwtGuard)
     getFriends(
         @User() user
@@ -51,7 +77,25 @@ export class UserController {
         return this.userService.getFriends(user.id);
     }
 
-    @Get('blocked')
+    @Post('block/:id')
+    @UseGuards(JwtGuard)
+    blockUser(
+        @User() user,
+        @Param('id', ParseIntPipe) id
+    ) {
+        return this.userService.blockUser(user, id);
+    }
+
+    @Delete('block/:id')
+    @UseGuards(JwtGuard)
+    unblockUser(
+        @User() user,
+        @Param('id', ParseIntPipe) id
+    ) {
+        return this.userService.unblockUser(user, id);
+    }
+
+    @Get('block')
     @UseGuards(JwtGuard)
     getBlockedUsers(
         @User() user
