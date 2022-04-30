@@ -29,10 +29,7 @@ export class UserService {
     }
 
     async findOneById(id: number): Promise<UserEntity> {
-      const user = await this.userRepository.findOne({id: id}); //juste id ?
-      if (!user)
-        throw new NotFoundException();
-      return user;
+      return await this.userRepository.findOne({id: id}); //juste id ?
     }
 
     async setTfaSecret(secret: string, id: number) {
@@ -73,6 +70,8 @@ export class UserService {
 
     async requestFriend(user: UserEntity, id: number) {
       const friend = await this.findOneById(id);
+      if (!friend)
+        throw new NotFoundException('User not found');
       user.friends = await this.getFriends(user.id);
       user.friends.push(friend);
       return await this.userRepository.save(user);
@@ -80,6 +79,8 @@ export class UserService {
 
     async deleteFriend(user: UserEntity, id: number) {
       const friendRemove = await this.findOneById(id);
+      if (!friendRemove)
+        throw new NotFoundException('User not found');
       friendRemove.friends = await this.getFriends(id);
       friendRemove.friends = friendRemove.friends.filter((friend) => friend.id !== user.id);
       await this.userRepository.save(friendRemove);
@@ -126,6 +127,8 @@ export class UserService {
 
     async blockUser(user: UserEntity, id: number) {
       const toBlock = await this.findOneById(id);
+      if (!toBlock)
+        throw new NotFoundException('User not found');
       user.blockedUsers = await this.getBlockedUsers(user.id);
       user.blockedUsers.push(toBlock);
       return await this.userRepository.save(user);
