@@ -68,6 +68,11 @@ export class UserService {
       })
     }
 
+    async setPicture(user: UserEntity, path: string) {
+      user.picture = path;
+      return await this.userRepository.save(user);
+    }
+
     async requestFriend(user: UserEntity, id: number) {
       const friend = await this.findOneById(id);
       if (!friend)

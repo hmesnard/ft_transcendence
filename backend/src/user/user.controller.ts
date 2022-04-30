@@ -1,7 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Res, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { User } from 'src/decorators/user.decorator';
+import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -49,6 +53,25 @@ export class UserController {
             throw new UnauthorizedException('Wrong authentication code');
         }
         await this.userService.turnOnTfa(user.id);
+    }
+
+    @Post('picture')
+    @UseGuards(JwtGuard)
+    @UseInterceptors(FileInterceptor('file'))
+    setPicture(
+        @User() user,
+        @UploadedFile() file: Express.Multer.File
+    ) {
+        return this.userService.setPicture(user, file.path);
+    }
+
+    @Get('picture')
+    @UseGuards(JwtGuard)
+    getPicture(
+        @User() user: UserEntity
+    ) {
+        const file = createReadStream(join(process.cwd(), user.picture));
+        return new StreamableFile(file);
     }
 
     @Post('friend/:id')

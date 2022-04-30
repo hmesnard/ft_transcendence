@@ -20,6 +20,11 @@ export class UserEntity extends TimestampEntity {
     @Exclude()
     tfaSecret?: string;
 
+    @Column({
+        default: null
+    })
+    picture: string
+
     @ManyToMany(type => UserEntity)
     @JoinTable()
     friends: UserEntity[];
