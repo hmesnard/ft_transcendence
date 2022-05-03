@@ -1,6 +1,7 @@
 import { Exclude } from "class-transformer";
 import { TimestampEntity } from "src/generics/timestamp.entity";
-import { Column, Entity, EntitySchema, JoinTable, ManyToMany, PrimaryColumn, Table } from "typeorm";
+import { MatchEntity } from "src/match/entities/match.entity";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from "typeorm";
 
 @Entity('user')
 export class UserEntity extends TimestampEntity {
@@ -25,11 +26,20 @@ export class UserEntity extends TimestampEntity {
     })
     picture: string
 
-    @ManyToMany(type => UserEntity)
+    @ManyToMany(() => UserEntity)
     @JoinTable()
     friends: UserEntity[];
 
-    @ManyToMany(type => UserEntity)
+    @ManyToMany(() => UserEntity)
     @JoinTable()
     blockedUsers: UserEntity[];
+
+    @OneToMany(() => MatchEntity, (match) => match.homePlayer)
+    homeMatches: MatchEntity[];
+
+    @OneToMany(() => MatchEntity, (match) => match.awayPlayer)
+    awayMatches: MatchEntity[];
+
+    @OneToMany(() => MatchEntity, (match) => match.winner)
+    wonMatches: MatchEntity[];
 }
