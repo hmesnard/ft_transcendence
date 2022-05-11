@@ -1,6 +1,6 @@
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { UserEntity } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { MessageEntity } from "./message.entity";
 
 export enum ChatStatus {
@@ -23,7 +23,8 @@ export class ChatEntity extends TimestampEntity {
     @Column({ nullable: true })
     password: string;
 
-    @ManyToMany(() => UserEntity)
+    @ManyToMany(() => UserEntity, { eager: true })
+    @JoinTable()
     members: UserEntity[];
 
     @OneToMany(() => MessageEntity, (message) => message.chat)

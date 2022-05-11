@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 
@@ -27,12 +27,25 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
   
   @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: { sender: string, room: string, message: string }) {
-    this.wss.to(payload.room).emit('chatToClient', payload);
+  async handleMessage(client: Socket, payload: { room: string, content: string }) {
+    const user = await this.chatService.getUserFromSocket(client);
+    const chat = await this.chatService.getChatById(+payload.room);
+    if (!this.chatService.clientIsMember(user, chat)) {
+      throw new WsException('Client is not member of this chat');
+    }
+
+    const message = await this.chatService.saveMessage(payload.content, user, chat);
+    this.wss.to(payload.room).emit('msgToClient', message);
   }
 
   @SubscribeMessage('joinRoom')
-  joinRoom(client: Socket, room: string) {
+  async joinRoom(client: Socket, room: string) {
+    const user = await this.chatService.getUserFromSocket(client);
+    const chat = await this.chatService.getChatById(+room);
+    if (!this.chatService.clientIsMember(user, chat)) {
+      throw new WsException('Client is not member of this chat');
+    }
+
     client.join(room);
   }
 
