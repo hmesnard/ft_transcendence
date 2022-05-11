@@ -17,6 +17,7 @@ import { TfaStrategy } from './strategies/tfa.strategy';
       signOptions: { expiresIn: 3600 }
     })
   ],
+  exports: [AuthService],
   controllers: [AuthController],
   providers: [AuthService, FtStrategy, TfaStrategy, JwtStrategy]
 })

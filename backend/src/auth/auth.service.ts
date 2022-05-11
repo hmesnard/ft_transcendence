@@ -21,4 +21,11 @@ export class AuthService {
     treatTfa(id: number, tfaOK = false) {
         return this.jwtService.sign({ id, tfaOK });
     }
+
+    async getUserFromAuthenticationToken(token: string) {
+        const payload = this.jwtService.verify(token);
+        if (payload.id) {
+          return this.userService.findOneById(payload.id);
+        }
+      }
 }

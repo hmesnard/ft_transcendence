@@ -1,4 +1,5 @@
 import { Exclude } from "class-transformer";
+import { MessageEntity } from "src/chat/entities/message.entity";
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { MatchEntity } from "src/match/entities/match.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from "typeorm";
@@ -42,4 +43,7 @@ export class UserEntity extends TimestampEntity {
 
     @OneToMany(() => MatchEntity, (match) => match.winner)
     wonMatches: MatchEntity[];
+
+    @OneToMany(() => MessageEntity, (message) => message.author)
+    messages: MessageEntity[];
 }
