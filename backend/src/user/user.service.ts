@@ -29,7 +29,7 @@ export class UserService {
     }
 
     async getUserById(id: number): Promise<UserEntity> {
-      return await this.userRepository.findOne({id: id}); //juste id ?
+      return await this.userRepository.findOne(id);
     }
 
     async setTfaSecret(secret: string, id: number) {
