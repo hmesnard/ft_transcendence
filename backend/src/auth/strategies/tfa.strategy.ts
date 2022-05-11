@@ -29,7 +29,7 @@ export class TfaStrategy extends PassportStrategy(Strategy, 'jwt-tfa') {
 
   async validate(payload: any) {
     console.log(payload);
-    const user = await this.userService.findOneById(payload.id);
+    const user = await this.userService.getUserById(payload.id);
     if (user) {
       return user;
     } else {

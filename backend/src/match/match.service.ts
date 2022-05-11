@@ -16,9 +16,9 @@ export class MatchService {
     async saveMatch(matchData: MatchDto) {
         const match = this.matchRepository.create();
 
-        match.homePlayer = await this.userService.findOneById(matchData.homePlayerId);
-        match.awayPlayer = await this.userService.findOneById(matchData.awayPlayerId);
-        match.winner = await this.userService.findOneById(matchData.winnerId);
+        match.homePlayer = await this.userService.getUserById(matchData.homePlayerId);
+        match.awayPlayer = await this.userService.getUserById(matchData.awayPlayerId);
+        match.winner = await this.userService.getUserById(matchData.winnerId);
         match.homeScore = matchData.homeScore;
         match.awayScore = matchData.awayScore;
 
