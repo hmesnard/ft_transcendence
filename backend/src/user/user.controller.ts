@@ -27,7 +27,7 @@ export class UserController {
     getProfile(
         @User() user
     ) {
-        return this.userService.findOneById(user.id);
+        return this.userService.getUserById(user.id);
     }
 
     @Post('tfa/secret')

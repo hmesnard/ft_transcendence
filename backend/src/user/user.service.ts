@@ -28,7 +28,7 @@ export class UserService {
       return this.userRepository.delete(id);
     }
 
-    async findOneById(id: number): Promise<UserEntity> {
+    async getUserById(id: number): Promise<UserEntity> {
       return await this.userRepository.findOne({id: id}); //juste id ?
     }
 
@@ -74,7 +74,7 @@ export class UserService {
     }
 
     async requestFriend(user: UserEntity, id: number) {
-      const friend = await this.findOneById(id);
+      const friend = await this.getUserById(id);
       if (!friend)
         throw new NotFoundException('User not found');
       user.friends = await this.getFriends(user.id);
@@ -83,7 +83,7 @@ export class UserService {
     }
 
     async deleteFriend(user: UserEntity, id: number) {
-      const friendRemove = await this.findOneById(id);
+      const friendRemove = await this.getUserById(id);
       if (!friendRemove)
         throw new NotFoundException('User not found');
       friendRemove.friends = await this.getFriends(id);
@@ -131,7 +131,7 @@ export class UserService {
     }
 
     async blockUser(user: UserEntity, id: number) {
-      const toBlock = await this.findOneById(id);
+      const toBlock = await this.getUserById(id);
       if (!toBlock)
         throw new NotFoundException('User not found');
       user.blockedUsers = await this.getBlockedUsers(user.id);

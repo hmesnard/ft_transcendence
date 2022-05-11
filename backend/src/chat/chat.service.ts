@@ -18,6 +18,6 @@ export class ChatService {
         }
         console.log(user);
         return user;
-      }
+    }
 
 }

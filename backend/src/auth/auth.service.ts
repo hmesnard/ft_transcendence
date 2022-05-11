@@ -10,7 +10,7 @@ export class AuthService {
     ) {}
 
     async treatFtOauth(user42) {
-        let user = await this.userService.findOneById(user42.id);
+        let user = await this.userService.getUserById(user42.id);
         if (!user) {
             user = await this.userService.createUser(user42);
         }
@@ -25,7 +25,7 @@ export class AuthService {
     async getUserFromAuthenticationToken(token: string) {
         const payload = this.jwtService.verify(token);
         if (payload.id) {
-          return this.userService.findOneById(payload.id);
+          return this.userService.getUserById(payload.id);
         }
       }
 }
