@@ -1,34 +1,43 @@
 import { Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatService } from './chat.service';
+import { AuthService } from './auth/auth.service';
+import { ChatService } from './chat/chat.service';
+import { UserService } from './user/user.service';
 
-@WebSocketGateway({cors: {origin: '*'}})
-export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway({ cors: {origin: '*'} })
+export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
-    private chatService: ChatService
+    private authService: AuthService,
+    private chatService: ChatService,
+    private userService: UserService
   ) {}
 
   @WebSocketServer() wss: Server;
 
-  private logger: Logger = new Logger('ChatGateway');
+  private logger: Logger = new Logger('AppGateway');
   
   afterInit(server: Server) {
     this.logger.log('Initialized !');
   }
   
-  handleConnection(client: Socket, ...args: any[]) {
-    this.chatService.getUserFromSocket(client);
+  async handleConnection(client: Socket, ...args: any[]) {
+    const user = await this.authService.getUserFromSocket(client);
+    this.userService.updateStatus(user.id, true);
+    this.wss.emit('updateStatus', 'connected');
     this.logger.log(`client connected:    ${client.id}`);
   }
   
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
+    const user = await this.authService.getUserFromSocket(client);
+    this.userService.updateStatus(user.id, false);
+    this.wss.emit('updateStatus', 'disconnected');
     this.logger.log(`client disconnected: ${client.id}`);
   }
   
   @SubscribeMessage('msgToServer')
   async handleMessage(client: Socket, payload: { room: string, content: string }) {
-    const user = await this.chatService.getUserFromSocket(client);
+    const user = await this.authService.getUserFromSocket(client);
     const chat = await this.chatService.getChatById(+payload.room);
     if (!this.chatService.clientIsMember(user, chat)) {
       throw new WsException('Client is not member of this chat');
@@ -40,7 +49,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @SubscribeMessage('joinRoom')
   async joinRoom(client: Socket, room: string) {
-    const user = await this.chatService.getUserFromSocket(client);
+    const user = await this.authService.getUserFromSocket(client);
     const chat = await this.chatService.getChatById(+room);
     if (!this.chatService.clientIsMember(user, chat)) {
       throw new WsException('Client is not member of this chat');

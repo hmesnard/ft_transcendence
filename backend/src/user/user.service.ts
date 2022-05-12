@@ -68,6 +68,12 @@ export class UserService {
       })
     }
 
+    updateStatus(id: number, status: boolean) {
+      return this.userRepository.update(id, {
+        connected: status
+      });
+    }
+
     async setPicture(user: UserEntity, path: string) {
       user.picture = path;
       return await this.userRepository.save(user);

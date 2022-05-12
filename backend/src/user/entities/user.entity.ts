@@ -22,6 +22,9 @@ export class UserEntity extends TimestampEntity {
     @Exclude()
     tfaSecret?: string;
 
+    @Column({ default: false })
+    connected: boolean;
+
     @Column({
         default: null
     })

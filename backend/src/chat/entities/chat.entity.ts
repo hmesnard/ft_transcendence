@@ -3,11 +3,6 @@ import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { MessageEntity } from "./message.entity";
 
-export enum ChatStatus {
-    public = 'public',
-    private = 'private'
-}
-
 @Entity('chat')
 export class ChatEntity extends TimestampEntity {
 
@@ -17,8 +12,8 @@ export class ChatEntity extends TimestampEntity {
     @Column({ unique: true })
     name: string;
 
-    @Column({ type: 'enum', enum: ChatStatus, default: ChatStatus.public })
-    status: ChatStatus;
+    @Column({ default: false })
+    private: boolean;
 
     @Column({ nullable: true })
     password: string;

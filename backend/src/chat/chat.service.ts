@@ -18,17 +18,6 @@ export class ChatService {
         private authService: AuthService
     ) {}
 
-    async getUserFromSocket(socket: Socket) {
-        const cookie = socket.handshake.headers.cookie;
-        //const { access_token: authenticationToken } = parse(cookie); //Parse cookie if necessary (https://wanago.io/2021/01/25/api-nestjs-chat-websockets/)
-        const user = await this.authService.getUserFromAuthenticationToken(cookie);
-        if (!user) {
-          throw new WsException('Invalid credentials.');
-        }
-        console.log(user);
-        return user;
-    }
-
     async getChatById(id: number): Promise<ChatEntity> {
         return await this.chatRepository.findOne(id);
     }

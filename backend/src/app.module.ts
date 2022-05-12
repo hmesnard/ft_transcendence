@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { MatchModule } from './match/match.module';
 import { ChatModule } from './chat/chat.module';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -27,6 +28,6 @@ import { ChatModule } from './chat/chat.module';
     ChatModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway],
 })
 export class AppModule {}
