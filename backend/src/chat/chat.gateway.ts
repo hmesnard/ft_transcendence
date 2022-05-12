@@ -18,8 +18,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
   
   handleConnection(client: Socket, ...args: any[]) {
-    this.logger.log(`client connected:    ${client.id}`);
     this.chatService.getUserFromSocket(client);
+    this.logger.log(`client connected:    ${client.id}`);
   }
   
   handleDisconnect(client: Socket) {

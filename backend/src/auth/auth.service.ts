@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 
@@ -25,7 +25,16 @@ export class AuthService {
     async getUserFromAuthenticationToken(token: string) {
         const payload = this.jwtService.verify(token);
         if (payload.id) {
-          return this.userService.getUserById(payload.id);
+          const user = await this.userService.getUserById(payload.id);
+          if (user) {
+              if (!user.tfaEnabled || payload.tfaOK) {
+                  return user
+                } else {
+                    throw new UnauthorizedException();
+                }
+            } else {
+                throw new UnauthorizedException();
+            }
         }
-      }
+    }
 }
