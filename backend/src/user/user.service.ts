@@ -70,7 +70,7 @@ export class UserService {
 
     updateStatus(id: number, status: boolean) {
       return this.userRepository.update(id, {
-        connected: status
+        online: status
       });
     }
 

@@ -23,7 +23,7 @@ export class UserEntity extends TimestampEntity {
     tfaSecret?: string;
 
     @Column({ default: false })
-    connected: boolean;
+    online: boolean;
 
     @Column({
         default: null
