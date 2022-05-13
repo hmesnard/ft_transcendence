@@ -38,20 +38,20 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('msgToServer')
   async handleMessage(client: Socket, payload: { room: string, content: string }) {
     const user = await this.authService.getUserFromSocket(client);
-    const chat = await this.chatService.getChatById(+payload.room);
-    if (!this.chatService.clientIsMember(user, chat)) {
+    const channel = await this.chatService.getChannelById(+payload.room);
+    if (!this.chatService.clientIsMember(user, channel)) {
       throw new WsException('Client is not member of this chat');
     }
 
-    const message = await this.chatService.saveMessage(payload.content, user, chat);
+    const message = await this.chatService.saveMessage(payload.content, user, channel);
     this.wss.to(payload.room).emit('msgToClient', message);
   }
 
   @SubscribeMessage('joinRoom')
   async joinRoom(client: Socket, room: string) {
     const user = await this.authService.getUserFromSocket(client);
-    const chat = await this.chatService.getChatById(+room);
-    if (!this.chatService.clientIsMember(user, chat)) {
+    const channel = await this.chatService.getChannelById(+room);
+    if (!this.chatService.clientIsMember(user, channel)) {
       throw new WsException('Client is not member of this chat');
     }
 

@@ -12,14 +12,14 @@ import { MessageEntity } from './entities/message.entity';
 export class ChatService {
     constructor(
         @InjectRepository(ChannelEntity)
-        private chatRepository: Repository<ChannelEntity>,
+        private channelRepository: Repository<ChannelEntity>,
         @InjectRepository(MessageEntity)
         private messageRepository: Repository<MessageEntity>,
         private authService: AuthService
     ) {}
 
-    async getChatById(id: number): Promise<ChannelEntity> {
-        return await this.chatRepository.findOne(id);
+    async getChannelById(id: number): Promise<ChannelEntity> {
+        return await this.channelRepository.findOne(id);
     }
 
     async clientIsMember(user: UserEntity, chat: ChannelEntity): Promise<boolean> {
@@ -31,11 +31,11 @@ export class ChatService {
         return false;
     }
 
-    async saveMessage(content: string, user: UserEntity, chat: ChannelEntity) {
+    async saveMessage(content: string, user: UserEntity, channel: ChannelEntity) {
         let message = this.messageRepository.create({
             content: content,
             author: user,
-            chat: chat
+            channel: channel
         });
         console.log(message);
         try {

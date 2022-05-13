@@ -22,6 +22,6 @@ export class ChannelEntity extends TimestampEntity {
     @JoinTable()
     members: UserEntity[];
 
-    @OneToMany(() => MessageEntity, (message) => message.chat)
+    @OneToMany(() => MessageEntity, (message) => message.channel)
     messages: MessageEntity[];
 }
