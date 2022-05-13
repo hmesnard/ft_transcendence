@@ -1,7 +1,7 @@
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { ChatEntity } from "./chat.entity";
+import { ChannelEntity } from "./channel.entity";
 
 @Entity('message')
 export class MessageEntity extends TimestampEntity {
@@ -15,6 +15,6 @@ export class MessageEntity extends TimestampEntity {
     @ManyToOne(() => UserEntity, (user) => user.messages)
     author: UserEntity;
 
-    @ManyToOne(() => ChatEntity, (chat) => chat.messages)
-    chat: ChatEntity;
+    @ManyToOne(() => ChannelEntity, (chat) => chat.messages)
+    chat: ChannelEntity;
 }

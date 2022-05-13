@@ -3,8 +3,8 @@ import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { MessageEntity } from "./message.entity";
 
-@Entity('chat')
-export class ChatEntity extends TimestampEntity {
+@Entity('channel')
+export class ChannelEntity extends TimestampEntity {
 
     @PrimaryGeneratedColumn()
     id: number;

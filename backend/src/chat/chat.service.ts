@@ -5,24 +5,24 @@ import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { ChatEntity } from './entities/chat.entity';
+import { ChannelEntity } from './entities/channel.entity';
 import { MessageEntity } from './entities/message.entity';
 
 @Injectable()
 export class ChatService {
     constructor(
-        @InjectRepository(ChatEntity)
-        private chatRepository: Repository<ChatEntity>,
+        @InjectRepository(ChannelEntity)
+        private chatRepository: Repository<ChannelEntity>,
         @InjectRepository(MessageEntity)
         private messageRepository: Repository<MessageEntity>,
         private authService: AuthService
     ) {}
 
-    async getChatById(id: number): Promise<ChatEntity> {
+    async getChatById(id: number): Promise<ChannelEntity> {
         return await this.chatRepository.findOne(id);
     }
 
-    async clientIsMember(user: UserEntity, chat: ChatEntity): Promise<boolean> {
+    async clientIsMember(user: UserEntity, chat: ChannelEntity): Promise<boolean> {
         for(var i = 0; i < chat.members.length; i++) {
             if (chat.members[i].id === user.id) {
                 return true;
@@ -31,7 +31,7 @@ export class ChatService {
         return false;
     }
 
-    async saveMessage(content: string, user: UserEntity, chat: ChatEntity) {
+    async saveMessage(content: string, user: UserEntity, chat: ChannelEntity) {
         let message = this.messageRepository.create({
             content: content,
             author: user,
