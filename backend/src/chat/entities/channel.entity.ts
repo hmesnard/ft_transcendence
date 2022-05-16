@@ -10,7 +10,8 @@ export enum ChannelStatus
 {
     public = 'public',
     private = 'private',
-    protected = 'protected'
+    protected = 'protected',
+    direct = 'direct'
 }
 
 @Entity('channel')
@@ -24,9 +25,6 @@ export class ChannelEntity extends TimestampEntity {
 
     @Column({ type: "enum", enum: ChannelStatus, default: ChannelStatus.public })
     status: ChannelStatus;
-
-    @Column({ default: false })
-    direct: boolean;
 
     @Column({ nullable: true })
     password: string;

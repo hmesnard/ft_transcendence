@@ -36,3 +36,12 @@ export class CreateMessageToChatDto
     @IsNotEmpty()
     message: string;
 }
+
+export class createPrivateChannelDto
+{
+    @IsNotEmpty()
+    name: string;
+
+    @IsNotEmpty()
+    usernames: string[];
+}

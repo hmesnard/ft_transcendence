@@ -5,7 +5,7 @@ import { UserEntity } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { ChatUtilsService } from './chatUtils.service';
-import { AdminUserDto, CreateMessageToChatDto, JoinedUserStatusDto, SetPasswordDto } from '../dto/chat.dto';
+import { AdminUserDto, CreateMessageToChatDto, createPrivateChannelDto, JoinedUserStatusDto, SetPasswordDto } from '../dto/chat.dto';
 import { ChannelEntity, ChannelStatus } from '../entities/channel.entity';
 import { JoinedUser } from '../entities/joinedUser.entity';
 import { JoinedUserStatus } from '../entities/joinedUserStatus.entity';
@@ -26,6 +26,57 @@ export class ChatService {
         private chatUtilService: ChatUtilsService
     ) {}
 
+    async createPrivateChannel(data: createPrivateChannelDto, user: UserEntity)
+    {
+        const channel = await this.chatUtilService.getChannelByName(data.name);
+        if (channel || channel.name.includes("direct_with_") === true)
+            throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
+        const newJoinedUser = await this.joinedUserRepository.create({
+            user,
+            owner: true,
+            userId: user.id,
+            channel
+        });
+        await this.joinedUserRepository.save(newJoinedUser);
+        const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
+            userId: user.id,
+            admin: true,
+            channel, 
+        });
+        await this.joinedUserStatusRepository.save(newJoinedUserStatus);
+        const newChannel = await this.channelRepository.create({
+            name: data.name,
+            status: ChannelStatus.private,
+            joinedUsers: [newJoinedUser],
+            joinedUserStatus: [newJoinedUserStatus],
+        });
+        await this.channelRepository.save(newChannel)
+        for (const username of data.usernames)
+        {
+            const friend = await this.userService.getUserByName(username);
+            if (friend)
+            {
+                const newJoinedUser = await this.joinedUserRepository.create({
+                    user: friend,
+                    owner: true,
+                    userId: friend.id,
+                    channel,
+                });
+                await this.joinedUserRepository.save(newJoinedUser);
+                const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
+                    userId: friend.id,
+                    admin: true,
+                    channel, 
+                });
+                await this.joinedUserStatusRepository.save(newJoinedUserStatus);
+                newChannel.joinedUsers.push(newJoinedUser);
+                newChannel.joinedUserStatus.push(newJoinedUserStatus);
+                await this.channelRepository.save(newChannel);
+            }
+        }
+        return newChannel;
+    }
+
     async createPublicChannel(channelName: string, user: UserEntity)
     {
         const channel = await this.chatUtilService.getChannelByName(channelName);
@@ -35,6 +86,7 @@ export class ChatService {
             user,
             owner: true,
             userId: user.id,
+            channel,
         });
         await this.joinedUserRepository.save(newJoinedUser);
         const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
@@ -63,6 +115,7 @@ export class ChatService {
             user,
             owner: true,
             userId: user.id,
+            channel,
         });
         await this.joinedUserRepository.save(newJoinedUser);
         const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
@@ -122,8 +175,10 @@ export class ChatService {
         const channel = await this.chatUtilService.getChannelByName(channelData.name);
         if (channel)
         {
-            if ((channel.direct === true || channel.status === ChannelStatus.private) && (channel.name.includes("direct_with_") === false || channel.name.includes(user.username) === false))
+            if (channel.status === ChannelStatus.private)
                 throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'This is a private chat, you dont have access to join here'}, HttpStatus.FORBIDDEN);
+            if (channel.status === ChannelStatus.direct && (channel.name.includes("direct_with_") === false || channel.name.includes(`${user.id}`) === false))
+                throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'This is a direct chat, you dont have access to join here'}, HttpStatus.FORBIDDEN);
             const joinedUserStatus = await this.joinedUserStatusRepository.findOne({ userId: user.id, channel });
             if (joinedUserStatus && joinedUserStatus.banned !== null)
             {
@@ -260,7 +315,7 @@ export class ChatService {
     {
         if (user.id === friend.id)
             throw new HttpException('You cant create direct chat with yourself', HttpStatus.FORBIDDEN);
-        if (await this.chatUtilService.getChannelByName("direct_with_" + user.username + "_" + friend.username) || await this.chatUtilService.getChannelByName("direct_with_" + friend.username + "_" + user.username))
+        if (await this.chatUtilService.getChannelByName("direct_with_" + user.id + "_" + friend.id) || await this.chatUtilService.getChannelByName("direct_with_" + friend.id + "_" + user.id))
             throw new HttpException('You already have direct chat with him', HttpStatus.FORBIDDEN);
         const joinedUser = await this.joinedUserRepository.create({
             user,
@@ -280,11 +335,10 @@ export class ChatService {
             userId: friend.id, 
         });
         await this.joinedUserStatusRepository.save(joinedFriendStatus);
-        const channelName = "direct_with_" + user.username + "_" + friend.username;
+        const channelName = "direct_with_" + user.id + "_" + friend.id;
         const channel = await this.channelRepository.create({
             name: channelName,
-            status: ChannelStatus.private,
-            direct: true,
+            status: ChannelStatus.direct,
             joinedUsers: [joinedUser, joinedFriend],
             joinedUserStatus: [joinedUserStatus, joinedFriendStatus],
         });
