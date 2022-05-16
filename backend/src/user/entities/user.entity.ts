@@ -1,8 +1,24 @@
 import { Exclude } from "class-transformer";
+import { JoinedUser } from "src/chat/entities/joinedUser.entity";
 import { MessageEntity } from "src/chat/entities/message.entity";
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { MatchEntity } from "src/match/entities/match.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from "typeorm";
+
+export enum UserLevel
+{
+    beginner = 'beginner',
+    advanced = 'advanced',
+    pro = 'pro',
+    expert = 'expert',
+}
+
+export enum UserStatus
+{
+    online = 'online',
+    offline = 'offline',
+    playing = 'playing',
+}
 
 @Entity('user')
 export class UserEntity extends TimestampEntity {
@@ -30,6 +46,21 @@ export class UserEntity extends TimestampEntity {
     })
     picture: string
 
+    @Column({ type: "enum", enum: UserStatus, default: UserStatus.offline })
+    status: UserStatus;
+
+    @Column({ type: "enum", enum: UserLevel, default: UserLevel.beginner })
+    level: UserLevel;
+
+    @Column({ default: 0 })
+    wins: number;
+
+    @Column({ default: 0 })
+    losses: number;
+
+    @Column({ default: 0 })
+    rank: number;
+
     @ManyToMany(() => UserEntity)
     @JoinTable()
     friends: UserEntity[];
@@ -49,4 +80,8 @@ export class UserEntity extends TimestampEntity {
 
     @OneToMany(() => MessageEntity, (message) => message.author)
     messages: MessageEntity[];
+
+    @OneToMany(() => JoinedUser, (joinedUser: JoinedUser) => joinedUser.user)
+    @Exclude({ toPlainOnly: true })
+    joinedUsers: JoinedUser[];
 }

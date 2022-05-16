@@ -32,6 +32,11 @@ export class UserService {
       return await this.userRepository.findOne(id);
     }
 
+    async getUserByName(username: string)
+    {
+      return await this.userRepository.findOne({ username });
+    }
+
     async setTfaSecret(secret: string, id: number) {
       return this.userRepository.update(id, {
         tfaSecret: secret
