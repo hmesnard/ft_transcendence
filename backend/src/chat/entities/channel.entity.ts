@@ -1,7 +1,8 @@
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { UserEntity } from "src/user/entities/user.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { MessageEntity } from "./message.entity";
+import { UserChannelStatus } from "./user-channel-status.entity";
 
 export enum ChannelStatus
 {
@@ -29,6 +30,9 @@ export class ChannelEntity extends TimestampEntity {
     @ManyToMany(() => UserEntity, { eager: true })
     @JoinTable()
     members: UserEntity[];
+
+    @ManyToOne(() => UserChannelStatus, (status) => status.channel)
+    userChannelStatus: UserChannelStatus[];
 
     @OneToMany(() => MessageEntity, (message) => message.channel)
     messages: MessageEntity[];

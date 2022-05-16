@@ -1,5 +1,6 @@
 import { Exclude } from "class-transformer";
 import { MessageEntity } from "src/chat/entities/message.entity";
+import { UserChannelStatus } from "src/chat/entities/user-channel-status.entity";
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { MatchEntity } from "src/match/entities/match.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from "typeorm";
@@ -53,6 +54,9 @@ export class UserEntity extends TimestampEntity {
 
     @OneToMany(() => MatchEntity, (match) => match.winner)
     wonMatches: MatchEntity[];
+
+    @OneToMany(() => UserChannelStatus, (status) => status.user)
+    userChannelStatus: UserChannelStatus[];
 
     @OneToMany(() => MessageEntity, (message) => message.author)
     messages: MessageEntity[];
