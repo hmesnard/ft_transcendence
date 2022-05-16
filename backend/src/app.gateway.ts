@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UnauthorizedException } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
@@ -22,44 +22,68 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
   
   async handleConnection(client: Socket, ...args: any[]) {
-    const user = await this.authService.getUserFromSocket(client);
-    this.userService.updateStatus(user.id, true);
-    this.wss.emit('updateStatus', 'online');
-    this.logger.log(`client connected:    ${client.id}`);
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      this.userService.updateStatus(user.id, true);
+      this.wss.emit('updateStatus', 'online');
+      this.logger.log(`client connected:    ${client.id}`);
+    } catch (e) {
+      this.error(client, e, true);
+    }
   }
   
   async handleDisconnect(client: Socket) {
-    const user = await this.authService.getUserFromSocket(client);
-    this.userService.updateStatus(user.id, false);
-    this.wss.emit('updateStatus', 'offline');
-    this.logger.log(`client disconnected: ${client.id}`);
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      this.userService.updateStatus(user.id, false);
+      this.wss.emit('updateStatus', 'offline');
+      this.logger.log(`client disconnected: ${client.id}`);
+      client.disconnect();
+    } catch (e) {
+      this.error(client, e, true);
+    }
   }
   
   @SubscribeMessage('msgToServer')
   async handleMessage(client: Socket, payload: { room: string, content: string }) {
-    const user = await this.authService.getUserFromSocket(client);
-    const channel = await this.chatService.getChannelById(+payload.room);
-    if (!this.chatService.clientIsMember(user, channel)) {
-      throw new WsException('Client is not member of this chat');
-    }
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      const channel = await this.chatService.getChannelById(+payload.room);
+      if (!this.chatService.clientIsMember(user, channel)) {
+        throw new WsException('Client is not member of this chat');
+      }
 
-    const message = await this.chatService.saveMessage(payload.content, user, channel);
-    this.wss.to(payload.room).emit('msgToClient', message);
+      const message = await this.chatService.saveMessage(payload.content, user, channel);
+      this.wss.to(payload.room).emit('msgToClient', message);
+    } catch (e) {
+      this.error(client, e);
+    }
   }
 
   @SubscribeMessage('joinRoom')
   async joinRoom(client: Socket, room: string) {
-    const user = await this.authService.getUserFromSocket(client);
-    const channel = await this.chatService.getChannelById(+room);
-    if (!this.chatService.clientIsMember(user, channel)) {
-      throw new WsException('Client is not member of this chat');
-    }
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      const channel = await this.chatService.getChannelById(+room);
+      if (!this.chatService.clientIsMember(user, channel)) {
+        throw new WsException('Client is not member of this chat');
+      }
 
-    client.join(room);
+      client.join(room);
+    } catch (e) {
+      this.error(client, e);
+    }
   }
 
   @SubscribeMessage('leaveRoom')
   leaveRoom(client: Socket, room: string) {
     client.leave(room);
   }
+
+  private error(socket: Socket, error: object, disconnect: boolean = false)
+    {
+      socket.emit('Error', error);
+      if (disconnect)
+        socket.disconnect();
+    }
 }
