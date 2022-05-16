@@ -49,7 +49,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try {
       const user = await this.authService.getUserFromSocket(client);
       const channel = await this.chatService.getChannelById(+payload.room);
-      if (!this.chatService.clientIsMember(user, channel)) {
+      if (!(await this.chatService.clientIsMember(user, channel))) {
         throw new WsException('Client is not member of this chat');
       }
 
@@ -65,7 +65,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try {
       const user = await this.authService.getUserFromSocket(client);
       const channel = await this.chatService.getChannelById(+room);
-      if (!this.chatService.clientIsMember(user, channel)) {
+      if (!(await this.chatService.clientIsMember(user, channel))) {
         throw new WsException('Client is not member of this chat');
       }
 
