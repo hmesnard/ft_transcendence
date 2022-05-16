@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
 import { Repository } from 'typeorm';
 import { NewUserDto } from './dto/new-user.dto';
-import { UserEntity } from './entities/user.entity';
+import { UserEntity, UserStatus } from './entities/user.entity';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
 
@@ -70,7 +70,7 @@ export class UserService {
 
     updateStatus(id: number, status: boolean) {
       return this.userRepository.update(id, {
-        online: status
+        status: (status ? UserStatus.ONLINE : UserStatus.OFFLINE)
       });
     }
 

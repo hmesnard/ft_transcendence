@@ -4,6 +4,13 @@ import { TimestampEntity } from "src/generics/timestamp.entity";
 import { MatchEntity } from "src/match/entities/match.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn} from "typeorm";
 
+export enum UserStatus
+{
+    ONLINE = 'online',
+    OFFLINE = 'offline',
+    PLAYING = 'playing',
+}
+
 @Entity('user')
 export class UserEntity extends TimestampEntity {
     @PrimaryColumn()
@@ -22,8 +29,8 @@ export class UserEntity extends TimestampEntity {
     @Exclude()
     tfaSecret?: string;
 
-    @Column({ default: false })
-    online: boolean;
+    @Column({ type: "enum", enum: UserStatus, default: UserStatus.OFFLINE })
+    status: UserStatus;
 
     @Column({
         default: null
