@@ -3,6 +3,14 @@ import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { MessageEntity } from "./message.entity";
 
+export enum ChannelStatus
+{
+    PUBLIC = 'public',
+    PRIVATE = 'private',
+    PROTECTED = 'protected',
+    DIRECT = 'direct'
+}
+
 @Entity('channel')
 export class ChannelEntity extends TimestampEntity {
 
@@ -12,8 +20,8 @@ export class ChannelEntity extends TimestampEntity {
     @Column({ unique: true })
     name: string;
 
-    @Column({ default: false })
-    private: boolean;
+    @Column({ type: "enum", enum: ChannelStatus, default: ChannelStatus.PUBLIC })
+    status: ChannelStatus;
 
     @Column({ nullable: true })
     password: string;
