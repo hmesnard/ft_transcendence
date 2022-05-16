@@ -12,7 +12,7 @@ export class JoinedUser
     owner: boolean
 
     @Column({ nullable: true })
-    username: string;
+    userId: number;
 
     @ManyToOne(() => UserEntity, (user: UserEntity) => user.joinedUsers)
     user: UserEntity;

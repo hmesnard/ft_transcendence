@@ -6,7 +6,7 @@ export class JoinedUserStatusDto
     name: string;
 
     @IsNotEmpty()
-    target: string;
+    targetId: number;
 }
 
 export class AdminUserDto
@@ -15,7 +15,7 @@ export class AdminUserDto
     name: string;
 
     @IsNotEmpty()
-    admin: string;
+    adminId: number;
 }
 
 export class SetPasswordDto

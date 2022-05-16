@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { WsException } from "@nestjs/websockets";
 import { UserEntity } from "src/user/entities/user.entity";
@@ -50,22 +50,17 @@ export class ChatUtilsService
     {
         const channel = await this.getChannelByName(data.name);
         if (!channel)
-            throw new WsException('Channel doesnt exists');
-            // throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
+            throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
         if (!await this.joinedUserRepository.findOne({ user, channel }))
-            throw new WsException('You are not memeber of this channel');
-            // throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
-        const joinedUserStatus = await this.joinedUserStatusRepository.findOne({ username: user.username, channel });
+            throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
+        const joinedUserStatus = await this.joinedUserStatusRepository.findOne({ userId: user.id, channel });
         if (joinedUserStatus && joinedUserStatus.admin === false)
-            throw new WsException('You are not admin of this channel');
-            // throw new HttpException('You are not admin of this chat', HttpStatus.FORBIDDEN);
-        if (!await this.joinedUserRepository.findOne({ username: data.target }))
-            throw new WsException('Selected user doesnt exists');
-            // throw new HttpException('Selected user doesnt exists', HttpStatus.NOT_FOUND);
-        const targetUserStatus = await this.joinedUserStatusRepository.findOne({ username: data.target, channel });
-        if (targetUserStatus && user.username === targetUserStatus.username)
-            throw new WsException('You have no access to choose yourself');
-            // throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
+            throw new HttpException('You are not admin of this chat', HttpStatus.FORBIDDEN);
+        if (!await this.joinedUserRepository.findOne({ userId: data.targetId }))
+            throw new HttpException('Selected user doesnt exists', HttpStatus.NOT_FOUND);
+        const targetUserStatus = await this.joinedUserStatusRepository.findOne({ userId: data.targetId, channel });
+        if (targetUserStatus && user.id === targetUserStatus.userId)
+            throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
         return targetUserStatus;
     }
 
@@ -73,15 +68,12 @@ export class ChatUtilsService
     {
         const channel = await this.getChannelByName(channelName);
         if (!channel)
-            throw new WsException('Channel doesnt exists');
-            // throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
+            throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
         const joinedUser = await this.joinedUserRepository.findOne({ user, channel });
         if (!joinedUser)
-            throw new WsException('You are not member of this channel');
-            // throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
+            throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
         if (joinedUser.owner === false)
-            throw new WsException('You are already member of this channel');
-            // throw new HttpException('You dont have access, you are not owner of this chat', HttpStatus.FORBIDDEN);
+            throw new HttpException('You dont have access, you are not owner of this chat', HttpStatus.FORBIDDEN);
         return channel;
     }
 
@@ -137,7 +129,7 @@ export class ChatUtilsService
 
     async deleteJoinedUsersStatusByUser(user: UserEntity)
     {
-        const joinedUsersStatus = await this.joinedUserStatusRepository.find({ username: user.username });
+        const joinedUsersStatus = await this.joinedUserStatusRepository.find({ userId: user.id });
         if (!joinedUsersStatus)
             return ;
         for (const joinedUserStatus of joinedUsersStatus)

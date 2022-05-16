@@ -8,7 +8,7 @@ export class JoinedUserStatus
     id: number;
 
     @Column()
-    username: string;
+    userId: number;
 
     @Column({ default: false })
     admin: boolean;
