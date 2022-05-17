@@ -26,56 +26,26 @@ export class ChatService {
         private chatUtilService: ChatUtilsService
     ) {}
 
-    // async createPrivateChannel(data: createPrivateChannelDto, user: UserEntity)
-    // {
-    //     const channel = await this.chatUtilService.getChannelByName(data.name);
-    //     if (channel || channel.name.includes("direct_with_") === true)
-    //         throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
-    //     const newJoinedUser = await this.joinedUserRepository.create({
-    //         user,
-    //         owner: true,
-    //         userId: user.id,
-    //         channel
-    //     });
-    //     await this.joinedUserRepository.save(newJoinedUser);
-    //     const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
-    //         userId: user.id,
-    //         admin: true,
-    //         channel, 
-    //     });
-    //     await this.joinedUserStatusRepository.save(newJoinedUserStatus);
-    //     const newChannel = await this.channelRepository.create({
-    //         name: data.name,
-    //         status: ChannelStatus.private,
-    //         joinedUsers: [newJoinedUser],
-    //         joinedUserStatus: [newJoinedUserStatus],
-    //     });
-    //     await this.channelRepository.save(newChannel)
-    //     for (const username of data.usernames)
-    //     {
-    //         const friend = await this.userService.getUserByName(username);
-    //         if (friend)
-    //         {
-    //             const newJoinedUser = await this.joinedUserRepository.create({
-    //                 user: friend,
-    //                 owner: true,
-    //                 userId: friend.id,
-    //                 channel,
-    //             });
-    //             await this.joinedUserRepository.save(newJoinedUser);
-    //             const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
-    //                 userId: friend.id,
-    //                 admin: true,
-    //                 channel, 
-    //             });
-    //             await this.joinedUserStatusRepository.save(newJoinedUserStatus);
-    //             newChannel.joinedUsers.push(newJoinedUser);
-    //             newChannel.joinedUserStatus.push(newJoinedUserStatus);
-    //             await this.channelRepository.save(newChannel);
-    //         }
-    //     }
-    //     return newChannel;
-    // }
+    async inviteUserToChannel(data: JoinedUserStatusDto, user: UserEntity)
+    {
+        const channel = await this.chatUtilService.utils_2(data.name, user);
+        const friend = await this.userService.getUserById(data.targetId);
+        if (await this.joinedUserRepository.findOne({ user: friend, channel }))
+            throw new HttpException({status: HttpStatus.NOT_FOUND, error: 'User is already in the channel'}, HttpStatus.NOT_FOUND);
+        const newJoinedUser = await this.joinedUserRepository.create({
+            user: friend,
+            userId: data.targetId,
+            channel
+        });
+        await this.joinedUserRepository.save(newJoinedUser);
+        if (await this.joinedUserStatusRepository.findOne({ userId: data.targetId, channel }))
+            return ;
+        const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
+            userId: data.targetId,
+            channel,
+        });
+        await this.joinedUserStatusRepository.save(newJoinedUserStatus);
+    }
 
     async createPublicChannel(channelName: string, user: UserEntity)
     {
@@ -98,6 +68,35 @@ export class ChatService {
         await this.joinedUserStatusRepository.save(newJoinedUserStatus);
         const newChannel = await this.channelRepository.create({
             name: channelName,
+            joinedUsers: [newJoinedUser],
+            joinedUserStatus: [newJoinedUserStatus],
+        });
+        await this.channelRepository.save(newChannel);
+        return newChannel;
+    }
+
+    async createPrivateChannel(channelName: string, user: UserEntity)
+    {
+        const channel = await this.chatUtilService.getChannelByName(channelName);
+        if (channel)
+            if (channel.name.includes("direct_with_") === true)
+                throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Channel already exists'}, HttpStatus.BAD_REQUEST);
+        const newJoinedUser = await this.joinedUserRepository.create({
+            user,
+            owner: true,
+            userId: user.id,
+            channel,
+        });
+        await this.joinedUserRepository.save(newJoinedUser);
+        const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
+            userId: user.id,
+            admin: true,
+            channel,
+        });
+        await this.joinedUserStatusRepository.save(newJoinedUserStatus);
+        const newChannel = await this.channelRepository.create({
+            name: channelName,
+            status: ChannelStatus.private,
             joinedUsers: [newJoinedUser],
             joinedUserStatus: [newJoinedUserStatus],
         });

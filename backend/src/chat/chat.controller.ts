@@ -26,10 +26,24 @@ export class ChatController
     }
 
     @UseGuards(JwtGuard)
+    @Post('/inviteuser')
+    async inviteUserToChannel(@Body() data: JoinedUserStatusDto, @User() user)
+    {
+        return this.chatService.inviteUserToChannel(data, user);
+    }
+
+    @UseGuards(JwtGuard)
     @Post('/createpublicchannel')
     async createPublicChannel(@Body('name') channelName: string, @User() user)
     {
         return this.chatService.createPublicChannel(channelName, user);
+    }
+
+    @UseGuards(JwtGuard)
+    @Post('/createprivatechannel')
+    async createPrivateChannel(@Body('name') channelName: string, @User() user)
+    {
+        return this.chatService.createPrivateChannel(channelName, user);
     }
 
     @UseGuards(JwtGuard)
