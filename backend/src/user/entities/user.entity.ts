@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { JoinedUser } from "src/chat/entities/joinedUser.entity";
+import { JoinedUserStatus } from "src/chat/entities/joinedUserStatus.entity";
 import { MessageEntity } from "src/chat/entities/message.entity";
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { MatchEntity } from "src/match/entities/match.entity";
@@ -81,7 +81,7 @@ export class UserEntity extends TimestampEntity {
     @OneToMany(() => MessageEntity, (message) => message.author)
     messages: MessageEntity[];
 
-    @OneToMany(() => JoinedUser, (joinedUser: JoinedUser) => joinedUser.user)
+    @OneToMany(() => JoinedUserStatus, (joinedUserStatus: JoinedUserStatus) => joinedUserStatus.user)
     @Exclude({ toPlainOnly: true })
-    joinedUsers: JoinedUser[];
+    joinedUserStatus: JoinedUserStatus[];
 }

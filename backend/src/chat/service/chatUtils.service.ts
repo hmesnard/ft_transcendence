@@ -5,7 +5,6 @@ import { UserEntity } from "src/user/entities/user.entity";
 import { Repository } from "typeorm";
 import { JoinedUserStatusDto } from "../dto/chat.dto";
 import { ChannelEntity } from "../entities/channel.entity";
-import { JoinedUser } from "../entities/joinedUser.entity";
 import { JoinedUserStatus } from "../entities/joinedUserStatus.entity";
 import { MessageEntity } from "../entities/message.entity";
 
@@ -13,7 +12,6 @@ import { MessageEntity } from "../entities/message.entity";
 export class ChatUtilsService
 {
     constructor(@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
-        @InjectRepository(JoinedUser) private joinedUserRepository: Repository<JoinedUser>,
         @InjectRepository(MessageEntity) private messageRepository: Repository<MessageEntity>,
         @InjectRepository(JoinedUserStatus) private joinedUserStatusRepository: Repository<JoinedUserStatus>) {}
 
@@ -46,94 +44,94 @@ export class ChatUtilsService
         return ;
     }
 
-    async utils(data: JoinedUserStatusDto, user: UserEntity)
-    {
-        const channel = await this.getChannelByName(data.name);
-        if (!channel)
-            throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
-        if (!await this.joinedUserRepository.findOne({ user, channel }))
-            throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
-        const joinedUserStatus = await this.joinedUserStatusRepository.findOne({ userId: user.id, channel });
-        if (joinedUserStatus && joinedUserStatus.admin === false)
-            throw new HttpException('You are not admin of this chat', HttpStatus.FORBIDDEN);
-        if (!await this.joinedUserRepository.findOne({ userId: data.targetId }))
-            throw new HttpException('Selected user doesnt exists', HttpStatus.NOT_FOUND);
-        const targetUserStatus = await this.joinedUserStatusRepository.findOne({ userId: data.targetId, channel });
-        if (targetUserStatus && user.id === targetUserStatus.userId)
-            throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
-        return targetUserStatus;
-    }
+    // async utils(data: JoinedUserStatusDto, user: UserEntity)
+    // {
+    //     const channel = await this.getChannelByName(data.name);
+    //     if (!channel)
+    //         throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
+    //     if (!await this.joinedUserRepository.findOne({ user, channel }))
+    //         throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
+    //     const joinedUserStatus = await this.joinedUserStatusRepository.findOne({ userId: user.id, channel });
+    //     if (joinedUserStatus && joinedUserStatus.admin === false)
+    //         throw new HttpException('You are not admin of this chat', HttpStatus.FORBIDDEN);
+    //     if (!await this.joinedUserRepository.findOne({ userId: data.targetId }))
+    //         throw new HttpException('Selected user doesnt exists', HttpStatus.NOT_FOUND);
+    //     const targetUserStatus = await this.joinedUserStatusRepository.findOne({ userId: data.targetId, channel });
+    //     if (targetUserStatus && user.id === targetUserStatus.userId)
+    //         throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
+    //     return targetUserStatus;
+    // }
 
-    async utils_2(channelName: string, user: UserEntity)
-    {
-        const channel = await this.getChannelByName(channelName);
-        if (!channel)
-            throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
-        const joinedUser = await this.joinedUserRepository.findOne({ user, channel });
-        if (!joinedUser)
-            throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
-        if (joinedUser.owner === false)
-            throw new HttpException('You dont have access, you are not owner of this chat', HttpStatus.FORBIDDEN);
-        return channel;
-    }
+    // async utils_2(channelName: string, user: UserEntity)
+    // {
+    //     const channel = await this.getChannelByName(channelName);
+    //     if (!channel)
+    //         throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
+    //     const joinedUser = await this.joinedUserRepository.findOne({ user, channel });
+    //     if (!joinedUser)
+    //         throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
+    //     if (joinedUser.owner === false)
+    //         throw new HttpException('You dont have access, you are not owner of this chat', HttpStatus.FORBIDDEN);
+    //     return channel;
+    // }
 
-    async deleteMessagesByUser(user: UserEntity)
-    {
-        const messages = await this.messageRepository.find({ author: user });
-        if (!messages)
-            return ;
-        for (const message of messages)
-            await this.messageRepository.delete(message);
-        return ;
-    }
+    // async deleteMessagesByUser(user: UserEntity)
+    // {
+    //     const messages = await this.messageRepository.find({ author: user });
+    //     if (!messages)
+    //         return ;
+    //     for (const message of messages)
+    //         await this.messageRepository.delete(message);
+    //     return ;
+    // }
 
-    async deleteMessagesByChannel(channel: ChannelEntity)
-    {
-        const messages = await this.messageRepository.find({ channel });
-        if (!messages)
-            return ;
-        for (const message of messages)
-            await this.messageRepository.delete(message);
-        return ;
-    }
+    // async deleteMessagesByChannel(channel: ChannelEntity)
+    // {
+    //     const messages = await this.messageRepository.find({ channel });
+    //     if (!messages)
+    //         return ;
+    //     for (const message of messages)
+    //         await this.messageRepository.delete(message);
+    //     return ;
+    // }
 
-    async deleteJoinedUsersByUser(user: UserEntity)
-    {
-        const joinedUsers = await this.joinedUserRepository.find({ user });
-        if (!joinedUsers)
-            return ;
-        for (const joinedUser of joinedUsers)
-            await this.joinedUserRepository.delete(joinedUser);
-        return ;
-    }
+    // async deleteJoinedUsersByUser(user: UserEntity)
+    // {
+    //     const joinedUsers = await this.joinedUserRepository.find({ user });
+    //     if (!joinedUsers)
+    //         return ;
+    //     for (const joinedUser of joinedUsers)
+    //         await this.joinedUserRepository.delete(joinedUser);
+    //     return ;
+    // }
 
-    async deleteJoinedUsersByChannel(channel: ChannelEntity)
-    {
-        const joinedUsers = await this.joinedUserRepository.find({ channel });
-        if (!joinedUsers)
-            return ;
-        for (const joinedUser of joinedUsers)
-            await this.joinedUserRepository.delete(joinedUser);
-        return ;
-    }
+    // async deleteJoinedUsersByChannel(channel: ChannelEntity)
+    // {
+    //     const joinedUsers = await this.joinedUserRepository.find({ channel });
+    //     if (!joinedUsers)
+    //         return ;
+    //     for (const joinedUser of joinedUsers)
+    //         await this.joinedUserRepository.delete(joinedUser);
+    //     return ;
+    // }
 
-    async deleteJoinedUsersStatusByChannel(channel: ChannelEntity)
-    {
-        const joinedUsersStatus = await this.joinedUserStatusRepository.find({ channel });
-        if (!joinedUsersStatus)
-            return ;
-        for (const joinedUserStatus of joinedUsersStatus)
-            await this.joinedUserStatusRepository.delete(joinedUserStatus);
-        return ;
-    }
+    // async deleteJoinedUsersStatusByChannel(channel: ChannelEntity)
+    // {
+    //     const joinedUsersStatus = await this.joinedUserStatusRepository.find({ channel });
+    //     if (!joinedUsersStatus)
+    //         return ;
+    //     for (const joinedUserStatus of joinedUsersStatus)
+    //         await this.joinedUserStatusRepository.delete(joinedUserStatus);
+    //     return ;
+    // }
 
-    async deleteJoinedUsersStatusByUser(user: UserEntity)
-    {
-        const joinedUsersStatus = await this.joinedUserStatusRepository.find({ userId: user.id });
-        if (!joinedUsersStatus)
-            return ;
-        for (const joinedUserStatus of joinedUsersStatus)
-            await this.joinedUserStatusRepository.delete(joinedUserStatus);
-        return ;
-    }
+    // async deleteJoinedUsersStatusByUser(user: UserEntity)
+    // {
+    //     const joinedUsersStatus = await this.joinedUserStatusRepository.find({ userId: user.id });
+    //     if (!joinedUsersStatus)
+    //         return ;
+    //     for (const joinedUserStatus of joinedUsersStatus)
+    //         await this.joinedUserStatusRepository.delete(joinedUserStatus);
+    //     return ;
+    // }
 }

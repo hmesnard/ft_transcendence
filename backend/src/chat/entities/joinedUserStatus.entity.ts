@@ -1,3 +1,4 @@
+import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ChannelEntity } from "./channel.entity";
 
@@ -7,8 +8,8 @@ export class JoinedUserStatus
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    userId: number;
+    @Column({ default: false })
+    owner: boolean;
 
     @Column({ default: false })
     admin: boolean;
@@ -21,4 +22,7 @@ export class JoinedUserStatus
 
     @ManyToOne(() => ChannelEntity, (channel: ChannelEntity) => channel.joinedUserStatus)
     channel: ChannelEntity;
+
+    @ManyToOne(() => UserEntity, (user: UserEntity) => user.joinedUserStatus)
+    user: UserEntity;
 }

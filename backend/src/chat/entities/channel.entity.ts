@@ -2,7 +2,6 @@ import { Exclude } from "class-transformer";
 import { TimestampEntity } from "src/generics/timestamp.entity";
 import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { JoinedUser } from "./joinedUser.entity";
 import { JoinedUserStatus } from "./joinedUserStatus.entity";
 import { MessageEntity } from "./message.entity";
 
@@ -28,10 +27,6 @@ export class ChannelEntity extends TimestampEntity {
 
     @Column({ nullable: true })
     password: string;
-
-    @OneToMany(() => JoinedUser, (joinedUser: JoinedUser) => joinedUser.channel)
-    @Exclude({ toPlainOnly: true })
-    joinedUsers: JoinedUser[];
 
     @OneToMany(() => JoinedUserStatus, (joinedUserStatus: JoinedUserStatus) => joinedUserStatus.channel)
     @Exclude({ toPlainOnly: true })
