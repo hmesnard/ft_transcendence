@@ -88,34 +88,30 @@ export class ChatService {
         return newChannel;
     }
 
-    // async createProtectedChannel(channelData: SetPasswordDto, user: UserEntity)
-    // {
-    //     const channel = await this.chatUtilService.getChannelByName(channelData.name);
-    //     if (channel || channelData.name.includes("direct_with_") === true)
-    //         throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
-    //     if (!channelData.password)
-    //         throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Please insert a password'}, HttpStatus.BAD_REQUEST);
-    //     const newJoinedUser = await this.joinedUserRepository.create({
-    //         user,
-    //         owner: true,
-    //         userId: user.id
-    //     });
-    //     await this.joinedUserRepository.save(newJoinedUser);
-    //     const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
-    //         userId: user.id,
-    //         admin: true
-    //     });
-    //     await this.joinedUserStatusRepository.save(newJoinedUserStatus);
-    //     const newChannel = await this.channelRepository.create({
-    //         name: channelData.name,
-    //         status: ChannelStatus.protected,
-    //         password: channelData.password,
-    //         joinedUsers: [newJoinedUser],
-    //         joinedUserStatus: [newJoinedUserStatus],
-    //     });
-    //     await this.channelRepository.save(newChannel);
-    //     return newChannel;
-    // }
+    async createProtectedChannel(channelData: SetPasswordDto, user: UserEntity)
+    {
+        const channel = await this.chatUtilService.getChannelByName(channelData.name);
+        if (channel || channelData.name.includes("direct_with_") === true)
+            throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
+        if (!channelData.password)
+            throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Please insert a password'}, HttpStatus.BAD_REQUEST);    
+        const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
+            owner: true,
+            admin: true,
+            channel,
+            user,
+        });
+        await this.joinedUserStatusRepository.save(newJoinedUserStatus);
+        const newChannel = await this.channelRepository.create({
+            name: channelData.name,
+            status: ChannelStatus.public,
+            password: channelData.password,
+            members: [user],
+            joinedUserStatus: [newJoinedUserStatus],
+        });
+        await this.channelRepository.save(newChannel);
+        return newChannel;
+    }
 
     // async disconnect(user: UserEntity)
     // {
