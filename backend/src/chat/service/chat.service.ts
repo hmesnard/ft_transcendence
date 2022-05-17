@@ -50,9 +50,8 @@ export class ChatService {
     async createPublicChannel(channelName: string, user: UserEntity)
     {
         const channel = await this.chatUtilService.getChannelByName(channelName);
-        if (channel)
-            if (channel.name.includes("direct_with_") === true)
-                throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
+        if (channel || channelName.includes("direct_with_") === true)
+            throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
         const newJoinedUser = await this.joinedUserRepository.create({
             user,
             owner: true,
@@ -76,9 +75,8 @@ export class ChatService {
     async createPrivateChannel(channelName: string, user: UserEntity)
     {
         const channel = await this.chatUtilService.getChannelByName(channelName);
-        if (channel)
-            if (channel.name.includes("direct_with_") === true)
-                throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Channel already exists'}, HttpStatus.BAD_REQUEST);
+        if (channel || channelName.includes("direct_with_") === true)
+            throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Channel already exists'}, HttpStatus.BAD_REQUEST);
         const newJoinedUser = await this.joinedUserRepository.create({
             user,
             owner: true,
@@ -103,9 +101,8 @@ export class ChatService {
     async createProtectedChannel(channelData: SetPasswordDto, user: UserEntity)
     {
         const channel = await this.chatUtilService.getChannelByName(channelData.name);
-        if (channel)
-            if (channel.name.includes("direct_with_") === true)
-                throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
+        if (channel || channelData.name.includes("direct_with_") === true)
+            throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Chat already exists'}, HttpStatus.BAD_REQUEST);
         if (!channelData.password)
             throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Please insert a password'}, HttpStatus.BAD_REQUEST);
         const newJoinedUser = await this.joinedUserRepository.create({
