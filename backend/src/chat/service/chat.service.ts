@@ -56,14 +56,12 @@ export class ChatService {
         const newJoinedUser = await this.joinedUserRepository.create({
             user,
             owner: true,
-            userId: user.id,
-            channel,
+            userId: user.id
         });
         await this.joinedUserRepository.save(newJoinedUser);
         const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
             userId: user.id,
-            admin: true,
-            channel, 
+            admin: true
         });
         await this.joinedUserStatusRepository.save(newJoinedUserStatus);
         const newChannel = await this.channelRepository.create({
@@ -84,14 +82,12 @@ export class ChatService {
         const newJoinedUser = await this.joinedUserRepository.create({
             user,
             owner: true,
-            userId: user.id,
-            channel,
+            userId: user.id
         });
         await this.joinedUserRepository.save(newJoinedUser);
         const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
             userId: user.id,
-            admin: true,
-            channel,
+            admin: true
         });
         await this.joinedUserStatusRepository.save(newJoinedUserStatus);
         const newChannel = await this.channelRepository.create({
@@ -115,14 +111,12 @@ export class ChatService {
         const newJoinedUser = await this.joinedUserRepository.create({
             user,
             owner: true,
-            userId: user.id,
-            channel,
+            userId: user.id
         });
         await this.joinedUserRepository.save(newJoinedUser);
         const newJoinedUserStatus = await this.joinedUserStatusRepository.create({
             userId: user.id,
-            admin: true,
-            channel,
+            admin: true
         });
         await this.joinedUserStatusRepository.save(newJoinedUserStatus);
         const newChannel = await this.channelRepository.create({
@@ -158,6 +152,18 @@ export class ChatService {
         await this.chatUtilService.deleteJoinedUsersStatusByChannel(channel);    
         await this.channelRepository.delete(channel);
         return ;
+    }
+
+    async kickUserFromChannel(data: JoinedUserStatusDto, user: UserEntity)
+    {
+        if (data.targetId === user.id)
+            throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'You cant kick yourself'}, HttpStatus.FORBIDDEN);
+        const channel = await this.chatUtilService.utils_2(data.name, user);
+        const friend = await this.userService.getUserById(data.targetId);
+        const joinedFriend = await this.joinedUserRepository.findOne({ user: friend, channel });
+        if (!joinedFriend)
+            throw new HttpException({status: HttpStatus.NOT_FOUND, error: 'User is not in this channel'}, HttpStatus.NOT_FOUND);
+        await this.joinedUserRepository.delete(joinedFriend);
     }
 
     async leaveChannel(id: number, user: UserEntity)
@@ -412,12 +418,12 @@ export class ChatService {
         return user;
     }
 
-    async getChannelsFromUser(user: UserEntity)
+    async getChannelsFromUser(userId: number)
     {
         const AllChannels = await this.chatUtilService.getAllChannels();
         const ChannelsfromUser: ChannelEntity[] = [];
         for (const channel of AllChannels)
-            if (await this.joinedUserRepository.findOne({ user, channel }))
+            if (await this.joinedUserRepository.findOne({ userId, channel }))
                 ChannelsfromUser.push(channel);
         return ChannelsfromUser;
     }

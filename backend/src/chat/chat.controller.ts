@@ -68,6 +68,13 @@ export class ChatController
     }
 
     @UseGuards(JwtGuard)
+    @Delete('/kickuserfromchannel')
+    async kickUserFromChat(@Body() data: JoinedUserStatusDto, @User() user)
+    {
+        return this.chatService.kickUserFromChannel(data, user);
+    }
+
+    @UseGuards(JwtGuard)
     @Delete('/leavechannel/:id')
     async leaveChannel(@Param('id') id: number, @User() user)
     {
@@ -168,5 +175,11 @@ export class ChatController
     async getUserFromChannel(@Body() data: JoinedUserStatusDto)
     {
         return this.chatService.getUserFromChannel(data);
+    }
+
+    @Get('/getchatsfromuser')
+    async getChannelsFromUser(@Body('userId') userId: number)
+    {
+        return this.chatService.getChannelsFromUser(userId);
     }
 }
