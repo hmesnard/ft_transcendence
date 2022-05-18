@@ -38,9 +38,6 @@ export class UserEntity extends TimestampEntity {
     @Exclude()
     tfaSecret?: string;
 
-    @Column({ default: false })
-    online: boolean;
-
     @Column({
         default: null
     })
