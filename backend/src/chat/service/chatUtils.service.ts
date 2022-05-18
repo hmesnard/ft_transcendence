@@ -2,8 +2,9 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { WsException } from "@nestjs/websockets";
 import { UserEntity } from "src/user/entities/user.entity";
+import { UserService } from "src/user/user.service";
 import { Repository } from "typeorm";
-import { JoinedUserStatusDto } from "../dto/chat.dto";
+import { AdminUserDto, JoinedUserStatusDto } from "../dto/chat.dto";
 import { ChannelEntity } from "../entities/channel.entity";
 import { JoinedUserStatus } from "../entities/joinedUserStatus.entity";
 import { MessageEntity } from "../entities/message.entity";
@@ -13,7 +14,32 @@ export class ChatUtilsService
 {
     constructor(@InjectRepository(ChannelEntity) private channelRepository: Repository<ChannelEntity>,
         @InjectRepository(MessageEntity) private messageRepository: Repository<MessageEntity>,
-        @InjectRepository(JoinedUserStatus) private joinedUserStatusRepository: Repository<JoinedUserStatus>) {}
+        @InjectRepository(JoinedUserStatus) private joinedUserStatusRepository: Repository<JoinedUserStatus>,
+        private userService: UserService) {}
+
+    async saveMessage(content: string, user: UserEntity, channel: ChannelEntity) {
+        let message = this.messageRepository.create({
+            content: content,
+            author: user,
+            channel: channel
+        });
+        console.log(message);
+        try {
+            message = await this.messageRepository.save(message);
+        } catch (e) {
+            throw new WsException('Error while saving message to the database');
+        }
+        return message;
+    }
+
+    async clientIsMember(user: UserEntity, chat: ChannelEntity): Promise<boolean> {
+        for(var i = 0; i < chat.members.length; i++) {
+            if (chat.members[i].id === user.id) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     async getAllChannels()
     {
@@ -22,7 +48,7 @@ export class ChatUtilsService
 
     async getChannelByName(channelName: string)
     {
-        const channel = await this.channelRepository.findOne({ name: channelName });
+        const channel = await this.channelRepository.findOne({ name: channelName })
         if (channel)
             return channel;
         return ; 
@@ -44,40 +70,66 @@ export class ChatUtilsService
         return ;
     }
 
-    // async utils(data: JoinedUserStatusDto, user: UserEntity)
-    // {
-    //     const channel = await this.getChannelByName(data.name);
-    //     if (!channel)
-    //         throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
-    //     if (!await this.joinedUserRepository.findOne({ user, channel }))
-    //         throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
-    //     const joinedUserStatus = await this.joinedUserStatusRepository.findOne({ userId: user.id, channel });
-    //     if (joinedUserStatus && joinedUserStatus.admin === false)
-    //         throw new HttpException('You are not admin of this chat', HttpStatus.FORBIDDEN);
-    //     if (!await this.joinedUserRepository.findOne({ userId: data.targetId }))
-    //         throw new HttpException('Selected user doesnt exists', HttpStatus.NOT_FOUND);
-    //     const targetUserStatus = await this.joinedUserStatusRepository.findOne({ userId: data.targetId, channel });
-    //     if (targetUserStatus && user.id === targetUserStatus.userId)
-    //         throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
-    //     return targetUserStatus;
-    // }
+    async utils(data: JoinedUserStatusDto, user: UserEntity)
+    {
+        const channel = await this.getChannelByName(data.name);
+        if (!channel)
+            throw new HttpException('Channel doesnt exists', HttpStatus.NOT_FOUND);
+        if (data.targetId === user.id)
+            throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
+        if (await this.clientIsMember(user, channel) === false)
+            throw new HttpException('You are not member of this channel', HttpStatus.FORBIDDEN);
+        const userStatus = await this.joinedUserStatusRepository.findOne({ user, channel });
+        if (userStatus.admin === false)
+            throw new HttpException('You are not admin of this channel', HttpStatus.FORBIDDEN);
+        const friend = await this.userService.getUserById(data.targetId);
+        if (!friend)
+            throw new HttpException('Selected user doesnt exists', HttpStatus.NOT_FOUND);
+        if (await this.clientIsMember(friend, channel) === false)
+            throw new HttpException('Selected user is not member of this channel', HttpStatus.FORBIDDEN);
+        const friendUserStatus = await this.joinedUserStatusRepository.findOne({ user: friend, channel });
+        if (friendUserStatus.owner === true)
+            throw new HttpException('You have no access to mute owner', HttpStatus.FORBIDDEN);
+        return friendUserStatus;
+    }
 
-    // async utils_2(channelName: string, user: UserEntity)
-    // {
-    //     const channel = await this.getChannelByName(channelName);
-    //     if (!channel)
-    //         throw new HttpException('Chat doesnt exists', HttpStatus.NOT_FOUND);
-    //     const joinedUser = await this.joinedUserRepository.findOne({ user, channel });
-    //     if (!joinedUser)
-    //         throw new HttpException('You are not member of this chat', HttpStatus.FORBIDDEN);
-    //     if (joinedUser.owner === false)
-    //         throw new HttpException('You dont have access, you are not owner of this chat', HttpStatus.FORBIDDEN);
-    //     return channel;
-    // }
+    async utils_2(adminData: AdminUserDto, user: UserEntity)
+    {
+        const channel = await this.getChannelByName(adminData.name);
+        if (!channel)
+            throw new HttpException('Channel doesnt exists', HttpStatus.NOT_FOUND);
+        if (adminData.adminId === user.id)
+            throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
+        if (await this.clientIsMember(user, channel) === false)
+            throw new HttpException('You are not member of this channel', HttpStatus.FORBIDDEN);
+        const userStatus = await this.joinedUserStatusRepository.findOne({ user, channel });
+        if (userStatus.owner === false)
+            throw new HttpException('You are not owner of this channel', HttpStatus.FORBIDDEN);
+        const friend = await this.userService.getUserById(adminData.adminId);
+        if (!friend)
+            throw new HttpException('Selected user doesnt exists', HttpStatus.NOT_FOUND);
+        if (await this.clientIsMember(friend, channel) === false)
+            throw new HttpException('Selected user is not member of this channel', HttpStatus.FORBIDDEN);
+        const friendUserStatus = await this.joinedUserStatusRepository.findOne({ user: friend, channel });
+        return friendUserStatus;
+    }
 
-    // async deleteMessagesByUser(user: UserEntity)
+    async utils_3(channelName: string, user: UserEntity)
+    {
+        const channel = await this.getChannelByName(channelName);
+        if (!channel)
+            throw new HttpException('Channel doesnt exists', HttpStatus.NOT_FOUND);
+        if (await this.clientIsMember(user, channel) === false)
+            throw new HttpException('You are not member of this channel', HttpStatus.FORBIDDEN);
+        const userStatus = await this.joinedUserStatusRepository.findOne({ user, channel });
+        if (userStatus.owner === false)
+            throw new HttpException('You are not owner of this channel', HttpStatus.FORBIDDEN);
+        return channel;
+    }
+
+    // async deleteMessagesByUser(user: User)
     // {
-    //     const messages = await this.messageRepository.find({ author: user });
+    //     const messages = await this.messageRepository.find({ user });
     //     if (!messages)
     //         return ;
     //     for (const message of messages)
@@ -95,39 +147,19 @@ export class ChatUtilsService
     //     return ;
     // }
 
-    // async deleteJoinedUsersByUser(user: UserEntity)
-    // {
-    //     const joinedUsers = await this.joinedUserRepository.find({ user });
-    //     if (!joinedUsers)
-    //         return ;
-    //     for (const joinedUser of joinedUsers)
-    //         await this.joinedUserRepository.delete(joinedUser);
-    //     return ;
-    // }
+    async deleteJoinedUsersStatusByChannel(channel: ChannelEntity)
+    {
+        const joinedUsersStatus = await this.joinedUserStatusRepository.find({ channel });
+        if (!joinedUsersStatus)
+            return ;
+        for (const joinedUserStatus of joinedUsersStatus)
+            await this.joinedUserStatusRepository.delete(joinedUserStatus);
+        return ;
+    }
 
-    // async deleteJoinedUsersByChannel(channel: ChannelEntity)
+    // async deleteJoinedUsersStatusByUser(user: User)
     // {
-    //     const joinedUsers = await this.joinedUserRepository.find({ channel });
-    //     if (!joinedUsers)
-    //         return ;
-    //     for (const joinedUser of joinedUsers)
-    //         await this.joinedUserRepository.delete(joinedUser);
-    //     return ;
-    // }
-
-    // async deleteJoinedUsersStatusByChannel(channel: ChannelEntity)
-    // {
-    //     const joinedUsersStatus = await this.joinedUserStatusRepository.find({ channel });
-    //     if (!joinedUsersStatus)
-    //         return ;
-    //     for (const joinedUserStatus of joinedUsersStatus)
-    //         await this.joinedUserStatusRepository.delete(joinedUserStatus);
-    //     return ;
-    // }
-
-    // async deleteJoinedUsersStatusByUser(user: UserEntity)
-    // {
-    //     const joinedUsersStatus = await this.joinedUserStatusRepository.find({ userId: user.id });
+    //     const joinedUsersStatus = await this.joinedUserStatusRepository.find({ user });
     //     if (!joinedUsersStatus)
     //         return ;
     //     for (const joinedUserStatus of joinedUsersStatus)

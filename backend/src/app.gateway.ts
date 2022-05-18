@@ -4,6 +4,7 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
 import { ChatService } from './chat/service/chat.service';
+import { ChatUtilsService } from './chat/service/chatUtils.service';
 import { UserService } from './user/user.service';
 
 @WebSocketGateway({ cors: {origin: '*'} })
@@ -11,6 +12,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   constructor(
     private authService: AuthService,
     private chatService: ChatService,
+    private chatUtilService: ChatUtilsService,
     private userService: UserService
   ) {}
 
@@ -25,7 +27,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async handleConnection(client: Socket, ...args: any[]) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      this.userService.updateStatus(user.id, true);
+  //    this.userService.updateStatus(user.id, true);
       this.wss.emit('updateStatus', 'online');
       this.logger.log(`client connected:    ${client.id}`);
     } catch (e) {
@@ -36,7 +38,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async handleDisconnect(client: Socket) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      this.userService.updateStatus(user.id, false);
+  //    this.userService.updateStatus(user.id, false);
       this.wss.emit('updateStatus', 'offline');
       this.logger.log(`client disconnected: ${client.id}`);
       client.disconnect();
@@ -49,12 +51,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async handleMessage(client: Socket, payload: { room: string, content: string }) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      const channel = await this.chatService.getChannelById(+payload.room);
-      if (!(await this.chatService.clientIsMember(user, channel))) {
+      const channel = await this.chatUtilService.getChannelById(+payload.room);
+      if (!(await this.chatUtilService.clientIsMember(user, channel))) {
         throw new WsException('Client is not member of this chat');
       }
 
-      const message = await this.chatService.saveMessage(payload.content, user, channel);
+      const message = await this.chatUtilService.saveMessage(payload.content, user, channel);
       this.wss.to(payload.room).emit('msgToClient', message);
     } catch (e) {
       this.error(client, e);
@@ -65,8 +67,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async joinRoom(client: Socket, room: string) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      const channel = await this.chatService.getChannelById(+room);
-      if (!(await this.chatService.clientIsMember(user, channel))) {
+      const channel = await this.chatUtilService.getChannelById(+room);
+      if (!(await this.chatUtilService.clientIsMember(user, channel))) {
         throw new WsException('Client is not member of this chat');
       }
 

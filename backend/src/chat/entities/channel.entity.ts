@@ -25,7 +25,8 @@ export class ChannelEntity extends TimestampEntity {
     @Column({ type: "enum", enum: ChannelStatus, default: ChannelStatus.public })
     status: ChannelStatus;
 
-    @Column({ nullable: true })
+    @Column({ default: null })
+    @Exclude({ toPlainOnly: true })
     password: string;
 
     @OneToMany(() => JoinedUserStatus, (joinedUserStatus: JoinedUserStatus) => joinedUserStatus.channel)
@@ -36,6 +37,7 @@ export class ChannelEntity extends TimestampEntity {
     @JoinTable()
     members: UserEntity[];
 
-    @OneToMany(() => MessageEntity, (message) => message.channel)
+    @OneToMany(() => MessageEntity, (message: MessageEntity) => message.channel)
+    @Exclude({ toPlainOnly: true })
     messages: MessageEntity[];
 }

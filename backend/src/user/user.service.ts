@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
 import { Repository } from 'typeorm';
 import { NewUserDto } from './dto/new-user.dto';
-import { UserEntity } from './entities/user.entity';
+import { UserEntity, UserStatus } from './entities/user.entity';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
 
@@ -26,6 +26,11 @@ export class UserService {
 
     deleteUser(id: number) {
       return this.userRepository.delete(id);
+    }
+
+    async getAllUsers()
+    {
+      return this.userRepository.find()
     }
 
     async getUserById(id: number): Promise<UserEntity> {
@@ -73,11 +78,11 @@ export class UserService {
       })
     }
 
-    updateStatus(id: number, status: boolean) {
-      return this.userRepository.update(id, {
-        online: status
-      });
-    }
+    // updateStatus(id: number, status: boolean) {
+    //   return this.userRepository.update(id, {
+    //     status: (status = UserStatus.online : UserStatus.offline)
+    //   });
+    // }
 
     async setPicture(user: UserEntity, path: string) {
       user.picture = path;
@@ -169,4 +174,12 @@ export class UserService {
           [id],
         );
     }
+
+    // async logOut(response: Response, user: UserEntity)
+    // {
+    //     response.clearCookie('jwt');
+    //     user.status = UserStatus.offline;
+    //     await this.userRepository.save(user);
+    //     return ;
+    // }
 }
