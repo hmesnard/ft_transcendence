@@ -78,11 +78,11 @@ export class UserService {
       })
     }
 
-    // updateStatus(id: number, status: boolean) {
-    //   return this.userRepository.update(id, {
-    //     status: (status = UserStatus.online : UserStatus.offline)
-    //   });
-    // }
+    updateStatus(id: number, status: UserStatus) {
+      return this.userRepository.update(id, {
+        status
+      });
+    }
 
     async setPicture(user: UserEntity, path: string) {
       user.picture = path;

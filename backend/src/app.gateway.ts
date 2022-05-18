@@ -3,15 +3,14 @@ import { Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
-import { ChatService } from './chat/service/chat.service';
 import { ChatUtilsService } from './chat/service/chatUtils.service';
+import { UserStatus } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 
 @WebSocketGateway({ cors: {origin: '*'} })
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private authService: AuthService,
-    private chatService: ChatService,
     private chatUtilService: ChatUtilsService,
     private userService: UserService
   ) {}
@@ -27,7 +26,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async handleConnection(client: Socket, ...args: any[]) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-  //    this.userService.updateStatus(user.id, true);
+      this.userService.updateStatus(user.id, UserStatus.online);
       this.wss.emit('updateStatus', 'online');
       this.logger.log(`client connected:    ${client.id}`);
     } catch (e) {
@@ -38,7 +37,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async handleDisconnect(client: Socket) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-  //    this.userService.updateStatus(user.id, false);
+      this.userService.updateStatus(user.id, UserStatus.offline);
       this.wss.emit('updateStatus', 'offline');
       this.logger.log(`client disconnected: ${client.id}`);
       client.disconnect();
