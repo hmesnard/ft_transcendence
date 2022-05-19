@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
 import { Repository } from 'typeorm';
@@ -33,8 +33,12 @@ export class UserService {
       return this.userRepository.find()
     }
 
-    async getUserById(id: number): Promise<UserEntity> {
-      return await this.userRepository.findOne(id);
+    async getUserById(id: number): Promise<UserEntity>
+    {
+        const user = await this.userRepository.findOne(id);
+        if (!user)
+            throw new NotFoundException('User with that name does not exists');
+        return user;
     }
 
     async getUserByName(username: string)
@@ -173,6 +177,12 @@ export class UserService {
                 );  `,
           [id],
         );
+    }
+
+    userIdIsSame(id: number, id2: number)
+    {
+        if (id === id2)
+            throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
     }
 
     // async logOut(response: Response, user: UserEntity)
