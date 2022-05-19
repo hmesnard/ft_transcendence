@@ -179,6 +179,14 @@ export class UserService {
         );
     }
 
+    async isblocked(user: UserEntity, friend: UserEntity)
+    {
+      friend.blockedUsers = await this.getBlockedUsers(friend.id);
+      for (const x of friend.blockedUsers)
+        if (x.id === user.id)
+            throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'User has been blocked you'}, HttpStatus.FORBIDDEN);
+    }
+
     userIdIsSame(id: number, id2: number)
     {
         if (id === id2)

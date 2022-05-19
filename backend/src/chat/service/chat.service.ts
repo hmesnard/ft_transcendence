@@ -25,6 +25,7 @@ export class ChatService
         const userStatus = await this.chatUtilService.getJoinedUserStatus(user, channel);
         const friend = await this.userService.getUserById(data.targetId);
         const friendUserStatus = await this.joinedUserStatusRepository.findOne({ user: friend, channel });
+        await this.userService.isblocked(user, friend);
         this.userService.userIdIsSame(data.targetId, user.id);
         this.chatUtilService.checkClientIsMember(user, channel);
         this.chatUtilService.userIsOwner(userStatus);
@@ -235,8 +236,9 @@ export class ChatService
 
     async createDirectChannel(user: UserEntity, friend: UserEntity)
     {
+        await this.userService.isblocked(user, friend);
         this.userService.userIdIsSame(user.id, friend.id);
-        if (await this.chatUtilService.getChannelByName("direct_with_" + user.id + "_" + friend.id) || await this.chatUtilService.getChannelByName("direct_with_" + friend.id + "_" + user.id))
+        if (await this.chatRepository.findOne({ name: `direct_with_${user.id}_${friend.id}` }) || await this.chatRepository.findOne({ name: `direct_with_${friend.id}_${user.id}` }))
             throw new HttpException('You already have direct channel with him', HttpStatus.FORBIDDEN);
         const joinedUserStatus = await this.joinedUserStatusRepository.create({
             user,
