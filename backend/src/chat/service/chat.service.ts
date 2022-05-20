@@ -63,26 +63,16 @@ export class ChatService
         return await this.chatUtilService.createNewChannel(channelData.name, ChannelStatus.protected, channelData.password, newJoinedUserStatus, user);
     }
 
-    ////// Complains: Cannot query across many-to-many for property members ////////
-    // async deleteChat(id: number, user: User)
-    // {
-    //     const chat = await this.chatUtilService.getChatById(id);
-    //     if (!chat)
-    //         throw new HttpException({status: HttpStatus.NOT_FOUND, error: 'Chat doesnt exists'}, HttpStatus.NOT_FOUND);
-    //     const UserStatus = await this.joinedUserStatusRepository.findOne({ user, chat });
-    //     if (!UserStatus)
-    //         throw new HttpException({status: HttpStatus.NOT_FOUND, error: 'You are not member of this chat'}, HttpStatus.NOT_FOUND);
-    //     if (UserStatus.owner === false)
-    //         throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'You dont have access to delete this chat, only owner can do that'}, HttpStatus.FORBIDDEN);
-    //     for (var i = 0; i < chat.members.length; i++)
-    //     {
-    //         chat.members.pop();
-    //     }
-    //     await this.chatRepository.save(chat);
-    //     await this.chatUtilService.deleteJoinedUsersStatusByChat(chat);
-    //     await this.chatRepository.delete(chat);
-    //     return ;
-    // }
+    async deleteChat(id: number, user: UserEntity)
+    {
+        const channel = await this.chatUtilService.getChannelById(id);
+        const userStatus = await this.chatUtilService.getJoinedUserStatus(user, channel);
+        this.chatUtilService.userIsOwner(userStatus);
+        await this.chatUtilService.deleteMessagesByChannel(channel);
+        await this.chatUtilService.deleteJoinedUsersStatusByChannel(channel);
+        await this.chatRepository.delete(channel.id);
+        return ;
+    }
 
     async kickUserFromChannel(data: JoinedUserStatusDto, user: UserEntity)
     {

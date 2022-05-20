@@ -122,7 +122,7 @@ export class ChatUtilsService
         const channel = await this.chatRepository.findOne(id);
         if (channel)
             return channel;
-        return ;
+        throw new HttpException('Channel doesnt exists', HttpStatus.NOT_FOUND);
     }
 
     async utils(data: JoinedUserStatusDto, user: UserEntity)
@@ -175,7 +175,7 @@ export class ChatUtilsService
         return ;
     }
 
-    async deleteMessagesByChat(channel: ChannelEntity)
+    async deleteMessagesByChannel(channel: ChannelEntity)
     {
         const messages = await this.messageRepository.find({ channel });
         if (!messages)
