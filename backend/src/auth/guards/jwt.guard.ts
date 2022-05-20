@@ -4,7 +4,7 @@
 // @Injectable()
 // export class JwtGuard extends AuthGuard('jwt') {}
 
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class JwtGuard implements CanActivate
       const jwt = request.cookies['jwt'];
       return this.jwtService.verify(jwt);
     } catch {
-      return false;
+      throw new UnauthorizedException();
     }
   }
 }
