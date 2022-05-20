@@ -64,38 +64,32 @@ export class ChatUtilsService
         return false;
     }
 
-    channelIsDirect(channel: ChannelEntity, channelName: string)
-    {
+    channelIsDirect(channel: ChannelEntity, channelName: string) {
         if (channel || channelName.includes("direct_with_") === true)
             throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Channel already exists'}, HttpStatus.BAD_REQUEST);
     }
 
-    userIsOwner(userStatus: JoinedUserStatus)
-    {
+    userIsOwner(userStatus: JoinedUserStatus) {
         if (userStatus.owner === false)
             throw new HttpException('You dont have access, you are not owner of this channel', HttpStatus.FORBIDDEN);
     }
 
-    channelIsPrivate(channel: ChannelEntity)
-    {
+    channelIsPrivate(channel: ChannelEntity) {
         if (channel.status === ChannelStatus.private)
             throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'This is a private channel, you dont have access to join here'}, HttpStatus.FORBIDDEN);
     }
 
-    checkIfPassword(password: string)
-    {
+    checkIfPassword(password: string) {
         if (!password)
             throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Please insert a password'}, HttpStatus.BAD_REQUEST);
     }
 
-    async checkClientIsMember(user: UserEntity, channel: ChannelEntity)
-    {
+    async checkClientIsMember(user: UserEntity, channel: ChannelEntity) {
         if (await this.clientIsMember(user, channel) === false)
             throw new HttpException('You are not member of this channel', HttpStatus.FORBIDDEN);
     }
 
-    async getAllChannels()
-    {
+    async getAllChannels() {
         return await this.chatRepository.find();
     }
 
