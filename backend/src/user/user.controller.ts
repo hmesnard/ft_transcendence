@@ -7,7 +7,20 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { User } from 'src/decorators/user.decorator';
 import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
+import { diskStorage } from 'multer';
+import { of } from 'rxjs';
 
+export const storage = {
+    storage: diskStorage({
+        destination: './uploads/profileimages',
+        filename: (req, file, cb) => {
+            const filename: string = (file.originalname).replace(/\s/g, '');
+            cb(null, `${filename}`)
+        }
+    })
+}
+
+@UseGuards(JwtGuard)
 @Controller('user')
 export class UserController {
     constructor(
@@ -15,7 +28,6 @@ export class UserController {
     ) {}
 
     @Delete()
-    @UseGuards(JwtGuard)
     deleteUser(
         @User() user
     ) {
@@ -23,7 +35,6 @@ export class UserController {
     }
 
     @Get()
-    @UseGuards(JwtGuard)
     getProfile(
         @User() user
     ) {
@@ -31,7 +42,6 @@ export class UserController {
     }
 
     @Post('tfa/secret')
-    @UseGuards(JwtGuard)
     async register(
         @Res() response: Response,
         @User() user
@@ -43,7 +53,6 @@ export class UserController {
 
     @Post('tfa/turn-on')
     @HttpCode(200)
-    @UseGuards(JwtGuard)
     async turnOnTfa(
         @User() user,
         @Body() { tfaCode }
@@ -56,7 +65,6 @@ export class UserController {
     }
 
     @Post('picture')
-    @UseGuards(JwtGuard)
     @UseInterceptors(FileInterceptor('file'))
     setPicture(
         @User() user,
@@ -66,7 +74,6 @@ export class UserController {
     }
 
     @Get('picture')
-    @UseGuards(JwtGuard)
     getPicture(
         @User() user: UserEntity
     ) {
@@ -75,7 +82,6 @@ export class UserController {
     }
 
     @Post('friend/:id')
-    @UseGuards(JwtGuard)
     requestFriend(
         @User() user,
         @Param('id', ParseIntPipe) id
@@ -84,7 +90,6 @@ export class UserController {
     }
 
     @Delete('friend/:id')
-    @UseGuards(JwtGuard)
     deleteFriend(
         @User() user,
         @Param('id', ParseIntPipe) id
@@ -93,7 +98,6 @@ export class UserController {
     }
     
     @Get('friend')
-    @UseGuards(JwtGuard)
     getFriends(
         @User() user
     ) {
@@ -101,7 +105,6 @@ export class UserController {
     }
 
     @Post('block/:id')
-    @UseGuards(JwtGuard)
     blockUser(
         @User() user,
         @Param('id', ParseIntPipe) id
@@ -110,7 +113,6 @@ export class UserController {
     }
 
     @Delete('block/:id')
-    @UseGuards(JwtGuard)
     unblockUser(
         @User() user,
         @Param('id', ParseIntPipe) id
@@ -119,10 +121,28 @@ export class UserController {
     }
 
     @Get('block')
-    @UseGuards(JwtGuard)
     getBlockedUsers(
         @User() user
     ) {
         return this.userService.getBlockedUsers(user.id);
     }
+
+    @Post('/logout')
+    async logOut(@Res({ passthrough: true }) response: Response, @User() user)
+    {
+        return this.userService.logOut(response, user);
+    }
+
+    // @Post('/upload')
+    // @UseInterceptors(FileInterceptor('file', storage))
+    // async uploadFile(@UploadedFile() file, @User() user)
+    // {
+    //     return this.userService.uploadFile(user, file);
+    // }
+
+    // @Get('/avatar/:imagename')
+    // async findAvatar(@Param('imagename') imagename, @Res() response: Response)
+    // {
+    //     return of(response.sendFile(join(process.cwd(), 'uploads/profileimages/' + imagename)));
+    // }
 }

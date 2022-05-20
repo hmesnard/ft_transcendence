@@ -4,6 +4,7 @@ import { User } from 'src/decorators/user.decorator';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/ft.guard';
+import { JwtGuard } from './guards/jwt.guard';
 import { TfaGuard } from './guards/tfa.guard';
 
 @Controller('auth')
