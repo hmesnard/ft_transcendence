@@ -1,12 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
+import { Request } from 'express';
 import { Socket } from 'socket.io';
+import { UserEntity } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
     constructor(
+        @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
         private userService: UserService,
         private jwtService: JwtService
     ) {}
@@ -49,5 +54,12 @@ export class AuthService {
         }
         console.log(user);
         return user;
+    }
+
+    async getLoggedUser(request: Request)
+    {
+        const cookie = request.cookies['jwt'];
+        const data = await this.jwtService.verifyAsync(cookie);
+        return this.userRepository.findOne({ username: data['username'] });
     }
 }

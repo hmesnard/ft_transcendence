@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Res, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Req, Res, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
@@ -9,6 +9,7 @@ import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 import { diskStorage } from 'multer';
 import { of } from 'rxjs';
+import { AuthService } from 'src/auth/auth.service';
 
 export const storage = {
     storage: diskStorage({
@@ -24,6 +25,7 @@ export const storage = {
 @Controller('user')
 export class UserController {
     constructor(
+        private authService: AuthService,
         private userService: UserService
     ) {}
 
@@ -128,9 +130,9 @@ export class UserController {
     }
 
     @Post('/logout')
-    async logOut(@Res({ passthrough: true }) response: Response, @User() user)
+    async logOut(@Res({ passthrough: true }) response: Response, @Req() request: Request)
     {
-        return this.userService.logOut(response, user);
+        return this.userService.logOut(response, await this.authService.getLoggedUser(request));
     }
 
     // @Post('/upload')

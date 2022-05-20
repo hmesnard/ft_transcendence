@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from 'src/user/entities/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -12,7 +14,7 @@ import { TfaStrategy } from './strategies/tfa.strategy';
 @Module({
   imports: [
     ConfigModule.forRoot(), //isGlobal ne marche pas !!??
-    UserModule, PassportModule.register({ defaultStrategy: 'jwt' }),
+    UserModule, TypeOrmModule.forFeature([UserEntity]), PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: 3600 }

@@ -1,16 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ChatService } from './service/chat.service';
 import { AdminUserDto, CreateMessageToChatDto, JoinedUserStatusDto, SetPasswordDto } from './dto/chat.dto';
 import { ChatUtilsService } from './service/chatUtils.service';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
-import { User } from 'src/decorators/user.decorator';
 import { UserService } from 'src/user/user.service';
+import { AuthService } from 'src/auth/auth.service';
+import { Request } from 'express';
 
 @UseGuards(JwtGuard)
 @Controller('chat')
 export class ChatController
 {
     constructor(private chatService: ChatService,
+        private authService: AuthService,
         private chatUtilService: ChatUtilsService,
         private userService: UserService) {}
 
@@ -27,117 +29,117 @@ export class ChatController
     }
 
     @Post('/inviteusertoprivatechannel')
-    async inviteUserToPrivateChannel(@Body() data: JoinedUserStatusDto, @User() user)
+    async inviteUserToPrivateChannel(@Body() data: JoinedUserStatusDto, @Req() request: Request)
     {
-        return this.chatService.inviteUserToPrivateChannel(data, user);
+        return this.chatService.inviteUserToPrivateChannel(data, await this.authService.getLoggedUser(request));
     }
 
     @Post('/createpublicchannel')
-    async createPublicChannel(@Body('name') channelName: string, @User() user)
+    async createPublicChannel(@Body('name') channelName: string, @Req() request: Request)
     {
-        return this.chatService.createPublicChannel(channelName, user);
+        return this.chatService.createPublicChannel(channelName, await this.authService.getLoggedUser(request));
     }
 
     @Post('/createprivatechannel')
-    async createPrivateChannel(@Body('name') channelName: string, @User() user)
+    async createPrivateChannel(@Body('name') channelName: string, @Req() request: Request)
     {
-        return this.chatService.createPrivateChannel(channelName, user);
+        return this.chatService.createPrivateChannel(channelName, await this.authService.getLoggedUser(request));
     }
 
     @Post('/createprotectedchannel')
-    async createProtectedChannel(@Body() channelData: SetPasswordDto, @User() user)
+    async createProtectedChannel(@Body() channelData: SetPasswordDto, @Req() request: Request)
     {
-        return this.chatService.createProtectedChannel(channelData, user);
+        return this.chatService.createProtectedChannel(channelData, await this.authService.getLoggedUser(request));
     }
 
     // @Delete('/deletechannel/:id')
-    // async deleteChannel(@Param('id') id: number, @User() user)
+    // async deleteChannel(@Param('id') id: number, @Req() request: Request)
     // {
-    //     return this.chatService.deleteChannel(id, user);
+    //     return this.chatService.deleteChannel(id, await this.authService.getLoggedUser(request));
     // }
 
     @Delete('/kickuserfromchannel')
-    async kickUserFromChannel(@Body() data: JoinedUserStatusDto, @User() user)
+    async kickUserFromChannel(@Body() data: JoinedUserStatusDto, @Req() request: Request)
     {
-        return this.chatService.kickUserFromChannel(data, user);
+        return this.chatService.kickUserFromChannel(data, await this.authService.getLoggedUser(request));
     }
 
     @Delete('/delete/:id')
-    async leaveChannel(@Param('id') id: number, @User() user)
+    async leaveChannel(@Param('id') id: number, @Req() request: Request)
     {
-        return this.chatService.leaveChannel(id, user);
+        return this.chatService.leaveChannel(id, await this.authService.getLoggedUser(request));
     }
 
     @Post('/joinchannel')
-    async joinChannel(@Body() channelData: SetPasswordDto, @User() user)
+    async joinChannel(@Body() channelData: SetPasswordDto, @Req() request: Request)
     {
-        return this.chatService.joinChannel(channelData, user);
+        return this.chatService.joinChannel(channelData, await this.authService.getLoggedUser(request));
     }
 
     @Post('/mute')
-    async muteUser(@Body() data: JoinedUserStatusDto, @User() user)
+    async muteUser(@Body() data: JoinedUserStatusDto, @Req() request: Request)
     {
-        return this.chatService.muteUser(data, user);
+        return this.chatService.muteUser(data, await this.authService.getLoggedUser(request));
     }
 
     @Post('/unmute')
-    async unMuteUser(@Body() data: JoinedUserStatusDto, @User() user)
+    async unMuteUser(@Body() data: JoinedUserStatusDto, @Req() request: Request)
     {
-        return this.chatService.unMuteUser(data, user);
+        return this.chatService.unMuteUser(data, await this.authService.getLoggedUser(request));
     }
 
     @Post('/ban')
-    async banUser(@Body() data: JoinedUserStatusDto, @User() user)
+    async banUser(@Body() data: JoinedUserStatusDto, @Req() request: Request)
     {
-        return this.chatService.banUser(data, user);
+        return this.chatService.banUser(data, await this.authService.getLoggedUser(request));
     }
 
     @Post('/unban')
-    async unBanUser(@Body() data: JoinedUserStatusDto, @User() user)
+    async unBanUser(@Body() data: JoinedUserStatusDto, @Req() request: Request)
     {
-        return this.chatService.unBanUser(data, user);
+        return this.chatService.unBanUser(data, await this.authService.getLoggedUser(request));
     }
 
     @Post('/admin')
-    async giveAdmin(@Body() adminData: AdminUserDto, @User() user)
+    async giveAdmin(@Body() adminData: AdminUserDto, @Req() request: Request)
     {
-        return this.chatService.giveAdmin(adminData, user);
+        return this.chatService.giveAdmin(adminData, await this.authService.getLoggedUser(request));
     }
 
     @Post('/unadmin')
-    async unAdmin(@Body() adminData: AdminUserDto, @User() user)
+    async unAdmin(@Body() adminData: AdminUserDto, @Req() request: Request)
     {
-        return this.chatService.unAdmin(adminData, user);
+        return this.chatService.unAdmin(adminData, await this.authService.getLoggedUser(request));
     }
 
     @Post('/password')
-    async setPassword(@Body() passwordData: SetPasswordDto, @User() user)
+    async setPassword(@Body() passwordData: SetPasswordDto, @Req() request: Request)
     {
-        return this.chatService.setPassword(passwordData, user);
+        return this.chatService.setPassword(passwordData, await this.authService.getLoggedUser(request));
     }
 
     @Post('/removepassword')
-    async removePassword(@Body('name') name: string, @User() user)
+    async removePassword(@Body('name') name: string, @Req() request: Request)
     {
-        return this.chatService.removePassword(name, user);
+        return this.chatService.removePassword(name, await this.authService.getLoggedUser(request));
     }
 
     @Post('/createdirectchannel/:id')
-    async createDirectChannel(@Param('id') id: number, @User() user)
+    async createDirectChannel(@Param('id') id: number, @Req() request: Request)
     {
-        return this.chatService.createDirectChannel(user, await this.userService.getUserById(id));
+        return this.chatService.createDirectChannel(await this.authService.getLoggedUser(request), await this.userService.getUserById(id));
     }
 
     @Post('/messagetochannel')
-    async createMessageToChannel(@Body() data: CreateMessageToChatDto, @User() user)
+    async createMessageToChannel(@Body() data: CreateMessageToChatDto, @Req() request: Request)
     {
-        return this.chatService.createMessageToChannel(data, user);
+        return this.chatService.createMessageToChannel(data, await this.authService.getLoggedUser(request));
     }
 
     @Get('/messagesfromchannel')
-    async getMessagesFromChannel(@Body('name') name: string, @User() user)
+    async getMessagesFromChannel(@Body('name') name: string, @Req() request: Request)
     {
-        return this.chatService.getMessagesFromChannel(name, user);
+        return this.chatService.getMessagesFromChannel(name, await this.authService.getLoggedUser(request));
     }
 
     @Get('/getallusers/:id')

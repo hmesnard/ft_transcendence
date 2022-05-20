@@ -3,6 +3,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthService } from 'src/auth/auth.service';
 import { UserEntity } from './entities/user.entity';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
@@ -18,6 +19,6 @@ import { UserService } from './user.service';
     })],
   exports: [UserService],
   controllers: [UserController],
-  providers: [UserService]
+  providers: [UserService, AuthService]
 })
 export class UserModule {}
