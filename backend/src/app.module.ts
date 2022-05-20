@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -27,7 +25,7 @@ import { AppGateway } from './app.gateway';
     MatchModule,
     ChatModule
   ],
-  controllers: [AppController],
-  providers: [AppService, AppGateway],
+  controllers: [],
+  providers: [AppGateway],
 })
 export class AppModule {}

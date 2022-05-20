@@ -1,9 +1,10 @@
+import { TimestampEntity } from "src/generics/timestamp.entity";
 import { UserEntity } from "src/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ChannelEntity } from "./channel.entity";
 
 @Entity()
-export class JoinedUserStatus
+export class JoinedUserStatus extends TimestampEntity
 {
     @PrimaryGeneratedColumn()
     id: number;
