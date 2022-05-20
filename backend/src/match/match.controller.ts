@@ -6,23 +6,22 @@ import { MatchDto } from './dto/match.dto';
 import { MatchService } from './match.service';
 
 @Controller('match')
-export class MatchController {
+export class MatchController
+{
     constructor(
         private matchService: MatchService
     ) {}
 
     @Post()
-    saveMatch(
-        @Body() matchData: MatchDto
-    ) {
+    saveMatch(@Body() matchData: MatchDto)
+    {
         return this.matchService.saveMatch(matchData);
     }
 
     @Get()
     @UseGuards(JwtGuard)
-    getMatches(
-        @User() user: UserEntity
-    ) {
+    getMatches(@User() user: UserEntity)
+    {
         return this.matchService.getMatches(user.id);
     }
 }

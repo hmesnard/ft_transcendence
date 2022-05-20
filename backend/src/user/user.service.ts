@@ -88,10 +88,10 @@ export class UserService {
       });
     }
 
-    async setPicture(user: UserEntity, path: string) {
-      user.picture = path;
-      return await this.userRepository.save(user);
-    }
+    // async setPicture(user: UserEntity, path: string) {
+    //   user.picture = path;
+    //   return await this.userRepository.save(user);
+    // }
 
     async requestFriend(user: UserEntity, id: number) {
       const friend = await this.getUserById(id);
@@ -150,41 +150,41 @@ export class UserService {
       return requests.filter((user) => requestedBy.some((usr) => user.id === usr.id));
     }
 
-    async blockUser(user: UserEntity, id: number) {
-      const toBlock = await this.getUserById(id);
-      if (!toBlock)
-        throw new NotFoundException('User not found');
-      user.blockedUsers = await this.getBlockedUsers(user.id);
-      user.blockedUsers.push(toBlock);
-      return await this.userRepository.save(user);
-    }
-
-    // async blockUser(id: number, user: UserEntity)
-    // {
-    //     this.userIdIsSame(id, user.id);
-    //     const blockedUser = await this.getUserById(id);
-    //     user.blockedUsers = await this.getBlockedUsers(user.id);
-    //     for (const x of user.blockedUsers)
-    //         if (x.id === blockedUser.id)
-    //             throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'User is already blocked'}, HttpStatus.FORBIDDEN);
-    //     user.blockedUsers.push(blockedUser);
-    //     return await this.userRepository.save(user);
+    // async blockUser(user: UserEntity, id: number) {
+    //   const toBlock = await this.getUserById(id);
+    //   if (!toBlock)
+    //     throw new NotFoundException('User not found');
+    //   user.blockedUsers = await this.getBlockedUsers(user.id);
+    //   user.blockedUsers.push(toBlock);
+    //   return await this.userRepository.save(user);
     // }
 
-    // async unBlockUser(id: number, user: UserEntity)
-    // {
-    //     this.userIdIsSame(id, user.id);
-    //     const blockedUser = await this.getUserById(id);
-    //     user.blockedUsers = await this.getBlockedUsers(user.id);
-    //     user.blockedUsers = user.blockedUsers.filter((blockedUser) => {return id !== blockedUser.id});
-    //     return await this.userRepository.save(user);
-    // }
-
-    async unblockUser(user: UserEntity, id: number) {
-      user.blockedUsers = await this.getBlockedUsers(user.id);
-      user.blockedUsers = user.blockedUsers.filter((usr) => {return usr.id !== id});
-      return await this.userRepository.save(user);
+    async blockUser(user: UserEntity, id: number)
+    {
+        this.userIdIsSame(id, user.id);
+        const blockedUser = await this.getUserById(id);
+        user.blockedUsers = await this.getBlockedUsers(user.id);
+        for (const x of user.blockedUsers)
+            if (x.id === blockedUser.id)
+                throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'User is already blocked'}, HttpStatus.FORBIDDEN);
+        user.blockedUsers.push(blockedUser);
+        return await this.userRepository.save(user);
     }
+
+    async unblockUser(user: UserEntity, id: number)
+    {
+        this.userIdIsSame(id, user.id);
+        const blockedUser = await this.getUserById(id);
+        user.blockedUsers = await this.getBlockedUsers(user.id);
+        user.blockedUsers = user.blockedUsers.filter((blockedUser) => {return id !== blockedUser.id});
+        return await this.userRepository.save(user);
+    }
+
+    // async unblockUser(user: UserEntity, id: number) {
+    //   user.blockedUsers = await this.getBlockedUsers(user.id);
+    //   user.blockedUsers = user.blockedUsers.filter((usr) => {return usr.id !== id});
+    //   return await this.userRepository.save(user);
+    // }
 
     async getBlockedUsers(id): Promise<UserEntity[]> {
         return await this.userRepository.query(
@@ -222,17 +222,17 @@ export class UserService {
         return ;
     }
 
-    // async uploadFile(user: UserEntity, file)
-    // {
-    //   const updatedUser = await this.userRepository.findOne({ username: user.username });
-    //   if (updatedUser.picture && updatedUser.picture != file.filename)
-    //   {
-    //       const fs = require('fs');
-    //       const path = './uploads/profileimages/' + updatedUser.picture;
-    //       fs.unlinkSync(path);
-    //   }
-    //   updatedUser.picture = file.filename;
-    //   await this.userRepository.save(updatedUser);
-    //   return updatedUser;
-    // }
+    async uploadFile(user: UserEntity, file)
+    {
+      const updatedUser = await this.userRepository.findOne({ username: user.username });
+      if (updatedUser.picture && updatedUser.picture != file.filename)
+      {
+          const fs = require('fs');
+          const path = './uploads/profileimages/' + updatedUser.picture;
+          fs.unlinkSync(path);
+      }
+      updatedUser.picture = file.filename;
+      await this.userRepository.save(updatedUser);
+      return updatedUser;
+    }
 }

@@ -16,17 +16,16 @@ export class AuthController {
 
     @Get('42')
 	@UseGuards(FtGuard)
-	ftAuth() {
+	ftAuth()
+	{
 		console.log('42login');
 		return ;
 	}
 
 	@Get('42/return')
 	@UseGuards(FtGuard)
-	async ftAuthReturn(
-		@User() user42,
-		@Res({passthrough: true}) res
-	) {
+	async ftAuthReturn(@User() user42, @Res({passthrough: true}) res)
+	{
 		const { user, jwt } = await this.authService.treatFtOauth(user42);
         res.cookie('access_token', jwt);
 		return user;
@@ -35,21 +34,18 @@ export class AuthController {
 	@Post('tfa')
 	@HttpCode(200)
 	@UseGuards(TfaGuard)
-	async authenticate(
-		@User() user,
-		@Body() { tfaCode },
-		@Res({passthrough: true}) res: Response
-	) {
-    const isCodeValid = this.userService.isTfaCodeValid(tfaCode, user);
-    if (!isCodeValid) {
-      throw new UnauthorizedException('Wrong authentication code');
-    }
+	async authenticate(@User() user, @Body() { tfaCode }, @Res({passthrough: true}) res: Response)
+	{
+		const isCodeValid = this.userService.isTfaCodeValid(tfaCode, user);
+		if (!isCodeValid) {
+			throw new UnauthorizedException('Wrong authentication code');
+    	}
 
-    const jwt = this.authService.treatTfa(user.id, true);
+		const jwt = this.authService.treatTfa(user.id, true);
 
-	res.clearCookie('access_token');
-	res.cookie('access_token', jwt);
+		res.clearCookie('access_token');
+		res.cookie('access_token', jwt);
 
-    return user;
-  }
+		return user;
+  	}
 }

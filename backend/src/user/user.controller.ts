@@ -1,11 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Req, Res, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
-import { createReadStream } from 'fs';
 import { join } from 'path';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
-import { User } from 'src/decorators/user.decorator';
-import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 import { diskStorage } from 'multer';
 import { of } from 'rxjs';
@@ -23,42 +20,39 @@ export const storage = {
 
 @UseGuards(JwtGuard)
 @Controller('user')
-export class UserController {
+export class UserController
+{
     constructor(
         private authService: AuthService,
         private userService: UserService
     ) {}
 
     @Delete()
-    deleteUser(
-        @User() user
-    ) {
+    async deleteUser(@Req() request: Request)
+    {
+        const user = await this.authService.getLoggedUser(request);
         return this.userService.deleteUser(user.id);
     }
 
     @Get()
-    getProfile(
-        @User() user
-    ) {
+    async getProfile(@Req() request: Request)
+    {
+        const user = await this.authService.getLoggedUser(request);
         return this.userService.getUserById(user.id);
     }
 
     @Post('tfa/secret')
-    async register(
-        @Res() response: Response,
-        @User() user
-    ) {
-        const { otpauthUrl } = await this.userService.generateTfaSecret(user);
-
+    async register(@Res() response: Response, @Req() request: Request)
+    {
+        const { otpauthUrl } = await this.userService.generateTfaSecret(await this.authService.getLoggedUser(request));
         return this.userService.pipeQrCodeStream(response, otpauthUrl);
     }
 
     @Post('tfa/turn-on')
     @HttpCode(200)
-    async turnOnTfa(
-        @User() user,
-        @Body() { tfaCode }
-    ) {
+    async turnOnTfa(@Req() request: Request, @Body() { tfaCode })
+    {
+        const user = await this.authService.getLoggedUser(request);
         const isCodeValid = this.userService.isTfaCodeValid(tfaCode, user);
         if (!isCodeValid) {
             throw new UnauthorizedException('Wrong authentication code');
@@ -66,66 +60,58 @@ export class UserController {
         await this.userService.turnOnTfa(user.id);
     }
 
-    @Post('picture')
-    @UseInterceptors(FileInterceptor('file'))
-    setPicture(
-        @User() user,
-        @UploadedFile() file: Express.Multer.File
-    ) {
-        return this.userService.setPicture(user, file.path);
-    }
+    // @Post('picture')
+    // @UseInterceptors(FileInterceptor('file'))
+    // setPicture(
+    //     @User() user,
+    //     @UploadedFile() file: Express.Multer.File
+    // ) {
+    //     return this.userService.setPicture(user, file.path);
+    // }
 
-    @Get('picture')
-    getPicture(
-        @User() user: UserEntity
-    ) {
-        const file = createReadStream(join(process.cwd(), user.picture));
-        return new StreamableFile(file);
-    }
+    // @Get('picture')
+    // getPicture(
+    //     @User() user: UserEntity
+    // ) {
+    //     const file = createReadStream(join(process.cwd(), user.picture));
+    //     return new StreamableFile(file);
+    // }
 
     @Post('friend/:id')
-    requestFriend(
-        @User() user,
-        @Param('id', ParseIntPipe) id
-    ) {
-        return this.userService.requestFriend(user, id);
+    async requestFriend(@Req() request: Request, @Param('id', ParseIntPipe) id)
+    {
+        return this.userService.requestFriend(await this.authService.getLoggedUser(request), id);
     }
 
     @Delete('friend/:id')
-    deleteFriend(
-        @User() user,
-        @Param('id', ParseIntPipe) id
-    ) {
-        return this.userService.deleteFriend(user, id);
+    async deleteFriend(@Req() request: Request, @Param('id', ParseIntPipe) id)
+    {
+        return this.userService.deleteFriend(await this.authService.getLoggedUser(request), id);
     }
     
     @Get('friend')
-    getFriends(
-        @User() user
-    ) {
+    async getFriends(@Req() request: Request)
+    {
+        const user = await this.authService.getLoggedUser(request);
         return this.userService.getFriends(user.id);
     }
 
     @Post('block/:id')
-    blockUser(
-        @User() user,
-        @Param('id', ParseIntPipe) id
-    ) {
-        return this.userService.blockUser(user, id);
+    async blockUser(@Req() request: Request, @Param('id', ParseIntPipe) id)
+    {
+        return this.userService.blockUser(await this.authService.getLoggedUser(request), id);
     }
 
     @Delete('block/:id')
-    unblockUser(
-        @User() user,
-        @Param('id', ParseIntPipe) id
-    ) {
-        return this.userService.unblockUser(user, id);
+    async unblockUser(@Req() request: Request, @Param('id', ParseIntPipe) id)
+    {
+        return this.userService.unblockUser(await this.authService.getLoggedUser(request), id);
     }
 
     @Get('block')
-    getBlockedUsers(
-        @User() user
-    ) {
+    async getBlockedUsers(@Req() request: Request)
+    {
+        const user = await this.authService.getLoggedUser(request);
         return this.userService.getBlockedUsers(user.id);
     }
 
@@ -135,16 +121,16 @@ export class UserController {
         return this.userService.logOut(response, await this.authService.getLoggedUser(request));
     }
 
-    // @Post('/upload')
-    // @UseInterceptors(FileInterceptor('file', storage))
-    // async uploadFile(@UploadedFile() file, @User() user)
-    // {
-    //     return this.userService.uploadFile(user, file);
-    // }
+    @Post('/picture')
+    @UseInterceptors(FileInterceptor('file', storage))
+    async uploadFile(@UploadedFile() file, @Req() request: Request)
+    {
+        return this.userService.uploadFile(await this.authService.getLoggedUser(request), file);
+    }
 
-    // @Get('/avatar/:imagename')
-    // async findAvatar(@Param('imagename') imagename, @Res() response: Response)
-    // {
-    //     return of(response.sendFile(join(process.cwd(), 'uploads/profileimages/' + imagename)));
-    // }
+    @Get('/picture/:imagename')
+    async findPicture(@Param('imagename') imagename, @Res() response: Response)
+    {
+        return of(response.sendFile(join(process.cwd(), 'uploads/profileimages/' + imagename)));
+    }
 }
