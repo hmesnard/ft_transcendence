@@ -165,25 +165,25 @@ export class ChatUtilsService
         return channel;
     }
 
-    // async deleteMessagesByUser(user: User)
-    // {
-    //     const messages = await this.messageRepository.find({ user });
-    //     if (!messages)
-    //         return ;
-    //     for (const message of messages)
-    //         await this.messageRepository.delete(message);
-    //     return ;
-    // }
+    async deleteMessagesByUser(author: UserEntity)
+    {
+        const messages = await this.messageRepository.find({ author });
+        if (!messages)
+            return ;
+        for (const message of messages)
+            await this.messageRepository.delete(message);
+        return ;
+    }
 
-    // async deleteMessagesByChat(chat: Chat)
-    // {
-    //     const messages = await this.messageRepository.find({ channel: chat });
-    //     if (!messages)
-    //         return ;
-    //     for (const message of messages)
-    //         await this.messageRepository.delete(message);
-    //     return ;
-    // }
+    async deleteMessagesByChat(channel: ChannelEntity)
+    {
+        const messages = await this.messageRepository.find({ channel });
+        if (!messages)
+            return ;
+        for (const message of messages)
+            await this.messageRepository.delete(message);
+        return ;
+    }
 
     async deleteJoinedUsersStatusByChannel(channel: ChannelEntity)
     {
@@ -195,29 +195,29 @@ export class ChatUtilsService
         return ;
     }
 
-    // async deleteJoinedUsersStatusByUser(user: User)
-    // {
-    //     const joinedUsersStatus = await this.joinedUserStatusRepository.find({ userId: user.id });
-    //     if (!joinedUsersStatus)
-    //         return ;
-    //     for (const joinedUserStatus of joinedUsersStatus)
-    //         await this.joinedUserStatusRepository.delete(joinedUserStatus);
-    //     return ;
-    // }
+    async deleteJoinedUsersStatusByUser(user: UserEntity)
+    {
+        const joinedUsersStatus = await this.joinedUserStatusRepository.find({ user });
+        if (!joinedUsersStatus)
+            return ;
+        for (const joinedUserStatus of joinedUsersStatus)
+            await this.joinedUserStatusRepository.delete(joinedUserStatus);
+        return ;
+    }
 
-        async saveMessage(content: string, user: UserEntity, channel: ChannelEntity)
-        {
-            let message = this.messageRepository.create({
-                content: content,
-                author: user,
-                channel: channel
-            });
-            console.log(message);
-            try {
-                message = await this.messageRepository.save(message);
-            } catch (e) {
-                throw new WsException('Error while saving message to the database');
-            }
-            return message;
+    async saveMessage(content: string, user: UserEntity, channel: ChannelEntity)
+    {
+        let message = this.messageRepository.create({
+            content: content,
+            author: user,
+            channel: channel
+        });
+        console.log(message);
+        try {
+            message = await this.messageRepository.save(message);
+        } catch (e) {
+            throw new WsException('Error while saving message to the database');
         }
+        return message;
+    }
 }

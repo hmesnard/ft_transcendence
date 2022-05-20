@@ -6,12 +6,14 @@ import { NewUserDto } from './dto/new-user.dto';
 import { UserEntity, UserStatus } from './entities/user.entity';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
+import { ChatUtilsService } from 'src/chat/service/chatUtils.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(UserEntity)
-        private userRepository: Repository<UserEntity>
+        private userRepository: Repository<UserEntity>,
+        private chatUtilService: ChatUtilsService
     ) {}
 
     async createUser(newUser: NewUserDto): Promise<UserEntity> { //console.log ici -> Done : on recoit tout le user42
@@ -24,8 +26,11 @@ export class UserService {
       return user;
     }
 
-    deleteUser(id: number) {
-      return this.userRepository.delete(id);
+    async deleteUser(user: UserEntity): Promise<void>
+    {
+      await this.chatUtilService.deleteMessagesByUser(user);
+      await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
+      await this.userRepository.delete(user.id);
     }
 
     async getAllUsers()
@@ -150,41 +155,41 @@ export class UserService {
       return requests.filter((user) => requestedBy.some((usr) => user.id === usr.id));
     }
 
-    // async blockUser(user: UserEntity, id: number) {
-    //   const toBlock = await this.getUserById(id);
-    //   if (!toBlock)
-    //     throw new NotFoundException('User not found');
-    //   user.blockedUsers = await this.getBlockedUsers(user.id);
-    //   user.blockedUsers.push(toBlock);
-    //   return await this.userRepository.save(user);
-    // }
-
-    async blockUser(user: UserEntity, id: number)
-    {
-        this.userIdIsSame(id, user.id);
-        const blockedUser = await this.getUserById(id);
-        user.blockedUsers = await this.getBlockedUsers(user.id);
-        for (const x of user.blockedUsers)
-            if (x.id === blockedUser.id)
-                throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'User is already blocked'}, HttpStatus.FORBIDDEN);
-        user.blockedUsers.push(blockedUser);
-        return await this.userRepository.save(user);
+    async blockUser(user: UserEntity, id: number) {
+      const toBlock = await this.getUserById(id);
+      if (!toBlock)
+        throw new NotFoundException('User not found');
+      user.blockedUsers = await this.getBlockedUsers(user.id);
+      user.blockedUsers.push(toBlock);
+      return await this.userRepository.save(user);
     }
 
-    async unblockUser(user: UserEntity, id: number)
-    {
-        this.userIdIsSame(id, user.id);
-        const blockedUser = await this.getUserById(id);
-        user.blockedUsers = await this.getBlockedUsers(user.id);
-        user.blockedUsers = user.blockedUsers.filter((blockedUser) => {return id !== blockedUser.id});
-        return await this.userRepository.save(user);
-    }
-
-    // async unblockUser(user: UserEntity, id: number) {
-    //   user.blockedUsers = await this.getBlockedUsers(user.id);
-    //   user.blockedUsers = user.blockedUsers.filter((usr) => {return usr.id !== id});
-    //   return await this.userRepository.save(user);
+    // async blockUser(user: UserEntity, id: number)
+    // {
+    //     this.userIdIsSame(id, user.id);
+    //     const blockedUser = await this.getUserById(id);
+    //     user.blockedUsers = await this.getBlockedUsers(user.id);
+    //     for (const x of user.blockedUsers)
+    //         if (x.id === blockedUser.id)
+    //             throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'User is already blocked'}, HttpStatus.FORBIDDEN);
+    //     user.blockedUsers.push(blockedUser);
+    //     return await this.userRepository.save(user);
     // }
+
+    // async unblockUser(user: UserEntity, id: number)
+    // {
+    //     this.userIdIsSame(id, user.id);
+    //     const blockedUser = await this.getUserById(id);
+    //     user.blockedUsers = await this.getBlockedUsers(user.id);
+    //     user.blockedUsers = user.blockedUsers.filter((blockedUser) => {return id !== blockedUser.id});
+    //     return await this.userRepository.save(user);
+    // }
+
+    async unblockUser(user: UserEntity, id: number) {
+      user.blockedUsers = await this.getBlockedUsers(user.id);
+      user.blockedUsers = user.blockedUsers.filter((usr) => {return usr.id !== id});
+      return await this.userRepository.save(user);
+    }
 
     async getBlockedUsers(id): Promise<UserEntity[]> {
         return await this.userRepository.query(

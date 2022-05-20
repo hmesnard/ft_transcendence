@@ -28,10 +28,11 @@ export class UserController
     ) {}
 
     @Delete()
-    async deleteUser(@Req() request: Request)
+    async deleteUser(@Res({ passthrough: true }) response: Response, @Req() request: Request)
     {
         const user = await this.authService.getLoggedUser(request);
-        return this.userService.deleteUser(user.id);
+        this.userService.logOut(response, user);
+        return this.userService.deleteUser(user);
     }
 
     @Get()
