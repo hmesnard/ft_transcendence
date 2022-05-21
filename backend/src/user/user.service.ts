@@ -50,7 +50,7 @@ export class UserService {
     {
         const user = await this.userRepository.findOne(id);
         if (!user)
-            return ;//throw new NotFoundException('User with that name does not exists');
+            return ;
         return user;
     }
 
@@ -100,11 +100,6 @@ export class UserService {
         status
       });
     }
-
-    // async setPicture(user: UserEntity, path: string) {
-    //   user.picture = path;
-    //   return await this.userRepository.save(user);
-    // }
 
     async requestFriend(user: UserEntity, id: number) {
       const friend = await this.getUserById(id);

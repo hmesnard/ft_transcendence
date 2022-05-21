@@ -15,7 +15,6 @@ export class ChatService
     constructor(@InjectRepository(ChannelEntity) private chatRepository: Repository<ChannelEntity>,
     @InjectRepository(MessageEntity) private messageRepository: Repository<MessageEntity>,
     @InjectRepository(JoinedUserStatus) private joinedUserStatusRepository: Repository<JoinedUserStatus>,
-    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
     private chatUtilService: ChatUtilsService,
     private userService: UserService) {}
 
