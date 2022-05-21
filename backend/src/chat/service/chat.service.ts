@@ -23,7 +23,7 @@ export class ChatService
     {
         const channel = await this.chatUtilService.getChannelByName(data.name);
         const userStatus = await this.chatUtilService.getJoinedUserStatus(user, channel);
-        const friend = await this.userService.getUserById(data.targetId);
+        const friend = await this.userService.getUserById_2(data.targetId);
         const friendUserStatus = await this.joinedUserStatusRepository.findOne({ user: friend, channel });
         await this.userService.isblocked(user, friend);
         this.userService.userIdIsSame(data.targetId, user.id);
@@ -63,7 +63,7 @@ export class ChatService
         return await this.chatUtilService.createNewChannel(channelData.name, ChannelStatus.protected, channelData.password, newJoinedUserStatus, user);
     }
 
-    async deleteChat(id: number, user: UserEntity)
+    async deleteChannel(id: number, user: UserEntity)
     {
         const channel = await this.chatUtilService.getChannelById(id);
         const userStatus = await this.chatUtilService.getJoinedUserStatus(user, channel);
@@ -77,7 +77,7 @@ export class ChatService
     async kickUserFromChannel(data: JoinedUserStatusDto, user: UserEntity)
     {
         const channel = await this.chatUtilService.getChannelByName(data.name);
-        const friend = await this.userService.getUserById(data.targetId);
+        const friend = await this.userService.getUserById_2(data.targetId);
         const userStatus = await this.chatUtilService.getJoinedUserStatus(user, channel);
         this.userService.userIdIsSame(data.targetId, user.id);
         this.chatUtilService.userIsOwner(userStatus);

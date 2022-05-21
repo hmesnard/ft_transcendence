@@ -26,23 +26,31 @@ export class UserService {
       return user;
     }
 
-    // async deleteUser(user: UserEntity): Promise<void>
-    // {
-    //   await this.chatUtilService.deleteMessagesByUser(user);
-    //   await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
-    //   await this.userRepository.delete(user.id);
-    // }
+    async deleteUser(user: UserEntity): Promise<void>
+    {
+      // await this.chatUtilService.deleteMessagesByUser(user);
+      // await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
+      await this.userRepository.delete(user.id);
+    }
 
     async getAllUsers()
     {
       return this.userRepository.find()
     }
 
-    async getUserById(id: number): Promise<UserEntity>
+    async getUserById_2(id: number): Promise<UserEntity>
     {
         const user = await this.userRepository.findOne(id);
         if (!user)
             throw new NotFoundException('User with that name does not exists');
+        return user;
+    }
+
+    async getUserById(id: number): Promise<UserEntity>
+    {
+        const user = await this.userRepository.findOne(id);
+        if (!user)
+            return ;//throw new NotFoundException('User with that name does not exists');
         return user;
     }
 

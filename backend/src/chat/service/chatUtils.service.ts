@@ -133,7 +133,7 @@ export class ChatUtilsService
         const userStatus = await this.getJoinedUserStatus(user, channel);
         if (userStatus.admin === false)
             throw new HttpException('You are not admin of this channel', HttpStatus.FORBIDDEN);
-        const friend = await this.userService.getUserById(data.targetId);
+        const friend = await this.userService.getUserById_2(data.targetId);
         this.checkClientIsMember(friend, channel);
         const friendUserStatus = await this.getJoinedUserStatus(friend, channel);
         if (friendUserStatus.owner === true)
@@ -149,7 +149,7 @@ export class ChatUtilsService
         const userStatus = await this.getJoinedUserStatus(user, channel);
         if (userStatus.owner === false)
             throw new HttpException('You are not owner of this channel', HttpStatus.FORBIDDEN);
-        const friend = await this.userService.getUserById(adminData.adminId);
+        const friend = await this.userService.getUserById_2(adminData.adminId);
         this.checkClientIsMember(friend, channel);
         const friendUserStatus = await this.getJoinedUserStatus(friend, channel);
         return friendUserStatus;
