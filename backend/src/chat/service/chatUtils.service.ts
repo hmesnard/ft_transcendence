@@ -171,7 +171,7 @@ export class ChatUtilsService
         if (!messages)
             return ;
         for (const message of messages)
-            await this.messageRepository.delete(message);
+            await this.messageRepository.delete(message.id);
         return ;
     }
 
@@ -181,7 +181,7 @@ export class ChatUtilsService
         if (!messages)
             return ;
         for (const message of messages)
-            await this.messageRepository.delete(message);
+            await this.messageRepository.delete(message.id);
         return ;
     }
 
@@ -191,7 +191,7 @@ export class ChatUtilsService
         if (!joinedUsersStatus)
             return ;
         for (const joinedUserStatus of joinedUsersStatus)
-            await this.joinedUserStatusRepository.delete(joinedUserStatus);
+            await this.joinedUserStatusRepository.delete(joinedUserStatus.id);
         return ;
     }
 
@@ -201,7 +201,7 @@ export class ChatUtilsService
         if (!joinedUsersStatus)
             return ;
         for (const joinedUserStatus of joinedUsersStatus)
-            await this.joinedUserStatusRepository.delete(joinedUserStatus);
+            await this.joinedUserStatusRepository.delete(joinedUserStatus.id);
         return ;
     }
 
