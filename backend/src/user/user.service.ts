@@ -6,14 +6,12 @@ import { NewUserDto } from './dto/new-user.dto';
 import { UserEntity, UserStatus } from './entities/user.entity';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
-import { ChatUtilsService } from 'src/chat/service/chatUtils.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
-   //     private chatUtilService: ChatUtilsService
     ) {}
 
     async createUser(newUser: NewUserDto): Promise<UserEntity> { //console.log ici -> Done : on recoit tout le user42
@@ -24,13 +22,6 @@ export class UserService {
         throw new ConflictException('Username must be unique'); //probably other possible errors
       }
       return user;
-    }
-
-    async deleteUser(user: UserEntity): Promise<void>
-    {
-      // await this.chatUtilService.deleteMessagesByUser(user);
-      // await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
-      await this.userRepository.delete(user.id);
     }
 
     async getAllUsers()
@@ -220,14 +211,6 @@ export class UserService {
     {
         if (id === id2)
             throw new HttpException('You have no access to choose yourself', HttpStatus.FORBIDDEN);
-    }
-
-    async logOut(response: Response, user: UserEntity)
-    {
-        response.clearCookie('jwt');
-        user.status = UserStatus.offline;
-        await this.userRepository.save(user);
-        return ;
     }
 
     async uploadFile(user: UserEntity, file)

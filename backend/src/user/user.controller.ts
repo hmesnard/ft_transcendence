@@ -31,8 +31,8 @@ export class UserController
     @Delete()
     async deleteUser(@Res({ passthrough: true }) response: Response, @User() user)
     {
-    //    this.userService.logOut(response, user);
-        return this.userService.deleteUser(user);
+    //    this.authService.logOut(response, user);
+        return this.authService.deleteUser(user);
     }
 
     @Get()
@@ -98,7 +98,7 @@ export class UserController
     @Post('/logout')
     async logOut(@Res({ passthrough: true }) response: Response, @User() user)
     {
-        return this.userService.logOut(response, user);
+        return this.authService.logOut(response, user);
     }
 
     @Post('/picture')

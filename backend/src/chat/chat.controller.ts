@@ -4,7 +4,6 @@ import { AdminUserDto, CreateMessageToChatDto, JoinedUserStatusDto, SetPasswordD
 import { ChatUtilsService } from './service/chatUtils.service';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { UserService } from 'src/user/user.service';
-import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/decorators/user.decorator';
 
 @UseGuards(JwtGuard)
@@ -12,7 +11,6 @@ import { User } from 'src/decorators/user.decorator';
 export class ChatController
 {
     constructor(private chatService: ChatService,
-        private authService: AuthService,
         private chatUtilService: ChatUtilsService,
         private userService: UserService) {}
 

@@ -2,8 +2,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
+import { Response } from 'express';
 import { Socket } from 'socket.io';
-import { UserEntity } from 'src/user/entities/user.entity';
+import { ChatUtilsService } from 'src/chat/service/chatUtils.service';
+import { UserEntity, UserStatus } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 
@@ -12,6 +14,7 @@ export class AuthService {
     constructor(
         @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
         private userService: UserService,
+        private chatUtilService: ChatUtilsService,
         private jwtService: JwtService
     ) {}
 
@@ -53,5 +56,20 @@ export class AuthService {
         }
         console.log(user);
         return user;
+    }
+
+    async deleteUser(user: UserEntity): Promise<void>
+    {
+      await this.chatUtilService.deleteMessagesByUser(user);
+      await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
+      await this.userRepository.delete(user.id);
+    }
+
+    async logOut(response: Response, user: UserEntity)
+    {
+        response.clearCookie('jwt');
+        user.status = UserStatus.offline;
+        await this.userRepository.save(user);
+        return ;
     }
 }
