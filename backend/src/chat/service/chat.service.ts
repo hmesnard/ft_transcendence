@@ -102,6 +102,12 @@ export class ChatService
         }
         channel.members = channel.members.filter((user) => {return id2 !== user.id});
         await this.chatRepository.save(channel);
+        if (channel.members.length === 0)
+        {
+            await this.chatUtilService.deleteMessagesByChannel(channel);
+            await this.chatUtilService.deleteJoinedUsersStatusByChannel(channel);
+            await this.chatRepository.delete(channel.id);
+        }
         return ;
     }
 
