@@ -13,7 +13,7 @@ export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
-  //      private chatUtilService: ChatUtilsService
+   //     private chatUtilService: ChatUtilsService
     ) {}
 
     async createUser(newUser: NewUserDto): Promise<UserEntity> { //console.log ici -> Done : on recoit tout le user42
