@@ -31,7 +31,7 @@ export class UserController
     @Delete()
     async deleteUser(@Res({ passthrough: true }) response: Response, @User() user)
     {
-        this.userService.logOut(response, user);
+    //    this.userService.logOut(response, user);
         return this.userService.deleteUser(user);
     }
 
