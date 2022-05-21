@@ -17,61 +17,61 @@ export class ChatController
         private chatUtilService: ChatUtilsService,
         private userService: UserService) {}
 
-    @Get('/getallchannels')
+    @Get('/all')
     getAllChannels()
     {
         return this.chatUtilService.getAllChannels();
     }
 
-    @Get('/getchannelbyname')
+    @Get()
     getChannelByName(@Body('name') channelName: string)
     {
         return this.chatUtilService.getChannelByName(channelName);
     }
 
-    @Post('/inviteusertoprivatechannel')
+    @Post('/invite')
     async inviteUserToPrivateChannel(@Body() data: JoinedUserStatusDto, @User() user)
     {
         return this.chatService.inviteUserToPrivateChannel(data, user);
     }
 
-    @Post('/createpublicchannel')
+    @Post('/public')
     async createPublicChannel(@Body('name') channelName: string, @User() user)
     {
         return this.chatService.createPublicChannel(channelName, user);
     }
 
-    @Post('/createprivatechannel')
+    @Post('/private')
     async createPrivateChannel(@Body('name') channelName: string, @User() user)
     {
         return this.chatService.createPrivateChannel(channelName, user);
     }
 
-    @Post('/createprotectedchannel')
+    @Post('/protected')
     async createProtectedChannel(@Body() channelData: SetPasswordDto, @User() user)
     {
         return this.chatService.createProtectedChannel(channelData, user);
     }
 
-    @Delete('/deletechannel/:id')
+    @Delete('/delete/:id')
     async deleteChannel(@Param('id') id: number, @User() user)
     {
         return this.chatService.deleteChannel(id, user);
     }
 
-    @Delete('/kickuserfromchannel')
+    @Delete('/kick')
     async kickUserFromChannel(@Body() data: JoinedUserStatusDto, @User() user)
     {
         return this.chatService.kickUserFromChannel(data, user);
     }
 
-    @Delete('/delete/:id')
+    @Delete('/leave/:id')
     async leaveChannel(@Param('id') id: number, @User() user)
     {
         return this.chatService.leaveChannel(id, user);
     }
 
-    @Post('/joinchannel')
+    @Post('/join')
     async joinChannel(@Body() channelData: SetPasswordDto, @User() user)
     {
         return this.chatService.joinChannel(channelData, user);
@@ -125,25 +125,25 @@ export class ChatController
         return this.chatService.removePassword(name, user);
     }
 
-    @Post('/createdirectchannel/:id')
+    @Post('/direct/:id')
     async createDirectChannel(@Param('id') id: number, @User() user)
     {
         return this.chatService.createDirectChannel(user, await this.userService.getUserById(id));
     }
 
-    @Post('/messagetochannel')
+    @Post('/createmessage')
     async createMessageToChannel(@Body() data: CreateMessageToChatDto, @User() user)
     {
         return this.chatService.createMessageToChannel(data, user);
     }
 
-    @Get('/messagesfromchannel')
+    @Get('/messages')
     async getMessagesFromChannel(@Body('name') name: string, @User() user)
     {
         return this.chatService.getMessagesFromChannel(name, user);
     }
 
-    @Get('/getallusers/:id')
+    @Get('/getusers/:id')
     async getAllUsersFromChannel(@Param('id') id: number)
     {
         return this.chatService.getAllUsersFromChannel(id);
@@ -155,7 +155,7 @@ export class ChatController
         return this.chatService.getUserFromChannel(data);
     }
 
-    @Get('/getchannelsfromuser')
+    @Get('/getchannels')
     async getChannelsFromUser(@Body('userId') userId: number)
     {
         return this.chatService.getChannelsFromUser(userId);
