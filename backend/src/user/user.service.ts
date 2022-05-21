@@ -13,7 +13,7 @@ export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
-        private chatUtilService: ChatUtilsService
+  //      private chatUtilService: ChatUtilsService
     ) {}
 
     async createUser(newUser: NewUserDto): Promise<UserEntity> { //console.log ici -> Done : on recoit tout le user42
@@ -26,12 +26,12 @@ export class UserService {
       return user;
     }
 
-    async deleteUser(user: UserEntity): Promise<void>
-    {
-      await this.chatUtilService.deleteMessagesByUser(user);
-      await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
-      await this.userRepository.delete(user.id);
-    }
+    // async deleteUser(user: UserEntity): Promise<void>
+    // {
+    //   await this.chatUtilService.deleteMessagesByUser(user);
+    //   await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
+    //   await this.userRepository.delete(user.id);
+    // }
 
     async getAllUsers()
     {

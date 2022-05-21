@@ -27,13 +27,13 @@ export class UserController
         private userService: UserService
     ) {}
 
-    @Delete()
-    async deleteUser(@Res({ passthrough: true }) response: Response, @Req() request: Request)
-    {
-        const user = await this.authService.getLoggedUser(request);
-        this.userService.logOut(response, user);
-        return this.userService.deleteUser(user);
-    }
+    // @Delete()
+    // async deleteUser(@Res({ passthrough: true }) response: Response, @Req() request: Request)
+    // {
+    //     const user = await this.authService.getLoggedUser(request);
+    //     this.userService.logOut(response, user);
+    //     return this.userService.deleteUser(user);
+    // }
 
     @Get()
     async getProfile(@Req() request: Request)
