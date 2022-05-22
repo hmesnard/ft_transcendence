@@ -11,10 +11,11 @@ import { ChatUtilsService } from './service/chatUtils.service';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { ConnectedUserEntity } from './entities/connectedUser.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ChannelEntity, MessageEntity, JoinedUserStatus, UserEntity]),
+    TypeOrmModule.forFeature([ChannelEntity, MessageEntity, JoinedUserStatus, UserEntity, ConnectedUserEntity]),
     AuthModule, PassportModule.register({ defaultStrategy: 'jwt' }), JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: 3600 }
