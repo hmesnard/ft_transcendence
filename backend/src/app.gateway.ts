@@ -61,9 +61,15 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const channel = await this.chatUtilService.getChannelByName(data.name);
       const message = await this.chatService.createMessageToChannel(data, user);
       for (const member of channel.members)
+      {
         if (await this.userService.isblocked_true(user, member) === false)
-          this.wss.to(data.name).to(member.connections.socketId).emit('msgToClient', message);
-      // this.wss.to(payload.room).emit('msgToClient', message);
+        {
+          // member owns this socket, I dont know how to get members socket with socketId ????
+          // socket.to(data.name).emit('msgToClient', message);
+        }
+      }
+      // this one sends message to all members in room, also to blocked ones...
+      this.wss.to(data.name).emit('msgToClient', message);
     } catch (e) {
       this.error(client, e);
     }
