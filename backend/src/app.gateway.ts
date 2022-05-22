@@ -62,7 +62,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const message = await this.chatService.createMessageToChannel(data, user);
       for (const member of channel.members)
         if (await this.userService.isblocked_true(user, member) === false)
-          this.wss.to(member.connections.socketId).emit('msgToClient', message);
+          this.wss.to(data.name).to(member.connections.socketId).emit('msgToClient', message);
       // this.wss.to(payload.room).emit('msgToClient', message);
     } catch (e) {
       this.error(client, e);
