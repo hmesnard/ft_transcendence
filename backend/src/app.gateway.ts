@@ -51,8 +51,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       this.error(client, e, true);
     }
   }
-  
-  // test this if it works
+
   @SubscribeMessage('msgToServer')
   async handleMessage(client: Socket, data: CreateMessageToChatDto)
   {
@@ -64,12 +63,22 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       {
         if (await this.userService.isblocked_true(user, member) === false)
         {
-          // member owns this socket, I dont know how to get members socket with socketId ????
+          // ---- test this if it works, looks like it !!!!! -----
+          const socket = this.wss.sockets.sockets.get(member.connections.socketId);
+          socket.to(data.name).emit('msgToClient', message);
+
+          // --- try these styles to get all connected sockets ---
+          // const sockets = Array.from(this.wss.sockets.sockets).map(socket => socket[0]);
+          // console.log(sockets);
+          // const sockets2 = (await this.wss.fetchSockets()).map(socket => socket.id);
+          // console.log(sockets2);
+
+          // --- member owns this socket, I dont know how to get members socket with socketId ???? ---
           // socket.to(data.name).emit('msgToClient', message);
         }
       }
-      // this one sends message to all members in room, also to blocked ones...
-      this.wss.to(data.name).emit('msgToClient', message);
+      // ---- this one sends message to all members in room, also to blocked ones... ----
+      // this.wss.to(data.name).emit('msgToClient', message);
     } catch (e) {
       this.error(client, e);
     }
