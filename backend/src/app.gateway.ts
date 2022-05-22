@@ -1,6 +1,6 @@
 
 import { Logger } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
+import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
 import { CreateMessageToChatDto, SetPasswordDto } from './chat/dto/chat.dto';
@@ -53,7 +53,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   @SubscribeMessage('msgToServer')
-  async handleMessage(client: Socket, data: CreateMessageToChatDto)
+  async handleMessage(client: Socket, @MessageBody() data: CreateMessageToChatDto)
   {
     try {
       const user = await this.authService.getUserFromSocket(client);
@@ -85,7 +85,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   @SubscribeMessage('joinRoom')
-  async joinRoom(client: Socket, channelData: SetPasswordDto)
+  async joinRoom(client: Socket, @MessageBody() channelData: SetPasswordDto)
   {
     try {
       const user = await this.authService.getUserFromSocket(client);
@@ -97,7 +97,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   @SubscribeMessage('leaveRoom')
-  async leaveRoom(client: Socket, room: string)
+  async leaveRoom(client: Socket, @MessageBody() room: string)
   {
     try {
       const user = await this.authService.getUserFromSocket(client);
