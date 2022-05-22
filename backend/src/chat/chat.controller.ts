@@ -74,48 +74,56 @@ export class ChatController
         return this.chatService.joinChannel(channelData, user);
     }
 
+    // should this be Patch()
     @Post('/mute')
     async muteUser(@Body() data: JoinedUserStatusDto, @User() user)
     {
         return this.chatService.muteUser(data, user);
     }
 
+    // should this be Patch()
     @Post('/unmute')
     async unMuteUser(@Body() data: JoinedUserStatusDto, @User() user)
     {
         return this.chatService.unMuteUser(data, user);
     }
 
+    // should this be Patch()
     @Post('/ban')
     async banUser(@Body() data: JoinedUserStatusDto, @User() user)
     {
         return this.chatService.banUser(data, user);
     }
 
+    // should this be Patch()
     @Post('/unban')
     async unBanUser(@Body() data: JoinedUserStatusDto, @User() user)
     {
         return this.chatService.unBanUser(data, user);
     }
 
+    // should this be Patch()
     @Post('/admin')
     async giveAdmin(@Body() adminData: AdminUserDto, @User() user)
     {
         return this.chatService.giveAdmin(adminData, user);
     }
 
+    // should this be Patch()
     @Post('/unadmin')
     async unAdmin(@Body() adminData: AdminUserDto, @User() user)
     {
         return this.chatService.unAdmin(adminData, user);
     }
 
+    // should this be Patch()
     @Post('/password')
     async setPassword(@Body() passwordData: SetPasswordDto, @User() user)
     {
         return this.chatService.setPassword(passwordData, user);
     }
 
+    // should this be Patch()
     @Post('/removepassword')
     async removePassword(@Body('name') name: string, @User() user)
     {

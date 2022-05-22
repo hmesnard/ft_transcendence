@@ -77,7 +77,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
           // socket.to(data.name).emit('msgToClient', message);
         }
       }
-      // ---- this one sends message to all members in room, also to blocked ones... ----
+      // ---- this one sends message to all members in room, also to blocked ones ----
       // this.wss.to(data.name).emit('msgToClient', message);
     } catch (e) {
       this.error(client, e);
