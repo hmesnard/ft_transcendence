@@ -31,9 +31,9 @@ export class MatchService {
         if (user.wins - user.losses > 5)
             user.level = UserLevel.advanced;
         if (user.wins - user.losses > 10)
-            user.level = UserLevel.advanced;
+            user.level = UserLevel.pro;
         if (user.wins - user.losses > 15)
-            user.level = UserLevel.advanced;
+            user.level = UserLevel.expert;
         await this.userRepository.save(user);   
     }
 
