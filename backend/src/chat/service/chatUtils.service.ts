@@ -65,7 +65,7 @@ export class ChatUtilsService
     }
 
     channelIsDirect(channel: ChannelEntity, channelName: string) {
-        if (channel || channelName.includes("direct_with_") === true)
+        if (channel !== undefined || channelName.includes("direct_with_") === true)
             throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'Channel already exists'}, HttpStatus.BAD_REQUEST);
     }
 
