@@ -96,7 +96,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     } catch (e) {
       this.error(client, e);
     }
-
   }
 
   private error(socket: Socket, error: object, disconnect: boolean = false)
