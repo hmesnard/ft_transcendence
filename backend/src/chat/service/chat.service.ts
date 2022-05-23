@@ -5,7 +5,6 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { AdminUserDto, CreateMessageToChatDto, JoinedUserStatusDto, SetPasswordDto } from '../dto/chat.dto';
 import { ChannelEntity, ChannelStatus } from '../entities/channel.entity';
-import { ConnectedUserEntity } from '../entities/connectedUser.entity';
 import { JoinedUserStatus } from '../entities/joinedUserStatus.entity';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatUtilsService } from './chatUtils.service';
@@ -16,24 +15,8 @@ export class ChatService
     constructor(@InjectRepository(ChannelEntity) private chatRepository: Repository<ChannelEntity>,
     @InjectRepository(MessageEntity) private messageRepository: Repository<MessageEntity>,
     @InjectRepository(JoinedUserStatus) private joinedUserStatusRepository: Repository<JoinedUserStatus>,
-    @InjectRepository(ConnectedUserEntity) private connectedUserRepository: Repository<ConnectedUserEntity>,
     private chatUtilService: ChatUtilsService,
     private userService: UserService) {}
-
-    async createConnectedUser(socketId: string, user: UserEntity)
-    {
-        const connectedUser = await this.connectedUserRepository.create({
-            socketId,
-            user,
-        });
-        await this.connectedUserRepository.save(connectedUser);
-        return connectedUser;
-    }
-
-    async deleteConnectedUserBySocketId(socketId: string)
-    {
-        return this.connectedUserRepository.delete({ socketId });
-    }
 
     async inviteUserToPrivateChannel(data: JoinedUserStatusDto, user: UserEntity)
     {

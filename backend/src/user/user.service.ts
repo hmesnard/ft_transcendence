@@ -235,4 +235,10 @@ export class UserService {
       await this.userRepository.save(updatedUser);
       return updatedUser;
     }
+
+    async updateUserSocketId(socketId: string, user: UserEntity)
+    {
+      user.socketId = socketId;
+      await this.userRepository.save(user);
+    }
 }

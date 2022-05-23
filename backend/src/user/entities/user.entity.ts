@@ -1,5 +1,4 @@
 import { Exclude } from "class-transformer";
-import { ConnectedUserEntity } from "src/chat/entities/connectedUser.entity";
 import { JoinedUserStatus } from "src/chat/entities/joinedUserStatus.entity";
 import { MessageEntity } from "src/chat/entities/message.entity";
 import { TimestampEntity } from "src/generics/timestamp.entity";
@@ -31,6 +30,9 @@ export class UserEntity extends TimestampEntity {
         unique: true
     })
     username: string;
+
+    @Column({ default: null })
+    socketId: string;
 
     @Column({ default: false })
     tfaEnabled: boolean;
@@ -80,7 +82,4 @@ export class UserEntity extends TimestampEntity {
     @OneToMany(() => JoinedUserStatus, (joinedUserStatus: JoinedUserStatus) => joinedUserStatus.user)
     @Exclude({ toPlainOnly: true })
     joinedUserStatus: JoinedUserStatus[];
-
-    @OneToMany(() => ConnectedUserEntity, (connections: ConnectedUserEntity) => connections.user)
-    connections: ConnectedUserEntity;
 }

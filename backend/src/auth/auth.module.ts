@@ -4,7 +4,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChannelEntity } from 'src/chat/entities/channel.entity';
-import { ConnectedUserEntity } from 'src/chat/entities/connectedUser.entity';
 import { JoinedUserStatus } from 'src/chat/entities/joinedUserStatus.entity';
 import { MessageEntity } from 'src/chat/entities/message.entity';
 import { ChatService } from 'src/chat/service/chat.service';
@@ -20,7 +19,7 @@ import { TfaStrategy } from './strategies/tfa.strategy';
 @Module({
   imports: [
     ConfigModule.forRoot(), //isGlobal ne marche pas !!??
-    UserModule, TypeOrmModule.forFeature([UserEntity, ChannelEntity, MessageEntity, JoinedUserStatus, ConnectedUserEntity]), PassportModule.register({ defaultStrategy: 'jwt' }),
+    UserModule, TypeOrmModule.forFeature([UserEntity, ChannelEntity, MessageEntity, JoinedUserStatus]), PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: 3600 }

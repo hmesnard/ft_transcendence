@@ -25,26 +25,28 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   afterInit(server: Server) {
     this.logger.log('Initialized !');
   }
-  
-  async handleConnection(client: Socket, ...args: any[]) {
+
+  async handleConnection(client: Socket, ...args: any[])
+  {
     try {
       console.log(client.id);
       const user = await this.authService.getUserFromSocket(client);
       this.userService.updateStatus(user.id, UserStatus.online);
       this.wss.emit('updateStatus', 'online');
-      await this.chatService.createConnectedUser(client.id, user);
+      await this.userService.updateUserSocketId(client.id, user);
       this.logger.log(`client connected:    ${client.id}`);
     } catch (e) {
       this.error(client, e, true);
     }
   }
   
-  async handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket)
+  {
     try {
       const user = await this.authService.getUserFromSocket(client);
+      await this.userService.updateUserSocketId(null, user);
       this.userService.updateStatus(user.id, UserStatus.offline);
       this.wss.emit('updateStatus', 'offline');
-      await this.chatService.deleteConnectedUserBySocketId(client.id);
       this.logger.log(`client disconnected: ${client.id}`);
       client.disconnect();
     } catch (e) {
@@ -63,8 +65,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       {
         if (await this.userService.isblocked_true(user, member) === false)
         {
-          // ---- test this if it works, looks like it !!!!! -----
-          const socket = this.wss.sockets.sockets.get(member.connections.socketId);
+          // ---- test this if it works -----
+          const socket = this.wss.sockets.sockets.get(member.socketId);
           socket.to(data.name).emit('msgToClient', message);
 
           // --- try these styles to get all connected sockets ---
