@@ -9,7 +9,7 @@ import { ChatUtilsService } from './chat/service/chatUtils.service';
 import { UserStatus } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 
-@WebSocketGateway({ cors: {origin: '*'} })
+@WebSocketGateway({ cors: {origin: '*'} }) // ({namespace: 'chat', cors: { origin: `http://localhost:3001`, credentials: true } })
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private authService: AuthService,
@@ -32,8 +32,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
-      this.userService.updateStatus(user.id, UserStatus.online);
-      this.wss.emit('updateStatus', 'online');
+   //   this.userService.updateStatus(user.id, UserStatus.online);
+   //   this.wss.emit('updateStatus', 'online');
       await this.userService.updateUserSocketId(client.id, user);
       this.logger.log(`client connected:    ${client.id}`);
     }
@@ -46,8 +46,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
-      this.userService.updateStatus(user.id, UserStatus.offline);
-      this.wss.emit('updateStatus', 'offline');
+  //    this.userService.updateStatus(user.id, UserStatus.offline);
+  //    this.wss.emit('updateStatus', 'offline');
       this.logger.log(`client disconnected: ${client.id}`);
       client.disconnect();
     }
@@ -163,93 +163,93 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('mute')
-  async muteUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.muteUser(data, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('mute')
+  // async muteUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.muteUser(data, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('unmute')
-  async unMuteUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.unMuteUser(data, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('unmute')
+  // async unMuteUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.unMuteUser(data, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('ban')
-  async banUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.banUser(data, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('ban')
+  // async banUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.banUser(data, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('mute')
-  async unBanUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.unBanUser(data, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('mute')
+  // async unBanUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.unBanUser(data, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('admin')
-  async giveAdmin(@ConnectedSocket() client: Socket, @MessageBody() data: AdminUserDto)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.giveAdmin(data, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('admin')
+  // async giveAdmin(@ConnectedSocket() client: Socket, @MessageBody() data: AdminUserDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.giveAdmin(data, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('unadmin')
-  async unAdmin(@ConnectedSocket() client: Socket, @MessageBody() data: AdminUserDto)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.unAdmin(data, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('unadmin')
+  // async unAdmin(@ConnectedSocket() client: Socket, @MessageBody() data: AdminUserDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.unAdmin(data, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('password')
-  async setPassword(@ConnectedSocket() client: Socket, @MessageBody() data: SetPasswordDto)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.setPassword(data, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('password')
+  // async setPassword(@ConnectedSocket() client: Socket, @MessageBody() data: SetPasswordDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.setPassword(data, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('removepassword')
-  async removePassword(@ConnectedSocket() client: Socket, @MessageBody() name: string)
-  {
-    try
-    {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.removePassword(name, user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('removepassword')
+  // async removePassword(@ConnectedSocket() client: Socket, @MessageBody() name: string)
+  // {
+  //   try
+  //   {
+  //     const user = await this.authService.getUserFromSocket(client);
+  //     await this.chatService.removePassword(name, user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
   @SubscribeMessage('direct')
   async createDirectChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
@@ -286,38 +286,38 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('getusers')
-  async getAllUsersFromChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
-  {
-    try
-    {
-      const users = await this.chatService.getAllUsersFromChannel(id);
-      client.emit('getusers', users);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('getusers')
+  // async getAllUsersFromChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
+  // {
+  //   try
+  //   {
+  //     const users = await this.chatService.getAllUsersFromChannel(id);
+  //     client.emit('getusers', users);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('getuser')
-  async getUserFromChannel(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  {
-    try
-    {
-      const user = await this.chatService.getUserFromChannel(data);
-      client.emit('getuser', user);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('getuser')
+  // async getUserFromChannel(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
+  // {
+  //   try
+  //   {
+  //     const user = await this.chatService.getUserFromChannel(data);
+  //     client.emit('getuser', user);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
-  @SubscribeMessage('getchannels')
-  async getChannelsFromUser(@ConnectedSocket() client: Socket, @MessageBody() id: number)
-  {
-    try
-    {
-      const channels = await this.chatService.getChannelsFromUser(id);
-      client.emit('getchannels', channels);
-    }
-    catch { throw new WsException('Something went wrong'); }
-  }
+  // @SubscribeMessage('getchannels')
+  // async getChannelsFromUser(@ConnectedSocket() client: Socket, @MessageBody() id: number)
+  // {
+  //   try
+  //   {
+  //     const channels = await this.chatService.getChannelsFromUser(id);
+  //     client.emit('getchannels', channels);
+  //   }
+  //   catch { throw new WsException('Something went wrong'); }
+  // }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
   {
