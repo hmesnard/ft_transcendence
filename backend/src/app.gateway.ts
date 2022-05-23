@@ -32,22 +32,22 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
-   //   this.userService.updateStatus(user.id, UserStatus.online);
-   //   this.wss.emit('updateStatus', 'online');
+      this.userService.updateStatus(user.id, UserStatus.online);
+      this.wss.emit('updateStatus', 'online');
       await this.userService.updateUserSocketId(client.id, user);
       this.logger.log(`client connected:    ${client.id}`);
     }
     catch (e) { this.error(client, e, true); }
   }
-  
+
   async handleDisconnect(@ConnectedSocket() client: Socket)
   {
     try
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
-  //    this.userService.updateStatus(user.id, UserStatus.offline);
-  //    this.wss.emit('updateStatus', 'offline');
+      this.userService.updateStatus(user.id, UserStatus.offline);
+      this.wss.emit('updateStatus', 'offline');
       this.logger.log(`client disconnected: ${client.id}`);
       client.disconnect();
     }
