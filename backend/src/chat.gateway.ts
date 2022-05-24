@@ -3,10 +3,9 @@ import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
-import { AdminUserDto, CreateMessageToChatDto, JoinedUserStatusDto, SetPasswordDto } from './chat/dto/chat.dto';
+import { CreateMessageToChatDto, JoinedUserStatusDto, SetPasswordDto } from './chat/dto/chat.dto';
 import { ChatService } from './chat/service/chat.service';
 import { ChatUtilsService } from './chat/service/chatUtils.service';
-import { UserStatus } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 
 @WebSocketGateway({ namespace: 'chat', cors: { origin: `http://localhost:3000`, credentials: true } }) // ({namespace: 'chat', cors: { origin: `http://localhost:${FRONT_END_PORT}`, credentials: true } })
@@ -64,11 +63,16 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
+      const channel = await this.chatUtilService.getChannelByName(data.name);
       await this.chatService.inviteUserToPrivateChannel(data, user);
       const friend = await this.userService.getUserById_2(data.targetId);
       const socket = this.wss.sockets.sockets.get(friend.socketId);
       if (socket !== undefined)
+      {
         socket.join(data.name);
+      }
+      this.wss.to(channel.name).emit('joinRoom', `User: ${friend.username} joined to channel`);
+      socket.emit('invite', channel);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -80,7 +84,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.createPublicChannel(name, user);
+      const channel = await this.chatUtilService.getChannelByName(name);
       client.join(name);
+      this.wss.emit('newChannel', channel);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -92,7 +98,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.createPrivateChannel(name, user);
+      const channel = await this.chatUtilService.getChannelByName(name);
       client.join(name);
+      this.wss.emit('newChannel', channel);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -104,7 +112,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.createProtectedChannel(data, user);
+      const channel = await this.chatUtilService.getChannelByName(data.name);
       client.join(data.name);
+      this.wss.emit('newChannel', channel);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -122,8 +132,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       {
           const socket = this.wss.sockets.sockets.get(member.socketId);
           if (socket !== undefined)
+          {
+            socket.emit('delete', `Channel: ${channel.name} has been deleted`);
             socket.leave(channel.name);
+          }
       }
+      this.wss.emit('delete', channel);
       await this.chatService.deleteChannel(id, user);
     }
     catch { throw new WsException('Something went wrong'); }
@@ -139,7 +153,11 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const friend = await this.userService.getUserById_2(data.targetId);
       const socket = this.wss.sockets.sockets.get(friend.socketId);
       if (socket !== undefined)
+      {
         socket.leave(data.name);
+        socket.emit('kick', `You have been kicked out from channel: ${data.name}`)
+      }
+      client.emit('kick', `You kicked out user: ${friend.username} from the channel`)
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -154,6 +172,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const name = channel.name;
       await this.chatService.leaveChannel(id, user);
       client.leave(name);
+      client.emit('leave', 'You left from the channel');
+      this.wss.to(name).emit('leave', `User: ${user.username} just left from the channel`);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -166,97 +186,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.joinChannel(channelData, user);
       client.join(channelData.name);
+      this.wss.to(channelData.name).emit('joinRoom', `User: ${user.username} joined to channel`);
     }
     catch { throw new WsException('Something went wrong'); }
   }
-
-  // @SubscribeMessage('mute')
-  // async muteUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.muteUser(data, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('unmute')
-  // async unMuteUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.unMuteUser(data, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('ban')
-  // async banUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.banUser(data, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('mute')
-  // async unBanUser(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.unBanUser(data, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('admin')
-  // async giveAdmin(@ConnectedSocket() client: Socket, @MessageBody() data: AdminUserDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.giveAdmin(data, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('unadmin')
-  // async unAdmin(@ConnectedSocket() client: Socket, @MessageBody() data: AdminUserDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.unAdmin(data, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('password')
-  // async setPassword(@ConnectedSocket() client: Socket, @MessageBody() data: SetPasswordDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.setPassword(data, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('removepassword')
-  // async removePassword(@ConnectedSocket() client: Socket, @MessageBody() name: string)
-  // {
-  //   try
-  //   {
-  //     const user = await this.authService.getUserFromSocket(client);
-  //     await this.chatService.removePassword(name, user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
 
   @SubscribeMessage('direct')
   async createDirectChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
@@ -270,6 +203,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       client.join(channel.name);
       if (socket !== undefined)
         socket.join(channel.name);
+      this.wss.to(channel.name).emit('newChannel', `New direct chat with ${user.username} and ${friend.username}`);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -294,39 +228,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
     catch { throw new WsException('Something went wrong'); }
   }
-
-  // @SubscribeMessage('getusers')
-  // async getAllUsersFromChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
-  // {
-  //   try
-  //   {
-  //     const users = await this.chatService.getAllUsersFromChannel(id);
-  //     client.emit('getusers', users);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('getuser')
-  // async getUserFromChannel(@ConnectedSocket() client: Socket, @MessageBody() data: JoinedUserStatusDto)
-  // {
-  //   try
-  //   {
-  //     const user = await this.chatService.getUserFromChannel(data);
-  //     client.emit('getuser', user);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
-
-  // @SubscribeMessage('getchannels')
-  // async getChannelsFromUser(@ConnectedSocket() client: Socket, @MessageBody() id: number)
-  // {
-  //   try
-  //   {
-  //     const channels = await this.chatService.getChannelsFromUser(id);
-  //     client.emit('getchannels', channels);
-  //   }
-  //   catch { throw new WsException('Something went wrong'); }
-  // }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
   {
