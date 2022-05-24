@@ -35,6 +35,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       this.userService.updateStatus(user.id, UserStatus.online);
       this.wss.emit('updateStatus', 'online');
       await this.userService.updateUserSocketId(client.id, user);
+      const rooms = await this.chatService.getChannelsFromUser(user.id);
+      for (const room of rooms)
+        client.join(room.name);
       this.logger.log(`client connected:    ${client.id}`);
     }
     catch (e) { this.error(client, e, true); }
