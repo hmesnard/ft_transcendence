@@ -9,8 +9,9 @@ import { ChatUtilsService } from './chat/service/chatUtils.service';
 import { UserStatus } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 
-@WebSocketGateway({ cors: {origin: '*'} }) // ({namespace: 'chat', cors: { origin: `http://localhost:3001`, credentials: true } })
-export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway({ namespace: 'chat', cors: { origin: `http://localhost:3000`, credentials: true } }) // ({namespace: 'chat', cors: { origin: `http://localhost:${FRONT_END_PORT}`, credentials: true } })
+export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private authService: AuthService,
     private chatUtilService: ChatUtilsService,
@@ -20,7 +21,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @WebSocketServer() wss: Server;
 
-  private logger: Logger = new Logger('AppGateway');
+  private logger: Logger = new Logger('ChatGateway');
   
   afterInit(server: Server)
   {
@@ -32,8 +33,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
-      this.userService.updateStatus(user.id, UserStatus.online);
-      this.wss.emit('updateStatus', 'online');
+      // this.userService.updateStatus(user.id, UserStatus.online);
+      // this.wss.emit('updateStatus', 'online');
       await this.userService.updateUserSocketId(client.id, user);
       const rooms = await this.chatService.getChannelsFromUser(user.id);
       for (const room of rooms)
@@ -49,8 +50,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
-      this.userService.updateStatus(user.id, UserStatus.offline);
-      this.wss.emit('updateStatus', 'offline');
+      // this.userService.updateStatus(user.id, UserStatus.offline);
+      // this.wss.emit('updateStatus', 'offline');
       this.logger.log(`client disconnected: ${client.id}`);
       client.disconnect();
     }

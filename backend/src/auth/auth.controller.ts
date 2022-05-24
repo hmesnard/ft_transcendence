@@ -13,7 +13,6 @@ export class AuthController {
 		private userService: UserService
     ) {}
 
-	// should this be Post() ?
     @Get('42')
 	@UseGuards(FtGuard)
 	ftAuth()
@@ -22,7 +21,6 @@ export class AuthController {
 		return ;
 	}
 
-	// should this be Post() ?
 	@Get('42/return')
 	@UseGuards(FtGuard)
 	async ftAuthReturn(@User() user42, @Res({passthrough: true}) res)
