@@ -66,7 +66,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       await this.chatService.inviteUserToPrivateChannel(data, user);
       const friend = await this.userService.getUserById_2(data.targetId);
       const socket = this.wss.sockets.sockets.get(friend.socketId);
-      socket.join(data.name);
+      if (socket !== undefined)
+        socket.join(data.name);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -119,7 +120,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       for (const member of channel.members)
       {
           const socket = this.wss.sockets.sockets.get(member.socketId);
-          socket.leave(channel.name);
+          if (socket !== undefined)
+            socket.leave(channel.name);
       }
       await this.chatService.deleteChannel(id, user);
     }
@@ -135,7 +137,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       await this.chatService.kickUserFromChannel(data, user);
       const friend = await this.userService.getUserById_2(data.targetId);
       const socket = this.wss.sockets.sockets.get(friend.socketId);
-      socket.leave(data.name);
+      if (socket !== undefined)
+        socket.leave(data.name);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -264,7 +267,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const channel = await this.chatService.createDirectChannel(user, friend);
       const socket = this.wss.sockets.sockets.get(friend.socketId);
       client.join(channel.name);
-      socket.join(channel.name);
+      if (socket !== undefined)
+        socket.join(channel.name);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -282,7 +286,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         if (await this.userService.isblocked_true(user, member) === false)
         {
           const socket = this.wss.sockets.sockets.get(member.socketId);
-          socket.to(data.name).emit('msgToClient', message);
+          if (socket !== undefined)
+            socket.to(data.name).emit('msgToClient', message);
         }
       }
     }
