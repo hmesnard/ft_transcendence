@@ -21,6 +21,17 @@ export class Player
     score?: number;
 }
 
+export class Ball
+{
+    x: number;
+    y: number;
+    speedX: number;
+    speedY: number;
+    speed: number;
+    size: number;
+    color: string;
+}
+
 export class Paddle
 {
     h: number;
@@ -31,6 +42,7 @@ export class Paddle
 export class GameOptions
 {
     paddleSize: number;
+    paddleSpeed: number;
     ballSpeed: number;
 }
 
@@ -41,6 +53,13 @@ export class Sound
     score: boolean;
     win: boolean;
     loose: boolean;
+}
+
+export class Canvas
+{
+    h: number;
+    w: number;
+    hitpoint: number;
 }
 
 export class Invites

@@ -2,14 +2,14 @@ import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
-import { Game, Invites, Player } from './game/game.class';
+import { Ball, Canvas, Game, GameOptions, Invites, Paddle, Player, Sound } from './game/game.class';
 import { MatchDto } from './match/dto/match.dto';
 import { UserEntity } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 import axios from 'axios';
 import { GameService } from './game/game.service';
 
-// All the emits are missing, I add them later!
+// I dont have any idea if these functions work, I will check it when I can try this with frontend
 
 @WebSocketGateway({ namespace: 'game', cors: { origin: `http://localhost:3000`, credentials: true }}) // ({namespace: 'chat', cors: { origin: `http://localhost:${FRONT_END_PORT}`, credentials: true } })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -20,9 +20,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   @WebSocketServer() wss: Server;
 
+  private gameId = 0;
   private queue: UserEntity[] = [];
   private invites: Invites[] = [];
   private games: Game[] = [];
+  private readonly defaultGameOptions: GameOptions = {
+    paddleSize: 2,
+    paddleSpeed: 10,
+    ballSpeed: 10
+  };
+  private readonly defaultCanvas: Canvas = {
+    h: 100,
+    w: 200,
+    hitpoint: 10
+  };
 
   private logger: Logger = new Logger('GameGateway');
 
@@ -143,7 +154,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   {
     const socket1 = this.wss.sockets.sockets.get(player1.socketId);
     const socket2 = this.wss.sockets.sockets.get(player2.socketId);
-    this.wss.to(room).socketsJoin(room);
+    socket1.join(room);
+    socket2.join(room);
     this.wss.to(room).emit('gameStarts', `Game between ${player1.username} and ${player2.username} starts now`);
   }
 
@@ -151,7 +163,94 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   {
     const room = `game_with_${player1.player.id}_${player2.player.id}`;
     this.addPlayersToGame(player1.player, player2.player, room);
-    // create game in gameService
+    this.createGame(player1, player2, this.defaultGameOptions, room);
+  }
+
+  async createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)
+  {
+ //   player1 = this.initPlayer1(player1);
+  }
+
+  initPlayer1(user: UserEntity, gameOptions: GameOptions)
+  {
+    const paddle = this.initPaddle(gameOptions);
+    const x = this.defaultCanvas.hitpoint;
+    const y = this.defaultCanvas.h / 2;
+    const player: Player = {
+      player: user,
+      x,
+      y,
+      paddle,
+      color: 'red',
+      score: 0
+    };
+    return player;
+  }
+
+  initPlayer2(user: UserEntity, gameOptions: GameOptions)
+  {
+    const paddle = this.initPaddle(gameOptions);
+    const x = this.defaultCanvas.w - this.defaultCanvas.hitpoint;
+    const y = this.defaultCanvas.h / 2;
+    const player: Player = {
+      player: user,
+      x,
+      y,
+      paddle,
+      color: 'blue',
+      score: 0
+    };
+    return player;
+  }
+
+  initPaddle(gameOptions: GameOptions)
+  {
+    const h = (0.2 + (gameOptions.paddleSize - 1) * 0.1) * this.defaultCanvas.h;
+    const w = 0.2 * 0.2 * this.defaultCanvas.h;
+    const speed = 0.1 * (this.defaultCanvas.h / 2 - h);
+    const paddle: Paddle = {
+      h,
+      w,
+      speed
+    };
+    return paddle;
+  }
+
+  initBall(gameOptions: GameOptions)
+  {
+    const paddle = this.initPaddle(gameOptions);
+    const x = this.defaultCanvas.w / 2;
+    const y = this.defaultCanvas.h / 2;
+    const size = paddle.w / 2;
+    var speed = gameOptions.ballSpeed;
+    var speedX = Math.round((Math.random() * 100) % 6);
+    var speedY = Math.round((Math.random() * 100) % 6);
+    if (speedX === 0)
+      speedX = 1;
+    if (speedY === 0)
+      speedY = -1;
+    const ball: Ball = {
+      x,
+      y,
+      speedX,
+      speedY,
+      speed,
+      size,
+      color: 'green'
+    };
+    return ball;
+  }
+
+  initSound()
+  {
+    const sound: Sound = {
+      hit: true,
+      wall: true,
+      score: true,
+      win: true,
+      loose: true
+    };
+    return sound;
   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
