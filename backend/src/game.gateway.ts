@@ -8,7 +8,7 @@ import { UserEntity } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 import axios from 'axios';
 
-// All the emits are missing, I add them soon!
+// All the emits are missing, I add them later!
 
 @WebSocketGateway({ namespace: 'game', cors: { origin: `http://localhost:3000`, credentials: true }}) // ({namespace: 'chat', cors: { origin: `http://localhost:${FRONT_END_PORT}`, credentials: true } })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -50,31 +50,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     catch (e) { this.error(client, e, true); }
   }
 
-  addPlayersToGame(player1: UserEntity, player2: UserEntity, room: string)
+  @SubscribeMessage('invite')
+  async invitePlayer(@ConnectedSocket() client: Socket, @MessageBody() id: number)
   {
-    const socket1 = this.wss.sockets.sockets.get(player1.socketId);
-    const socket2 = this.wss.sockets.sockets.get(player2.socketId);
-    if (socket1 !== undefined)
-      socket1.join(room);
-    if (socket2 !== undefined)
-      socket2.join(room);
+    // invite player
+    // send emit to invited player
   }
-
-  // removePlayersFromGame(player1: UserEntity, player2: UserEntity, room: string)
-  // {
-  //   const socket1 = this.wss.sockets.sockets.get(player1.socketId);
-  //   const socket2 = this.wss.sockets.sockets.get(player2.socketId);
-  //   if (socket1 !== undefined)
-  //     socket1.leave(room);
-  //   if (socket2 !== undefined)
-  //     socket2.leave(room);
-  // }
 
   @SubscribeMessage('leaveGame')
   async leaveGame(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
     // end game
-    // left player loose and other player wins
+    // leaving player loose and other player wins
     // other player leaves too
     client.leave(room);
   }
@@ -89,7 +76,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const player1: Player = { player: this.queue.shift() };
       const player2: Player = { player: this.queue.shift() };
       this.startGame(player1, player2);
+      const socket1 = this.wss.sockets.sockets.get(player1.player.socketId);
+      const socket2 = this.wss.sockets.sockets.get(player2.player.socketId);
+      socket1.emit('gameStarts', player1);
+      socket2.emit('gameStarts', player2);
     }
+    client.emit('JoinQueue', user);
   }
 
   @SubscribeMessage('leaveQueue')
@@ -97,24 +89,27 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   {
     const user = await this.authService.getUserFromSocket(client);
     this.queue.filter(player => player.id !== user.id);
+    this.wss.emit('leaveQueue', user);
   }
+
+  @SubscribeMessage('addSpectator')
+  async addSpectator(@ConnectedSocket() client: Socket, @MessageBody() room: string)
+  {
+    const user = await this.authService.getUserFromSocket(client);
+    client.join(room);
+    this.wss.to(room).emit('newSpectator', user);
+  }
+
+
+
+
+
 
   async startGame(player1: Player, player2: Player)
   {
     const room = `game_with_${player1.player.id}_${player2.player.id}`;
     this.addPlayersToGame(player1.player, player2.player, room);
     // create game in gameService
-  }
-
-  @SubscribeMessage('addSpectator')
-  async addSpectator(@ConnectedSocket() client: Socket, @MessageBody() room: string)
-  {
-    client.join(room);
-  }
-
-  leaveRoom(socket: Socket, room: string)
-  {
-    socket.leave(room);
   }
 
   async endGame(game: Game)
@@ -134,11 +129,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.wss.to(game.name).socketsLeave(game.name);
   }
 
-  @SubscribeMessage('invite')
-  async invitePlayer(@ConnectedSocket() client: Socket, @MessageBody() id: number)
+  addPlayersToGame(player1: UserEntity, player2: UserEntity, room: string)
   {
-    // invite player
-    // send emit to invited player
+    const socket1 = this.wss.sockets.sockets.get(player1.socketId);
+    const socket2 = this.wss.sockets.sockets.get(player2.socketId);
+    if (socket1 !== undefined && socket2 !== undefined)
+    {
+      this.wss.to(room).socketsJoin(room);
+      this.wss.to(room).emit('gameStarts', `Game between ${player1.username} and ${player2.username} starts now`);
+    }
+    else
+    {
+      if (socket2 === undefined)
+        socket1.emit('leaveGame', `Player: ${player2.username} is not available`);
+    }
   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
