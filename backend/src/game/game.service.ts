@@ -1,4 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class GameService {}
+export class GameService
+{
+    constructor() {}
+
+    async getPlayersFromGame()
+    {
+
+    }
+}

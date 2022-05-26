@@ -9,7 +9,7 @@ import { ChatUtilsService } from './chat/service/chatUtils.service';
 import { UserService } from './user/user.service';
 
 @WebSocketGateway({ namespace: 'chat', cors: { origin: `http://localhost:3000`, credentials: true } }) // ({namespace: 'chat', cors: { origin: `http://localhost:${FRONT_END_PORT}`, credentials: true } })
-export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
     private authService: AuthService,

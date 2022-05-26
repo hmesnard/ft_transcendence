@@ -7,6 +7,7 @@ import { MatchDto } from './match/dto/match.dto';
 import { UserEntity } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 import axios from 'axios';
+import { GameService } from './game/game.service';
 
 // All the emits are missing, I add them later!
 
@@ -14,7 +15,8 @@ import axios from 'axios';
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(private authService: AuthService,
-    private userService: UserService) {}
+    private userService: UserService,
+    private gameService: GameService) {}
 
   @WebSocketServer() wss: Server;
 
@@ -45,6 +47,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
       this.logger.log(`client disconnected: ${client.id}`);
+      const queueIndex = this.queue.indexOf(user);
+      if (queueIndex !== -1)
+        this.queue.splice(queueIndex, 1);
       client.disconnect();
     }
     catch (e) { this.error(client, e, true); }
@@ -100,18 +105,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.wss.to(room).emit('newSpectator', user);
   }
 
-
-
-
-
-
-  async startGame(player1: Player, player2: Player)
-  {
-    const room = `game_with_${player1.player.id}_${player2.player.id}`;
-    this.addPlayersToGame(player1.player, player2.player, room);
-    // create game in gameService
-  }
-
   async endGame(game: Game)
   {
     const matchBody: MatchDto = {
@@ -133,16 +126,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   {
     const socket1 = this.wss.sockets.sockets.get(player1.socketId);
     const socket2 = this.wss.sockets.sockets.get(player2.socketId);
-    if (socket1 !== undefined && socket2 !== undefined)
-    {
-      this.wss.to(room).socketsJoin(room);
-      this.wss.to(room).emit('gameStarts', `Game between ${player1.username} and ${player2.username} starts now`);
-    }
-    else
-    {
-      if (socket2 === undefined)
-        socket1.emit('leaveGame', `Player: ${player2.username} is not available`);
-    }
+    this.wss.to(room).socketsJoin(room);
+    this.wss.to(room).emit('gameStarts', `Game between ${player1.username} and ${player2.username} starts now`);
+  }
+
+  async startGame(player1: Player, player2: Player)
+  {
+    const room = `game_with_${player1.player.id}_${player2.player.id}`;
+    this.addPlayersToGame(player1.player, player2.player, room);
+    // create game in gameService
   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
