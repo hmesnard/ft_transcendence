@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
-import { Game, Player } from './game/game.class';
+import { Game, Invites, Player } from './game/game.class';
 import { MatchDto } from './match/dto/match.dto';
 import { UserEntity } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
@@ -21,6 +21,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @WebSocketServer() wss: Server;
 
   private queue: UserEntity[] = [];
+  private invites: Invites[] = [];
+  private games: Game[] = [];
 
   private logger: Logger = new Logger('GameGateway');
 
@@ -55,20 +57,40 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     catch (e) { this.error(client, e, true); }
   }
 
-  @SubscribeMessage('invite')
+  @SubscribeMessage('addInvite')
   async invitePlayer(@ConnectedSocket() client: Socket, @MessageBody() id: number)
   {
-    // invite player
-    // send emit to invited player
+    const user = await this.authService.getUserFromSocket(client);
+    const invitedUser = await this.userService.getUserById_2(id);
+    this.invites.push({
+      sender: user,
+      invitedUser
+    });
+    const socket = this.wss.sockets.sockets.get(invitedUser.socketId);
+    socket.emit('addInvite', 'You have been invited to game');
+  }
+
+  @SubscribeMessage('acceptInvite')
+  async acceptInvite(@ConnectedSocket() client: Socket, sender: UserEntity)
+  {
+    const invitedUser = await this.authService.getUserFromSocket(client);
+    const index = this.invites.indexOf({sender, invitedUser});
+    if (index === -1)
+    {
+      client.emit('acceptInvite', 'Invite doesnt exists');
+      return ;
+    }
+    this.invites.slice(index, 1);
+    const player1: Player = { player: sender };
+    const player2: Player = { player: invitedUser };
+    this.startGame(player1, player2);
   }
 
   @SubscribeMessage('leaveGame')
   async leaveGame(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
-    // end game
-    // leaving player loose and other player wins
-    // other player leaves too
-    client.leave(room);
+    const game = this.games.find(e => e.name === room)
+    this.endGame(game);
   }
 
   @SubscribeMessage('JoinQueue')
@@ -81,12 +103,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const player1: Player = { player: this.queue.shift() };
       const player2: Player = { player: this.queue.shift() };
       this.startGame(player1, player2);
-      const socket1 = this.wss.sockets.sockets.get(player1.player.socketId);
-      const socket2 = this.wss.sockets.sockets.get(player2.player.socketId);
-      socket1.emit('gameStarts', player1);
-      socket2.emit('gameStarts', player2);
     }
-    client.emit('JoinQueue', user);
   }
 
   @SubscribeMessage('leaveQueue')

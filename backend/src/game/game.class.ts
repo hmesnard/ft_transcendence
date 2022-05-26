@@ -45,5 +45,6 @@ export class Sound
 
 export class Invites
 {
-    user: UserEntity;
+    sender: UserEntity;
+    invitedUser: UserEntity;
 }
