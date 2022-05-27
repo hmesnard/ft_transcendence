@@ -6,9 +6,7 @@ import { Ball, Canvas, Game, GameOptions, Paddle, Player, Sound } from './game.c
 export class GameService
 {
     constructor() {}
-
-    private gameId = 0;
-
+    
     private readonly defaultCanvas: Canvas = {
         h: 100,
         w: 200,

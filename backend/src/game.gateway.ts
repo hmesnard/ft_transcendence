@@ -183,11 +183,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     
   }
 
-//   async createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)
-//   {
-//  //   player1 = this.initPlayer1(player1);
-//   }
-
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
   {
     socket.emit('Error', error);
