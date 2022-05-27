@@ -161,7 +161,26 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   {
     const room = `game_with_${player1.player.id}_${player2.player.id}`;
     this.addPlayersToGame(player1.player, player2.player, room);
-    this.gameService.createGame(player1, player2, this.defaultGameOptions, room);
+    this.createGame(player1, player2, this.defaultGameOptions, room);
+  }
+
+  createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)
+  {
+    player1 = this.gameService.initPlayer1(player1.player, gameOptions);
+    player2 = this.gameService.initPlayer2(player2.player, gameOptions);
+    const ball = this.gameService.initBall(gameOptions);
+    const sounds = this.gameService.initSound();
+    const game: Game = {
+        id: this.gameId++,
+        options: gameOptions,
+        players: [player1, player2],
+        finished: false,
+        name: room,
+        ball,
+        sounds
+    };
+    this.games.push(game);
+    
   }
 
 //   async createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)

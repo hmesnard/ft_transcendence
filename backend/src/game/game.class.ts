@@ -9,6 +9,9 @@ export class Game
     finished: boolean;
     winner?: Player;
     name: string;
+    ball: Ball;
+    sounds: Sound;
+    intervalId?: NodeJS.Timer;
 }
 
 export class Player

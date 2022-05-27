@@ -1,22 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/user/entities/user.entity';
-import { Ball, Canvas, GameOptions, Paddle, Player, Sound } from './game.class';
+import { Ball, Canvas, Game, GameOptions, Paddle, Player, Sound } from './game.class';
 
 @Injectable()
 export class GameService
 {
     constructor() {}
 
+    private gameId = 0;
+
     private readonly defaultCanvas: Canvas = {
         h: 100,
         w: 200,
         hitpoint: 10
     };
-
-    async createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)
-    {
-        //   player1 = this.initPlayer1(player1);
-    }
 
     initPlayer1(user: UserEntity, gameOptions: GameOptions)
     {
@@ -68,7 +65,7 @@ export class GameService
         const paddle = this.initPaddle(gameOptions);
         const x = this.defaultCanvas.w / 2;
         const y = this.defaultCanvas.h / 2;
-        const size = paddle.w / 2;
+        const size = paddle.w;
         var speed = gameOptions.ballSpeed;
         var speedX = Math.round((Math.random() * 100) % 6);
         var speedY = Math.round((Math.random() * 100) % 6);
