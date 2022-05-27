@@ -56,9 +56,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
       this.logger.log(`client disconnected: ${client.id}`);
-      const queueIndex = this.queue.indexOf(user);
-      if (queueIndex !== -1)
-        this.queue.splice(queueIndex, 1);
+      // if player is on queue, remove that player from there
+      this.queue.filter(player => player.id !== user.id);
       client.disconnect();
     }
     catch (e) { this.error(client, e, true); }
@@ -69,6 +68,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   {
     const user = await this.authService.getUserFromSocket(client);
     const invitedUser = await this.userService.getUserById_2(id);
+    // add invited user to invites
     this.invites.push({
       sender: user,
       invitedUser
@@ -87,16 +87,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       client.emit('acceptInvite', 'Invite doesnt exists');
       return ;
     }
+    // remove invited user from invites
     this.invites.slice(index, 1);
     const player1: Player = { player: sender };
     const player2: Player = { player: invitedUser };
+    // start the game
     this.startGame(player1, player2);
   }
 
   @SubscribeMessage('leaveGame')
   async leaveGame(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
+    // find the game
     const game = this.games.find(e => e.name === room)
+    // end game and leave
     this.endGame(game);
   }
 
@@ -104,7 +108,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async joinQueue(@ConnectedSocket() client: Socket)
   {
     const user = await this.authService.getUserFromSocket(client);
+    // user joins to queue
     this.queue.push(user);
+    // add players to game until there queue has only 0 or 1 users
     while (this.queue.length >= 2)
     {
       const player1: Player = { player: this.queue.shift() };
@@ -117,6 +123,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async leaveQueue(@ConnectedSocket() client: Socket)
   {
     const user = await this.authService.getUserFromSocket(client);
+    // user leaves from queue
     this.queue.filter(player => player.id !== user.id);
     this.wss.emit('leaveQueue', user);
   }
@@ -125,6 +132,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   async addSpectator(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
     const user = await this.authService.getUserFromSocket(client);
+    // user joins to game as a spectator
     client.join(room);
     this.wss.to(room).emit('newSpectator', user);
   }
@@ -140,18 +148,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       homeScore: game.players[0].score,
       awayScore: game.players[1].score
     };
+    // save game data with http request
     await axios({
       url: `http://localhost:3001/match`,
       method: 'POST',
       data: matchBody
     });
+    // players leaves from gameroom and game has been deleted from game array
     this.wss.to(game.name).socketsLeave(game.name);
+    this.games.filter(e => e.id !== game.id);
   }
 
   addPlayersToGame(player1: UserEntity, player2: UserEntity, room: string)
   {
     const socket1 = this.wss.sockets.sockets.get(player1.socketId);
     const socket2 = this.wss.sockets.sockets.get(player2.socketId);
+    // players join to game room
     socket1.join(room);
     socket2.join(room);
     this.wss.to(room).emit('gameStarts', `Game between ${player1.username} and ${player2.username} starts now`);
@@ -159,6 +171,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   async startGame(player1: Player, player2: Player)
   {
+    // adding players to game room and game will be created
     const room = `game_with_${player1.player.id}_${player2.player.id}`;
     this.addPlayersToGame(player1.player, player2.player, room);
     this.createGame(player1, player2, this.defaultGameOptions, room);
@@ -180,7 +193,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         sounds
     };
     this.games.push(game);
-    
+    // continue 
   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)

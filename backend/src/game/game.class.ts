@@ -47,6 +47,7 @@ export class GameOptions
     paddleSize: number;
     paddleSpeed: number;
     ballSpeed: number;
+    // map:
 }
 
 export class Sound
