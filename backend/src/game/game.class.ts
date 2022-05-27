@@ -1,3 +1,14 @@
+export enum Dir
+{
+    STOP = 0,
+    LEFT = 1,
+    UPLEFT = 2,
+    DOWNLEFT = 3,
+    RIGHT = 4,
+    UPRIGHT = 5,
+    DOWNRIGHT = 6
+}
+
 import { UserEntity } from "src/user/entities/user.entity";
 
 export class Game
@@ -28,8 +39,7 @@ export class Ball
 {
     x: number;
     y: number;
-    speedX: number;
-    speedY: number;
+    direction: Dir;
     speed: number;
     size: number;
     color: string;
