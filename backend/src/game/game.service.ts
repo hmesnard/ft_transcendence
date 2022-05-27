@@ -13,6 +13,11 @@ export class GameService
         hitpoint: 10
     };
 
+    async createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)
+    {
+        //   player1 = this.initPlayer1(player1);
+    }
+
     initPlayer1(user: UserEntity, gameOptions: GameOptions)
     {
         const paddle = this.initPaddle(gameOptions);

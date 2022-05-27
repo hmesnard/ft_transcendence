@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
-import { Ball, Canvas, Game, GameOptions, Invites, Paddle, Player, Sound } from './game/game.class';
+import { Game, GameOptions, Invites, Paddle, Player } from './game/game.class';
 import { MatchDto } from './match/dto/match.dto';
 import { UserEntity } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
@@ -24,6 +24,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   private queue: UserEntity[] = [];
   private invites: Invites[] = [];
   private games: Game[] = [];
+  
   private readonly defaultGameOptions: GameOptions = {
     paddleSize: 2,
     paddleSpeed: 10,
@@ -128,6 +129,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.wss.to(room).emit('newSpectator', user);
   }
 
+
+
   async endGame(game: Game)
   {
     const matchBody: MatchDto = {
@@ -158,13 +161,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   {
     const room = `game_with_${player1.player.id}_${player2.player.id}`;
     this.addPlayersToGame(player1.player, player2.player, room);
-    this.createGame(player1, player2, this.defaultGameOptions, room);
+    this.gameService.createGame(player1, player2, this.defaultGameOptions, room);
   }
 
-  async createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)
-  {
- //   player1 = this.initPlayer1(player1);
-  }
+//   async createGame(player1: Player, player2: Player, gameOptions: GameOptions, room: string)
+//   {
+//  //   player1 = this.initPlayer1(player1);
+//   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
   {
