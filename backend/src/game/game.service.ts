@@ -6,7 +6,7 @@ import { Ball, Canvas, Game, GameOptions, Paddle, Player, Sound } from './game.c
 export class GameService
 {
     constructor() {}
-    
+
     private readonly defaultCanvas: Canvas = {
         h: 100,
         w: 200,
@@ -65,8 +65,8 @@ export class GameService
         const y = this.defaultCanvas.h / 2;
         const size = paddle.w;
         var speed = gameOptions.ballSpeed;
-        var speedX = Math.round((Math.random() * 100) % 6);
-        var speedY = Math.round((Math.random() * 100) % 6);
+        var speedX = Math.round((Math.random() * 100 - 3) % 6);
+        var speedY = Math.round((Math.random() * 100 - 3) % 6);
         if (speedX === 0)
             speedX = 1;
         if (speedY === 0)
