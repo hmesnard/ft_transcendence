@@ -1,3 +1,5 @@
+import { UserEntity } from "src/user/entities/user.entity";
+
 export enum Dir
 {
     STOP = 0,
@@ -8,8 +10,6 @@ export enum Dir
     UPRIGHT = 5,
     DOWNRIGHT = 6
 }
-
-import { UserEntity } from "src/user/entities/user.entity";
 
 export class Game
 {

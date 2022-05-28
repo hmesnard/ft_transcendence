@@ -148,7 +148,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       homeScore: game.players[0].score,
       awayScore: game.players[1].score
     };
-    // save game data with http request
+    // save game data with sending http request
     await axios({
       url: `http://localhost:3001/match`,
       method: 'POST',
@@ -169,7 +169,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.wss.to(room).emit('gameStarts', `Game between ${player1.username} and ${player2.username} starts now`);
   }
 
-  async startGame(player1: Player, player2: Player)
+  startGame(player1: Player, player2: Player)
   {
     // adding players to game room and game will be created
     const room = `game_with_${player1.player.id}_${player2.player.id}`;
@@ -193,7 +193,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         sounds
     };
     this.games.push(game);
-    // continue 
+    // create game loop
+
   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)

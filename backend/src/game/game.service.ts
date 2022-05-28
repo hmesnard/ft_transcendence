@@ -13,6 +13,7 @@ export class GameService
         hitpoint: 10
     };
 
+    // when player hits the ball
     setRandomBallDirection(x: number)
     {
         var direction: Dir;
@@ -23,7 +24,7 @@ export class GameService
         return direction;
     }
 
-    // when ball hits top and bottom
+    // when ball hits top or bottom
     changeBallDirection(direction: Dir)
     {
         if (direction === Dir.DOWNLEFT)
@@ -57,6 +58,17 @@ export class GameService
         player.x = this.defaultCanvas.w - this.defaultCanvas.hitpoint;
         player.y = this.defaultCanvas.h / 2;
         return player;
+    }
+
+    checkBallPosition(game: Game)
+    {
+        if (game.ball.x === 0)
+            return this.goal(2, game);
+        else if (game.ball.x === this.defaultCanvas.w)
+            return this.goal(1, game);
+        else if (game.ball.y === this.defaultCanvas.h || game.ball.y === 0)
+            game.ball.direction = this.changeBallDirection(game.ball.direction);
+        return game;
     }
 
     goal(num: number, game: Game)
