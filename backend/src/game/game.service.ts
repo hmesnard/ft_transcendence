@@ -59,14 +59,47 @@ export class GameService
         return player;
     }
 
+    // returns true if player hits the ball, false if its a goal
+    checkIfHomePlayerHitsBall(game: Game)
+    {
+        var size = game.players[0].paddle.h;
+        if (game.ball.x === 1)
+            while (--size >= 0)
+                if (game.players[0].y + size === game.ball.y)
+                    return true;
+        return false;
+    }
+
+    // returns true if player hits the ball, false if its a goal
+    checkIfAwayPlayerHitsBall(game: Game)
+    {
+        var size = game.players[0].paddle.h;
+        if (game.ball.x === this.defaultCanvas.w - 1)
+            while (--size >= 0)
+                if (game.players[1].y + size === game.ball.y)
+                    return true;
+        return false;
+    }
+
     checkBallPosition(game: Game)
     {
-        if (game.ball.x === 0)
-            return this.goal(2, game);
-        else if (game.ball.x === this.defaultCanvas.w)
-            return this.goal(1, game);
+        if (game.ball.x === 1)
+        {
+            if (this.checkIfHomePlayerHitsBall(game) === true)
+                game.ball.direction = this.setRandomBallDirection(1);
+            else
+                return this.goal(2, game);
+        }
+        else if (game.ball.x === this.defaultCanvas.w - 1)
+        {
+            if (this.checkIfAwayPlayerHitsBall(game) === true)
+                game.ball.direction = this.setRandomBallDirection(2);
+            else
+                return this.goal(1, game);
+        }
         else if (game.ball.y === this.defaultCanvas.h || game.ball.y === 0)
             game.ball.direction = this.changeBallDirection(game.ball.direction);
+        game.ball = this.moveBall(game.ball);
         return game;
     }
 
@@ -90,6 +123,20 @@ export class GameService
         game.players[0] = this.resetPlayer1(game.players[0]);
         game.players[1] = this.resetPlayer2(game.players[1]);
         return game;
+    }
+
+    movePlayerUp(player: Player)
+    {
+        if (player.y < this.defaultCanvas.h - player.paddle.h)
+            player.y++;
+        return player;
+    }
+
+    movePlayerDown(player: Player)
+    {
+        if (player.y > 0)
+            player.y--;
+        return player;
     }
 
     moveBall(ball: Ball)
@@ -130,7 +177,7 @@ export class GameService
         const player: Player = {
             player: user,
             x: 1,
-            y: this.defaultCanvas.h / 2,
+            y: this.defaultCanvas.h / 2 - gameOptions.paddleSize / 2,
             paddle: this.initPaddle(gameOptions),
             color: 'red',
             score: 0
@@ -143,7 +190,7 @@ export class GameService
         const player: Player = {
             player: user,
             x: this.defaultCanvas.w - 1,
-            y: this.defaultCanvas.h / 2,
+            y: this.defaultCanvas.h / 2 - gameOptions.paddleSize / 2,
             paddle: this.initPaddle(gameOptions),
             color: 'blue',
             score: 0
