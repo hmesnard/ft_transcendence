@@ -73,7 +73,6 @@ export class Canvas
 {
     h: number;
     w: number;
-    hitpoint: number;
 }
 
 export class Invites

@@ -26,9 +26,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   private games: Game[] = [];
   
   private readonly defaultGameOptions: GameOptions = {
-    paddleSize: 2,
-    paddleSpeed: 10,
-    ballSpeed: 10
+    paddleSize: 4,
+    paddleSpeed: 2,
+    ballSpeed: 4
   };
 
   private logger: Logger = new Logger('GameGateway');

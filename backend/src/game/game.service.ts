@@ -8,9 +8,8 @@ export class GameService
     constructor() {}
 
     private readonly defaultCanvas: Canvas = {
-        h: 100,
-        w: 200,
-        hitpoint: 10
+        h: 20,
+        w: 40,
     };
 
     // when player hits the ball
@@ -48,14 +47,14 @@ export class GameService
 
     resetPlayer1(player: Player)
     {
-        player.x = this.defaultCanvas.hitpoint;
+        player.x = 1;
         player.y = this.defaultCanvas.h / 2;
         return player;
     }
 
     resetPlayer2(player: Player)
     {
-        player.x = this.defaultCanvas.w - this.defaultCanvas.hitpoint;
+        player.x = this.defaultCanvas.w - 1;
         player.y = this.defaultCanvas.h / 2;
         return player;
     }
@@ -128,14 +127,11 @@ export class GameService
 
     initPlayer1(user: UserEntity, gameOptions: GameOptions)
     {
-        const paddle = this.initPaddle(gameOptions);
-        const x = this.defaultCanvas.hitpoint;
-        const y = this.defaultCanvas.h / 2;
         const player: Player = {
             player: user,
-            x,
-            y,
-            paddle,
+            x: 1,
+            y: this.defaultCanvas.h / 2,
+            paddle: this.initPaddle(gameOptions),
             color: 'red',
             score: 0
         };
@@ -144,14 +140,11 @@ export class GameService
 
     initPlayer2(user: UserEntity, gameOptions: GameOptions)
     {
-        const paddle = this.initPaddle(gameOptions);
-        const x = this.defaultCanvas.w - this.defaultCanvas.hitpoint;
-        const y = this.defaultCanvas.h / 2;
         const player: Player = {
             player: user,
-            x,
-            y,
-            paddle,
+            x: this.defaultCanvas.w - 1,
+            y: this.defaultCanvas.h / 2,
+            paddle: this.initPaddle(gameOptions),
             color: 'blue',
             score: 0
         };
@@ -160,31 +153,22 @@ export class GameService
 
     initPaddle(gameOptions: GameOptions)
     {
-        const h = (0.2 + (gameOptions.paddleSize - 1) * 0.1) * this.defaultCanvas.h;
-        const w = 0.2 * 0.2 * this.defaultCanvas.h;
-        const speed = 0.1 * (this.defaultCanvas.h / 2 - h);
         const paddle: Paddle = {
-            h,
-            w,
-            speed
+            h: gameOptions.paddleSize,
+            w: 1,
+            speed: gameOptions.paddleSpeed
         };
         return paddle;
     }
 
     initBall(gameOptions: GameOptions)
     {
-        const paddle = this.initPaddle(gameOptions);
-        const x = this.defaultCanvas.w / 2;
-        const y = this.defaultCanvas.h / 2;
-        const size = paddle.w;
-        var speed = gameOptions.ballSpeed;
-        var direction = Dir.STOP;
         const ball: Ball = {
-            x,
-            y,
-            direction,
-            speed,
-            size,
+            x: this.defaultCanvas.w / 2,
+            y: this.defaultCanvas.h / 2,
+            direction: Dir.STOP,
+            speed: gameOptions.ballSpeed,
+            size: 1,
             color: 'green'
         };
         return ball;
