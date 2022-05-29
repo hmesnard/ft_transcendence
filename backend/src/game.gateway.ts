@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
 import { Game, GameOptions, Invites, Paddle, Player } from './game/game.class';
@@ -27,8 +27,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   
   private readonly defaultGameOptions: GameOptions = {
     paddleSize: 4,
-    paddleSpeed: 2,
-    ballSpeed: 4
+    paddleSpeed: 1,
+    ballSpeed: 1
   };
 
   private logger: Logger = new Logger('GameGateway');
@@ -137,10 +137,50 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.wss.to(room).emit('newSpectator', user);
   }
 
+  @SubscribeMessage('moveUp')
+  async handleMoveUp(@ConnectedSocket() client: Socket)
+  {
+    const user = await this.authService.getUserFromSocket(client);
+    let index;
+    index = this.games.findIndex(e => e.players[0].player.id === user.id);
+    if (index === -1)
+    {
+      index = this.games.findIndex(e => e.players[1].player.id === user.id);
+      if (index === -1)
+        throw new WsException('Game doesnt exists');
+    }
+    let player1 = this.games[index].players[0];
+    let player2 = this.games[index].players[1];
+    if (player1.player.id === user.id)
+      this.gameService.movePlayerUp(player1);
+    else
+      this.gameService.movePlayerUp(player2);
+  }
 
+  @SubscribeMessage('moveDown')
+  async handleMoveDown(@ConnectedSocket() client: Socket)
+  {
+    const user = await this.authService.getUserFromSocket(client);
+    let index;
+    index = this.games.findIndex(e => e.players[0].player.id === user.id);
+    if (index === -1)
+    {
+      index = this.games.findIndex(e => e.players[1].player.id === user.id);
+      if (index === -1)
+        throw new WsException('Game doesnt exists');
+    }
+    let player1 = this.games[index].players[0];
+    let player2 = this.games[index].players[1];
+    if (player1.player.id === user.id)
+      this.gameService.movePlayerDown(player1);
+    else
+      this.gameService.movePlayerDown(player2);
+  }
 
   async endGame(game: Game)
   {
+    // game loop is ended
+    clearInterval(game.intervalId);
     const matchBody: MatchDto = {
       homePlayerId: game.players[0].player.id,
       awayPlayerId: game.players[1].player.id,
