@@ -183,7 +183,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     player2 = this.gameService.initPlayer2(player2.player, gameOptions);
     const ball = this.gameService.initBall(gameOptions);
     const sounds = this.gameService.initSound();
-    const game: Game = {
+    let game: Game = {
         id: this.gameId++,
         options: gameOptions,
         players: [player1, player2],
@@ -193,8 +193,58 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         sounds
     };
     this.games.push(game);
-    // create game loop
+    // Wait 5 seconds to start the game
+    let pause = true;
+    setTimeout(() => {
+      pause = false;
+    }, 5000);
+    // create game loop with 60fps
+    game.intervalId = setInterval(async () => {
+      if (pause === false)
+      {
+        // check ball position and move ball
+        game = this.gameService.checkBallPosition(game);
+        if (game.sounds.score === true)
+        {
+          // 1 second pause if someone scored
+          pause = true;
+          setTimeout(() => {
+            pause = false;
+          }, 1000);
+          if (game.finished === true)
+            this.endGame(game);
+        }
+      }
+      this.sendGameUpdate(game);
+      game.sounds = this.gameService.initSound();
+    }, 16);
+  }
 
+  sendGameUpdate(game: Game)
+  {
+    const gameUpdate = {
+      player1: {
+        user: game.players[0].player,
+        x: game.players[0].x,
+        y: game.players[0].y,
+        score: game.players[0].score
+      },
+      player2: {
+        user: game.players[1].player,
+        x: game.players[1].x,
+        y: game.players[1].y,
+        score: game.players[1].score
+      },
+      ball: {
+        x: game.ball.x,
+        y: game.ball.y,
+        size: game.ball.size
+      },
+      options: game.options,
+      name: game.name,
+      sounds: game.sounds
+    };
+    this.wss.to(game.name).emit('gameUpdate', gameUpdate);
   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)
