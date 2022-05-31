@@ -7,7 +7,8 @@ import { MatchDto } from './dto/match.dto';
 import { MatchEntity } from './entities/match.entity';
 
 @Injectable()
-export class MatchService {
+export class MatchService
+{
     constructor(
         @InjectRepository(MatchEntity) private matchRepository: Repository<MatchEntity>,
         @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
@@ -70,15 +71,18 @@ export class MatchService {
         return this.matchRepository.save(match);
     }
 
-    async getHomeMatches(id: number): Promise<MatchEntity[]> {
+    async getHomeMatches(id: number): Promise<MatchEntity[]>
+    {
         return await this.matchRepository.find({ where: { homePlayer: id } });
     }
 
-    async getAwayMatches(id: number): Promise<MatchEntity[]> {
+    async getAwayMatches(id: number): Promise<MatchEntity[]>
+    {
         return await this.matchRepository.find({ where: { awayPlayer: id } });
     }
 
-    async getMatches(id: number): Promise<MatchEntity[]> {
+    async getMatches(id: number): Promise<MatchEntity[]>
+    {
         return (await this.getHomeMatches(id)).concat(await this.getAwayMatches(id));
     }
 }

@@ -1,9 +1,8 @@
 import styled from "styled-components"
-import React from "react";
 
 
-function SideBarOption(props: any){
-
+function SideBarOption(props: any)
+{
     const addChannel = () => {
         const ChannelName = prompt("channel name");
         const Channelpassword = prompt("channel pass");

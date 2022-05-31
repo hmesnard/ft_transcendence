@@ -1,11 +1,11 @@
 import { Avatar } from "@material-ui/core";
-import React from "react";
 import styled from "styled-components"
 // import AccessTimeIcon from "@material-ui/icons/AccessTime"c
 // import SearchIcone from "@material-ui/icons/Search"
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline"
 
-function Header(){
+function Header()
+{
 	return (
 	<HeaderContainer>
 		<HeaderLeft>

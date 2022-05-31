@@ -1,16 +1,15 @@
 import styled from "styled-components"
-import React from "react";
 import FiberManueRecordIcon from "@material-ui/icons/FiberManualRecord" 
 import CreateIcon from "@material-ui/icons/Create"
 import SideBarOption from "../SideBarOption";
 import PeopleAltIcon from "@material-ui/icons/PeopleAlt"
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 
 
 
-function SideBar(){
+function SideBar()
+{
 	return (	
 		<SideBarContainer>
 			<SideBarHeader> 
