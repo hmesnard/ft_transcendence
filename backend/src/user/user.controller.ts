@@ -38,6 +38,7 @@ export class UserController
     @Get()
     async getProfile(@User() user)
     {
+        console.log('LOOL');
         return this.userService.getUserById(user.id);
     }
 

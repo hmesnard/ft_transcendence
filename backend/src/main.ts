@@ -10,6 +10,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(new Reflector()));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  app.enableCors();
   await app.listen(3000);
 }
 bootstrap();
