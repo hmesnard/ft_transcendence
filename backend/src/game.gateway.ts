@@ -190,7 +190,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     };
     // save game data with sending http request
     await axios({
-      url: `http://localhost:3001/match`,
+      url: `http://localhost:3000/match`,
       method: 'POST',
       data: matchBody
     });
@@ -239,7 +239,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       pause = false;
     }, 5000);
     // create game loop with 60fps
-    game.intervalId = setInterval(async () => {
+    game.intervalId = setInterval(async () => 
+    {
       if (pause === false)
       {
         // check ball position and move ball
