@@ -1,0 +1,62 @@
+.modal2 {
+	font-size: 25px;
+	background-color: grey;
+  }
+.modal2 > .header {
+	width: 100%;
+	border-bottom: 1px solid gray;
+	font-size: 40px;
+	text-align: center;
+	padding: 5px;
+}
+.modal2 > .content {
+	width: 100%;
+	padding: 10px 5px;
+	text-align: center;
+}
+.modal2 > .actions {
+	width: 100%;
+	padding: 10px 5px;
+	margin: auto;
+	text-align: center;
+}
+.modal2 > .close {
+	cursor: pointer;
+	position: absolute;
+	display: block;
+	padding: 2px 5px;
+	line-height: 20px;
+	right: 10px;
+	top: 5px;
+	font-size: 24px;
+	background: #ffffff;
+	border-radius: 18px;
+	border: 1px solid #cfcece;
+}
+
+.button-return {
+    background-color: lightslategrey; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 32px;
+  }
+
+.menu-settings {
+	max-height: 80vh;
+    overflow-y: auto;
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+.menu-item-settings {
+  cursor:  pointer;
+  padding: 5px;
+  height: 70px;
+  border: 2px solid rgba(187, 187, 187, 0.466);
+  font-size: 32px;
+}

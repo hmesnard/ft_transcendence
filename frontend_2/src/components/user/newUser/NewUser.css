@@ -1,0 +1,35 @@
+.new-user{
+	width: 100vw;
+	height: 100vh;
+	background-color: #f2f2f2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.user-form {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: left;
+}
+
+.signup-form{
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+}
+
+input{
+	width: 50vw;
+	height: 30px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	margin-bottom: 10px;
+	padding-left: 10px;
+}

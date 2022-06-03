@@ -1,0 +1,12 @@
+.button-sender {
+  background-color: grey; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 32px;
+  height: 60px;
+  width: 10%;
+}
