@@ -8,6 +8,7 @@ import { diskStorage } from 'multer';
 import { of } from 'rxjs';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/decorators/user.decorator';
+import { UserEntity } from './entities/user.entity';
 
 export const storage = {
     storage: diskStorage({
@@ -35,10 +36,15 @@ export class UserController
         return this.authService.deleteUser(user);
     }
 
+    @Get('allusers')
+    async getAllUsers(): Promise<UserEntity[]>
+    {
+        return this.userService.getAllUsers();
+    }
+
     @Get()
     async getProfile(@User() user)
     {
-        console.log('LOOL');
         return this.userService.getUserById(user.id);
     }
 
@@ -99,6 +105,7 @@ export class UserController
     @Post('/logout')
     async logOut(@Res({ passthrough: true }) response: Response, @User() user)
     {
+        console.log('lol');
         return this.authService.logOut(response, user);
     }
 

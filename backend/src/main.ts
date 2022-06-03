@@ -10,7 +10,15 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(new Reflector()));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
-  app.enableCors();
+  
+  const cors = require('cors');
+  const corsOptions = {
+    origin: 'http://localhost:3001',
+    credentials: true,
+    optionSuccessStatus: 200
+  }
+  app.use(cors(corsOptions));
+
   await app.listen(3000);
 }
 bootstrap();
