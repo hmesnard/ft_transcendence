@@ -23,6 +23,16 @@ export class UserService
         return user;
     }
 
+    async paginate(page: number = 1): Promise<any>
+    {
+        const take = 15;
+        const [users, total] = await this.userRepository.findAndCount({
+            take,
+            skip: (page - 1) * take
+        });
+        return { data: users, meta: { total, page, last_page: Math.ceil(total / take)}};
+    }
+
     async getAllUsers()
     {
       return this.userRepository.find()

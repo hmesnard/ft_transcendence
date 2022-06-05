@@ -76,6 +76,7 @@ export class AuthService
 
     async logOut(response: Response, user: UserEntity)
     {
+        console.log(response.cookie);
         response.clearCookie('jwt');
         user.status = UserStatus.offline;
         await this.userRepository.save(user);

@@ -1,30 +1,20 @@
 import React from 'react';
 import './App.css';
-import { Nav } from './components/Nav';
-import { Menu } from './components/Menu';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import FrontPage from './pages/FrontPage';
-import { Users } from './pages/Users';
+import Users from './pages/users/Users';
+import SingIn from './pages/SignIn';
+import Profile from './pages/Profile';
 
 function App() {
   return (
     <div className="App">
-      <Nav/>
-
-      <div className="container-fluid">
-        <div className="row">
-          <Menu/>
-
-          <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <BrowserRouter>
-              <Routes>
-                {/* <FrontPage/> */}
-                <Route path="/" element={<FrontPage/>}></Route>
-              </Routes>
-            </BrowserRouter>
-          </main>
-        </div>
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Profile/>}></Route>
+          <Route path="/users" element={<Users/>}></Route>
+          <Route path="/signin" element={<SingIn/>}></Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 export const Menu = () => {
     return (
@@ -6,25 +7,25 @@ export const Menu = () => {
             <div className="position-sticky pt-3">
               <ul className="nav flex-column">
                 <li className="nav-item">
-                  <a className="nav-link active">
-                    Front Page
-                  </a>
+                  <NavLink to={'/'} className={({isActive}) => (isActive ? "nav-link active" : "nav-link")}>
+                    Profile
+                  </NavLink>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link active">
+                  <NavLink to={'/users'} className={({isActive}) => (isActive ? "nav-link active" : "nav-link")}>
                     Users
-                  </a>
+                  </NavLink>
                 </li>
-                <li className="nav-item">
-                  <a className="nav-link active">
+                {/* <li className="nav-item">
+                  <Link to={'chat'} className="nav-link active">
                     Chat
-                  </a>
+                  </Link>
                 </li> 
                 <li className="nav-item">
-                  <a className="nav-link active">
+                  <Link to={'/game'} className="nav-link active">
                     Game
-                  </a>
-                </li> 
+                  </Link>
+                </li> */}
               </ul>
             </div>
           </nav>

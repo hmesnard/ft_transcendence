@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Query, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { join } from 'path';
@@ -37,9 +37,10 @@ export class UserController
     }
 
     @Get('allusers')
-    async getAllUsers(): Promise<UserEntity[]>
+    async getAllUsers(@Query('page') page: number): Promise<UserEntity[]>
     {
-        return this.userService.getAllUsers();
+        return this.userService.paginate(page);
+       // return this.userService.getAllUsers();
     }
 
     @Get()
@@ -105,7 +106,6 @@ export class UserController
     @Post('/logout')
     async logOut(@Res({ passthrough: true }) response: Response, @User() user)
     {
-        console.log('lol');
         return this.authService.logOut(response, user);
     }
 
