@@ -1,8 +1,10 @@
 import { Body, Controller, Get, HttpCode, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { User } from 'src/decorators/user.decorator';
-import { UserEntity } from 'src/user/entities/user.entity';
+import { UserEntity, UserStatus } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import { FtGuard } from './guards/ft.guard';
 import { TfaGuard } from './guards/tfa.guard';
@@ -11,7 +13,8 @@ import { TfaGuard } from './guards/tfa.guard';
 export class AuthController {
     constructor(
         private authService: AuthService,
-		private userService: UserService
+		private userService: UserService,
+		@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>
     ) {}
 
     @Get('42')
@@ -27,8 +30,10 @@ export class AuthController {
 	async ftAuthReturn(@User() user42, @Res({passthrough: true}) res)
 	{
 		const { user, jwt } = await this.authService.treatFtOauth(user42);
+		user.status = UserStatus.online;
+		this.userRepository.save(user);
         res.cookie('access_token', jwt);
-		return user;
+		return ;
 	}
 
 	@Post('tfa')

@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { SyntheticEvent, useState } from "react";
-import { Navigate } from "react-router";
-import background from "../assets/the_pong.png";
+import { Redirect } from "react-router";
 
 const SingIn = () =>
 {
@@ -24,22 +23,17 @@ const SingIn = () =>
 
     if (redirect)
     {
-        return <Navigate to={'/'} />
+        return <Redirect to={'/'} />
     }
 
     return(
-        <div style={{ backgroundImage: `url(${background})` }}>
-            <div>
+        <div>
             <form onSubmit={submit}>
-                <button style={{
-                    margin: '40vh 30vw', width: '300px', height: '200px',
-                    backgroundColor: 'white', color: 'black', border: '2px solid black'
-                    }} type="submit"><h1><b><mark>42 SignIn</mark></b></h1></button>
+                <p>42 Sign In</p>
+                <button type="submit">signin</button>
             </form>
-            </div>
         </div>
     );
 }
 
 export default SingIn;
-

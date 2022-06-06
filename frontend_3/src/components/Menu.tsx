@@ -16,12 +16,12 @@ export const Menu = () => {
                     Users
                   </NavLink>
                 </li>
-                {/* <li className="nav-item">
-                  <Link to={'chat'} className="nav-link active">
-                    Chat
-                  </Link>
-                </li> 
                 <li className="nav-item">
+                  <NavLink to={'/channels'} className={({isActive}) => (isActive ? "nav-link active" : "nav-link")}>
+                    Channels
+                  </NavLink>
+                </li> 
+                {/* <li className="nav-item">
                   <Link to={'/game'} className="nav-link active">
                     Game
                   </Link>

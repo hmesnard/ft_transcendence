@@ -21,7 +21,7 @@ body {
   /* rtl:remove */
   left: 0;
   z-index: 100; /* Behind the navbar */
-  padding: 48px 0 0; /* Height of navbar */
+  padding: 60px 0 0; /* Height of navbar */
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
 }
 
@@ -68,9 +68,9 @@ body {
  */
 
 .navbar-brand {
-  padding-top: .75rem;
-  padding-bottom: .75rem;
-  background-color: rgba(0, 0, 0, .25);
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+  /* background-color: rgba(223, 16, 16, 0.25); */
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
 }
 
@@ -93,3 +93,4 @@ body {
   border-color: transparent;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }
+

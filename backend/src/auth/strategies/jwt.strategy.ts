@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { UserService } from "src/user/user.service";
 
@@ -10,13 +10,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       private userService: UserService
   ) {
 
-    const extractJwtFromCookie = (req: Request) => {
+    const extractJwtFromCookie = (req: Request, res: Response) => {
       let token = null;
-      console.log(req.cookies);
+
       if (req && req.cookies) {
         token = req.cookies['access_token'];
       }
-      console.log(token);
       return token || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     };
 
@@ -28,7 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log(payload);
     const user = await this.userService.getUserById(payload.id);
     if (user) {
       if (!user.tfaEnabled || payload.tfaOK) {

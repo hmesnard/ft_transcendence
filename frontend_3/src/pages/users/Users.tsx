@@ -12,7 +12,7 @@ const Users = () =>
   useEffect(() => {
     (
       async () => {
-        const {data} = await axios.get(`user/allusers?page=${page}`, {withCredentials: true});
+        const {data} = await axios.get(`user/allusers?page=${page}`);
 
         setUsers(data.data);
         setLastPage(data.meta.last_page);

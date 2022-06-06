@@ -89,6 +89,16 @@ export class ChatUtilsService
             throw new HttpException('You are not member of this channel', HttpStatus.FORBIDDEN);
     }
 
+    async paginate(page: number = 1): Promise<any>
+    {
+        const take = 15;
+        const [channels, total] = await this.chatRepository.findAndCount({
+            take,
+            skip: (page - 1) * take
+        });
+        return { data: channels, meta: { total, page, last_page: Math.ceil(total / take)}};
+    }
+
     async getAllChannels() {
         return await this.chatRepository.find();
     }

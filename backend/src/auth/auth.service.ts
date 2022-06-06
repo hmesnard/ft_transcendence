@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Socket } from 'socket.io';
 import { ChatService } from 'src/chat/service/chat.service';
 import { ChatUtilsService } from 'src/chat/service/chatUtils.service';
@@ -73,11 +73,11 @@ export class AuthService
         await this.chatUtilService.deleteJoinedUsersStatusByUser(user);
         await this.userRepository.delete(user.id);
     }
-
+    
     async logOut(response: Response, user: UserEntity)
     {
-        console.log(response.cookie);
-        response.clearCookie('jwt');
+        response.clearCookie('access_token');
+        response.sendStatus(200);
         user.status = UserStatus.offline;
         await this.userRepository.save(user);
         return ;

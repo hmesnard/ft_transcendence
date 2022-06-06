@@ -5,6 +5,10 @@ import { store } from './app/store';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './index.css';
+import axios from "axios";
+
+axios.defaults.baseURL = 'http://localhost:3000/';
+axios.defaults.withCredentials = true;
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);

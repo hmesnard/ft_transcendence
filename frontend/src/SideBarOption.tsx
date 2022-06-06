@@ -1,13 +1,15 @@
+import { useEffect } from "react";
 import styled from "styled-components"
-
+import axios from "axios";
 
 function SideBarOption(props: any)
 {
-    const addChannel = () => {
+    const addChannel = async () => {
         const ChannelName = prompt("channel name");
         const Channelpassword = prompt("channel pass");
         const channelPrivqte = prompt("channel pass");
     }
+
 
     const selectChannel = () => {
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ChatService } from './service/chat.service';
 import { AdminUserDto, CreateMessageToChatDto, JoinedUserStatusDto, SetPasswordDto } from './dto/chat.dto';
 import { ChatUtilsService } from './service/chatUtils.service';
@@ -15,9 +15,10 @@ export class ChatController
         private userService: UserService) {}
 
     @Get('/all')
-    getAllChannels()
+    getAllChannels(@Query('page') page: number)
     {
-        return this.chatUtilService.getAllChannels();
+        return this.chatUtilService.paginate(page);
+    //    return this.chatUtilService.getAllChannels();
     }
 
     @Get()

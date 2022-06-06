@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Users from './pages/users/Users';
 import SingIn from './pages/SignIn';
 import Profile from './pages/Profile';
+import Channels from './pages/chat/Channels';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<Profile/>}></Route>
           <Route path="/users" element={<Users/>}></Route>
           <Route path="/signin" element={<SingIn/>}></Route>
+          <Route path="/channels" element={<Channels/>}></Route>
         </Routes>
       </BrowserRouter>
     </div>
