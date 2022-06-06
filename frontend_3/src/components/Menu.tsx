@@ -6,8 +6,13 @@ export const Menu = () => {
         <nav id="sidebarMenu" className="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div className="position-sticky pt-3">
               <ul className="nav flex-column">
-                <li className="nav-item">
+              <li className="nav-item">
                   <NavLink to={'/'} className={({isActive}) => (isActive ? "nav-link active" : "nav-link")}>
+                    Game
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink to={'/profile'} className={({isActive}) => (isActive ? "nav-link active" : "nav-link")}>
                     Profile
                   </NavLink>
                 </li>
