@@ -31,6 +31,7 @@ const Nav = () =>
 
     const logout = async () => {
         await axios.post('user/logout', {});
+        window.location.reload();
     }
 
     return (

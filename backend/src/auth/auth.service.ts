@@ -56,8 +56,9 @@ export class AuthService
     async getUserFromSocket(socket: Socket)
     {
         const cookie = socket.handshake.headers.cookie;
+        var temp = cookie.split('=');
         //const { access_token: authenticationToken } = parse(cookie); //Parse cookie if necessary (https://wanago.io/2021/01/25/api-nestjs-chat-websockets/)
-        const user = await this.getUserFromAuthenticationToken(cookie);
+        const user = await this.getUserFromAuthenticationToken(temp[1]);
         if (!user)
             throw new WsException('Invalid credentials.');
      //   console.log(user);

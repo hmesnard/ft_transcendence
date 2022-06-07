@@ -32,8 +32,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     try
     {
       const user = await this.authService.getUserFromSocket(client);
-      // this.userService.updateStatus(user.id, UserStatus.online);
-      // this.wss.emit('updateStatus', 'online');
       await this.userService.updateUserSocketId(client.id, user);
       const rooms = await this.chatService.getChannelsFromUser(user.id);
       for (const room of rooms)
@@ -49,8 +47,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
-      // this.userService.updateStatus(user.id, UserStatus.offline);
-      // this.wss.emit('updateStatus', 'offline');
       this.logger.log(`client disconnected: ${client.id}`);
       client.disconnect();
     }

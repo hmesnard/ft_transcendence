@@ -1,11 +1,13 @@
 import axios from "axios";
-import React, { SyntheticEvent, useState } from "react";
+import React, { SyntheticEvent, useEffect, useState } from "react";
 import { Navigate } from "react-router";
 import background from "../assets/the_pong.png";
+import io, { Socket } from 'socket.io-client';
 
 const SingIn = () =>
 {
     const [redirect, setRedirect] = useState(false);
+  //  const [socket, setSocket] = useState();
 
     const submit = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -17,6 +19,15 @@ const SingIn = () =>
                 await axios.get('user');
                 myWindow?.close();
                 setRedirect(true);
+                const newSocket = io(`http://localhost:3000/game`, {withCredentials: true, transports: ['websocket']});
+                console.log(newSocket);
+               // setSocket(newSocket)
+                // useEffect(() => {
+                //     const newSocket = io(`http://localhost:3000/game`, {withCredentials: true, transports: ['websocket']});
+                //     // setSocket(newSocket);
+                //     // return () => newSocket.close();
+                //     console.log(newSocket);
+                //   }, [setSocket]);
                 clearInterval(interval);
             } catch (e) {}
         }, 1000);

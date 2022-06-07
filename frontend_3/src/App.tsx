@@ -5,7 +5,7 @@ import Users from './pages/users/Users';
 import SingIn from './pages/SignIn';
 import Profile from './pages/Profile';
 import Channels from './pages/chat/Channels';
-import Game from './pages/Game';
+import Game from './pages/game/Game';
 
 function App() {
   return (
