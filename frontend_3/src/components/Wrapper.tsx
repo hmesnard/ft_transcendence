@@ -11,28 +11,20 @@ type Props = {
 
 const sockets: Socket[] = [];
 
-const Wrapper = ({children}: Props) => //extends React.Component<Props>
+const Wrapper = ({children}: Props) =>
 {
     const [redirect, setRedirect] = useState(false);
 
     useEffect(() => {
         (
             async () => {
-                const {data} = await axios.get('user');
-                if (data.socketId === null)
-                {
-                    const newSocket = io(`http://localhost:3000/chat`, {withCredentials: true, transports: ['websocket']});
-                    sockets.push(newSocket);
-                }
-            }
-        )();
-    }, []);
-
-    useEffect(() => {
-        (
-            async () => {
                 try {
                     const {data} = await axios.get('user');
+                    if (data.socketId === null)
+                    {
+                        const newSocket = io(`http://localhost:3000/chat`, {withCredentials: true, transports: ['websocket']});
+                        sockets.push(newSocket);
+                    }
                 } catch (e) {
                     setRedirect(true);
                 }
