@@ -12,14 +12,6 @@ const Channels = () =>
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState(ChannelStatus.public);
-  const [socket, setSocket] = useState<null | Socket>(null);
-
-  useEffect(() => {
-      const newSocket = io(`http://localhost:3000/chat`, {withCredentials: true, transports: ['websocket']});
-       setSocket(newSocket);
-      // return () => newSocket.close();
-      console.log(newSocket);
-  }, [setSocket]);
 
   const submit = async (e: SyntheticEvent) =>
   {

@@ -1,12 +1,15 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router";
+import io, { Socket } from "socket.io-client";
 import { Menu } from "./Menu";
 import Nav from "./Nav";
 
 type Props = {
     children: JSX.Element | JSX.Element[] | string,
 };
+
+const sockets: Socket[] = [];
 
 const Wrapper = ({children}: Props) => //extends React.Component<Props>
 {
@@ -15,8 +18,21 @@ const Wrapper = ({children}: Props) => //extends React.Component<Props>
     useEffect(() => {
         (
             async () => {
+                const {data} = await axios.get('user');
+                if (data.socketId === null)
+                {
+                    const newSocket = io(`http://localhost:3000/chat`, {withCredentials: true, transports: ['websocket']});
+                    sockets.push(newSocket);
+                }
+            }
+        )();
+    }, []);
+
+    useEffect(() => {
+        (
+            async () => {
                 try {
-                    const response = await axios.get('user');
+                    const {data} = await axios.get('user');
                 } catch (e) {
                     setRedirect(true);
                 }
