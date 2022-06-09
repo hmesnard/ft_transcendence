@@ -19,6 +19,7 @@ const Wrapper = ({children}: Props) =>
         (
             async () => {
                 try {
+                    
                     const {data} = await axios.get('user');
                     if (data.socketId === null)
                     {

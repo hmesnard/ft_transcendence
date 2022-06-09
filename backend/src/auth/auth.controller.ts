@@ -30,8 +30,6 @@ export class AuthController {
 	async ftAuthReturn(@User() user42, @Res({passthrough: true}) res)
 	{
 		const { user, jwt } = await this.authService.treatFtOauth(user42);
-		user.status = UserStatus.online;
-		this.userRepository.save(user);
         res.cookie('access_token', jwt);
 		return ;
 	}

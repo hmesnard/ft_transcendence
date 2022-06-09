@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
 import { Game, GameOptions, Invites, Paddle, Player } from './game/game.class';
 import { MatchDto } from './match/dto/match.dto';
-import { UserEntity } from './user/entities/user.entity';
+import { UserEntity, UserStatus } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 import axios from 'axios';
 import { GameService } from './game/game.service';
@@ -50,6 +50,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(client.id, user);
+      this.userService.updateStatus(user.id, UserStatus.online);
+      this.wss.emit('updateStatus', 'online');
       this.logger.log(`client connected:    ${client.id}`);
     }
     catch (e) { this.error(client, e, true); }
@@ -61,6 +63,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
+      this.userService.updateStatus(user.id, UserStatus.offline);
+      this.wss.emit('updateStatus', 'offline');
       this.logger.log(`client disconnected: ${client.id}`);
       // if player is on queue, remove that player from there
       this.queue.filter(player => player.id !== user.id);
