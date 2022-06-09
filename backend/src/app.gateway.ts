@@ -8,15 +8,21 @@ import { UserEntity } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
 import axios from 'axios';
 import { GameService } from './game/game.service';
+import { CreateMessageToChatDto, SetPasswordDto } from './chat/dto/chat.dto';
+import { ChatService } from './chat/service/chat.service';
+import { ChatUtilsService } from './chat/service/chatUtils.service';
 
 // I dont have any idea if these functions work, I will check it when I can try this with frontend
 
-@WebSocketGateway({ namespace: 'game', cors: { origin: `http://localhost:3000`, credentials: true }}) // ({namespace: 'chat', cors: { origin: `http://localhost:${FRONT_END_PORT}`, credentials: true } })
-export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+@WebSocketGateway({cors: { origin: `http://localhost:3000`, credentials: true }})
+export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(private authService: AuthService,
     private userService: UserService,
-    private gameService: GameService) {}
+    private gameService: GameService,
+    private chatService: ChatService,
+    private chatUtilService: ChatUtilsService,
+    ) {}
 
   @WebSocketServer() wss: Server;
 
@@ -31,7 +37,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     ballSpeed: 1
   };
 
-  private logger: Logger = new Logger('GameGateway');
+  private logger: Logger = new Logger('AppGateway');
 
   afterInit(server: Server)
   {
@@ -62,6 +68,60 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
     catch (e) { this.error(client, e, true); }
   }
+
+  ///////// CHAT PART /////////////
+
+  @SubscribeMessage('join')
+  async joinRoom(@ConnectedSocket() client: Socket, @MessageBody() channelData: SetPasswordDto)
+  {
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      await this.chatService.joinChannel(channelData, user);
+      client.join(channelData.name);
+      this.wss.to(channelData.name).emit('joinRoom', `User: ${user.username} joined to channel`);
+    }
+    catch { throw new WsException('Something went wrong'); }
+  }
+
+  @SubscribeMessage('leave')
+  async leaveChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
+  {
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      const channel = await this.chatUtilService.getChannelById(id);
+      const name = channel.name;
+      await this.chatService.leaveChannel(id, user);
+      client.leave(name);
+      client.emit('leave', 'You left from the channel');
+      this.wss.to(name).emit('leave', `User: ${user.username} just left from the channel`);
+    }
+    catch { throw new WsException('Something went wrong'); }
+  }
+
+  @SubscribeMessage('msgToServer')
+  async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: CreateMessageToChatDto)
+  {
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      const channel = await this.chatUtilService.getChannelByName(data.name);
+      const message = await this.chatService.createMessageToChannel(data, user);
+      for (const member of channel.members)
+      {
+        if (await this.userService.isblocked_true(user, member) === false)
+        {
+          const socket = this.wss.sockets.sockets.get(member.socketId);
+          if (socket !== undefined)
+            socket.to(data.name).emit('msgToClient', message);
+        }
+      }
+    }
+    catch { throw new WsException('Something went wrong'); }
+  }
+
+  ///////// GAME PART /////////////
 
   @SubscribeMessage('addInvite')
   async invitePlayer(@ConnectedSocket() client: Socket, @MessageBody() id: number)

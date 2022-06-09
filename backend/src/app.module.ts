@@ -5,9 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { MatchModule } from './match/match.module';
 import { ChatModule } from './chat/chat.module';
-import { ChatGateway } from './chat.gateway';
+// import { ChatGateway } from './chat.gateway';
 import { GameModule } from './game/game.module';
-import { GameGateway } from './game.gateway';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -29,6 +29,6 @@ import { GameGateway } from './game.gateway';
     GameModule
   ],
   controllers: [],
-  providers: [ChatGateway, GameGateway],
+  providers: [AppGateway],
 })
 export class AppModule {}
