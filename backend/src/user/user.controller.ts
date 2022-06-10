@@ -30,9 +30,8 @@ export class UserController
     ) {}
 
     @Delete()
-    async deleteUser(@Res({ passthrough: true }) response: Response, @User() user)
+    async deleteUser(@User() user)
     {
-    //    this.authService.logOut(response, user);
         return this.authService.deleteUser(user);
     }
 
@@ -40,7 +39,18 @@ export class UserController
     async getAllUsers(@Query('page') page: number): Promise<UserEntity[]>
     {
         return this.userService.paginate(page);
-       // return this.userService.getAllUsers();
+    }
+
+    @Get('get/user/:id')
+    async getUserById(@Param('id', ParseIntPipe) id)
+    {
+        return this.userService.getUserById(id);
+    }
+
+    @Get('get/user')
+    async getUserByName(@Body('username') username: string)
+    {
+        return this.userService.getUserByName(username);
     }
 
     @Get()

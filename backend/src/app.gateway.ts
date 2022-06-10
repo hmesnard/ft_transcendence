@@ -130,115 +130,147 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('addInvite')
   async invitePlayer(@ConnectedSocket() client: Socket, @MessageBody() id: number)
   {
-    const user = await this.authService.getUserFromSocket(client);
-    const invitedUser = await this.userService.getUserById_2(id);
-    // add invited user to invites
-    this.invites.push({
-      sender: user,
-      invitedUser
-    });
-    const socket = this.wss.sockets.sockets.get(invitedUser.socketId);
-    socket.emit('addInvite', 'You have been invited to game');
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      const invitedUser = await this.userService.getUserById_2(id);
+      // add invited user to invites
+      this.invites.push({
+        sender: user,
+        invitedUser
+      });
+      const socket = this.wss.sockets.sockets.get(invitedUser.socketId);
+      socket.emit('addInvite', 'You have been invited to game');
+    }
+    catch { throw new WsException('Something went wrong'); }
   }
 
   @SubscribeMessage('acceptInvite')
   async acceptInvite(@ConnectedSocket() client: Socket, sender: UserEntity)
   {
-    const invitedUser = await this.authService.getUserFromSocket(client);
-    const index = this.invites.indexOf({sender, invitedUser});
-    if (index === -1)
+    try
     {
-      client.emit('acceptInvite', 'Invite doesnt exists');
-      return ;
+      const invitedUser = await this.authService.getUserFromSocket(client);
+      const index = this.invites.indexOf({sender, invitedUser});
+      if (index === -1)
+      {
+        client.emit('acceptInvite', 'Invite doesnt exists');
+        return ;
+      }
+      // remove invited user from invites
+      this.invites.slice(index, 1);
+      const player1: Player = { player: sender };
+      const player2: Player = { player: invitedUser };
+      // start the game
+      this.startGame(player1, player2);
     }
-    // remove invited user from invites
-    this.invites.slice(index, 1);
-    const player1: Player = { player: sender };
-    const player2: Player = { player: invitedUser };
-    // start the game
-    this.startGame(player1, player2);
+    catch { throw new WsException('Something went wrong'); }
   }
 
   @SubscribeMessage('leaveGame')
   async leaveGame(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
-    // find the game
-    const game = this.games.find(e => e.name === room)
-    // end game and leave
-    this.endGame(game);
+    try
+    {
+      // find the game
+      const game = this.games.find(e => e.name === room)
+      // end game and leave
+      this.endGame(game);
+    }
+    catch { throw new WsException('Something went wrong'); }
   }
 
   @SubscribeMessage('JoinQueue')
   async joinQueue(@ConnectedSocket() client: Socket)
   {
-    const user = await this.authService.getUserFromSocket(client);
-    // user joins to queue
-    this.queue.push(user);
-    // add players to game until there queue has only 0 or 1 users
-    while (this.queue.length >= 2)
+    try
     {
-      const player1: Player = { player: this.queue.shift() };
-      const player2: Player = { player: this.queue.shift() };
-      this.startGame(player1, player2);
+      const user = await this.authService.getUserFromSocket(client);
+      // user joins to queue
+      this.queue.push(user);
+      // add players to game until there queue has only 0 or 1 users
+      while (this.queue.length >= 2)
+      {
+        const player1: Player = { player: this.queue.shift() };
+        const player2: Player = { player: this.queue.shift() };
+        this.startGame(player1, player2);
+      }
     }
+    catch { throw new WsException('Something went wrong'); }
   }
 
   @SubscribeMessage('leaveQueue')
   async leaveQueue(@ConnectedSocket() client: Socket)
   {
-    const user = await this.authService.getUserFromSocket(client);
-    // user leaves from queue
-    this.queue.filter(player => player.id !== user.id);
-    this.wss.emit('leaveQueue', user);
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      // user leaves from queue
+      this.queue.filter(player => player.id !== user.id);
+      this.wss.emit('leaveQueue', user);
+    }
+    catch { throw new WsException('Something went wrong'); }
   }
 
   @SubscribeMessage('addSpectator')
   async addSpectator(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
-    const user = await this.authService.getUserFromSocket(client);
-    // user joins to game as a spectator
-    client.join(room);
-    this.wss.to(room).emit('newSpectator', user);
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      // user joins to game as a spectator
+      client.join(room);
+      this.wss.to(room).emit('newSpectator', user);
+    }
+    catch { throw new WsException('Something went wrong'); }
   }
 
   @SubscribeMessage('moveUp')
   async handleMoveUp(@ConnectedSocket() client: Socket)
   {
-    const user = await this.authService.getUserFromSocket(client);
-    let index;
-    index = this.games.findIndex(e => e.players[0].player.id === user.id);
-    if (index === -1)
+    try
     {
-      index = this.games.findIndex(e => e.players[1].player.id === user.id);
+      const user = await this.authService.getUserFromSocket(client);
+      let index;
+      index = this.games.findIndex(e => e.players[0].player.id === user.id);
       if (index === -1)
-        throw new WsException('Game doesnt exists');
+      {
+        index = this.games.findIndex(e => e.players[1].player.id === user.id);
+        if (index === -1)
+          throw new WsException('Game doesnt exists');
+      }
+      let player1 = this.games[index].players[0];
+      let player2 = this.games[index].players[1];
+      if (player1.player.id === user.id)
+        this.gameService.movePlayerUp(player1);
+      else
+        this.gameService.movePlayerUp(player2);
     }
-    let player1 = this.games[index].players[0];
-    let player2 = this.games[index].players[1];
-    if (player1.player.id === user.id)
-      this.gameService.movePlayerUp(player1);
-    else
-      this.gameService.movePlayerUp(player2);
+    catch { throw new WsException('Something went wrong'); }
   }
 
   @SubscribeMessage('moveDown')
   async handleMoveDown(@ConnectedSocket() client: Socket)
   {
-    const user = await this.authService.getUserFromSocket(client);
-    let index;
-    index = this.games.findIndex(e => e.players[0].player.id === user.id);
-    if (index === -1)
+    try
     {
-      index = this.games.findIndex(e => e.players[1].player.id === user.id);
+      const user = await this.authService.getUserFromSocket(client);
+      let index;
+      index = this.games.findIndex(e => e.players[0].player.id === user.id);
       if (index === -1)
-        throw new WsException('Game doesnt exists');
+      {
+        index = this.games.findIndex(e => e.players[1].player.id === user.id);
+        if (index === -1)
+          throw new WsException('Game doesnt exists');
+      }
+      let player1 = this.games[index].players[0];
+      let player2 = this.games[index].players[1];
+      if (player1.player.id === user.id)
+        this.gameService.movePlayerDown(player1);
+      else
+        this.gameService.movePlayerDown(player2);
     }
-    let player1 = this.games[index].players[0];
-    let player2 = this.games[index].players[1];
-    if (player1.player.id === user.id)
-      this.gameService.movePlayerDown(player1);
-    else
-      this.gameService.movePlayerDown(player2);
+    catch { throw new WsException('Something went wrong'); }
   }
 
   async endGame(game: Game)
