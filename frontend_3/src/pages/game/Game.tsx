@@ -8,7 +8,7 @@ import { User } from "../../models/user";
 import axios from "axios";
 import { setInterval } from "timers/promises";
 import GameLoop from "./GameLoop";
-import { sockets } from "../../components/Wrapper";
+import { sockets, user } from "../../components/Wrapper";
 
 const Game = () =>
 {
@@ -18,10 +18,17 @@ const Game = () =>
     const [ballSpeed, setBallSpeed] = useState(1);
     const [invitedUser, setInvitedUser] = useState<string | null>(null);
     const [matchMaking, setMatchMaking] = useState(false);
+    const [socket, setSocket] = useState<Socket | null>(null);
 
     const submit = async (e: SyntheticEvent) => {
         e.preventDefault();
         setPlace("option");
+    }
+
+    for (var i=0; i < sockets.length; i++)
+    {
+        if (sockets[i].id === user[0].socketId)
+            sockets[i].emit("leave", { id: 4 });
     }
 
     const options = async (e: SyntheticEvent) => {

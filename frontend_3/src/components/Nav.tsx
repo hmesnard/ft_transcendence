@@ -5,7 +5,7 @@ import { User, UserLevel, UserStatus } from "../models/user";
 
 const Nav = () =>
 {
-    const [user, setUser] = useState(new User(0, '', '', false, '', 'default.png', UserStatus.offline, UserLevel.beginner, 0, 0, 0));
+    const [user, setUser] = useState(new User(0, '', '', 'default.png', UserStatus.offline, UserLevel.beginner, 0, 0, 0));
 
     useEffect(() => {
         (
@@ -16,8 +16,6 @@ const Nav = () =>
                     data.id,
                     data.username,
                     data.socketId,
-                    data.tfaEnable,
-                    data.tfaSecret,
                     data.picture,
                     data.status,
                     data.level,
