@@ -30,33 +30,33 @@ const Wrapper = ({children}: Props) =>
                         sockets.push(newSocket);
 
                         // Add events what client will listen
-                        sockets[0].on('joinToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('leaveToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('msgToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('addInviteToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('acceptInviteToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('gameStartsToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('gameUpdateToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('leaveQueueToClient', (msg) => {
-                            console.log(msg);
-                        });
-                        sockets[0].on('newSpectatorToClient', (msg) => {
-                            console.log(msg);
-                        });
+                        // sockets[0].on('joinToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('leaveToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('msgToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('addInviteToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('acceptInviteToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('gameStartsToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('gameUpdateToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('leaveQueueToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
+                        // sockets[0].on('newSpectatorToClient', (msg) => {
+                        //     console.log(msg);
+                        // });
                     }
                 } catch (e) {
                     setRedirect(true);

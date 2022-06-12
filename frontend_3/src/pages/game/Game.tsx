@@ -18,6 +18,7 @@ const Game = () =>
     const [invitedUser, setInvitedUser] = useState<string | null>(null);
     const [matchMaking, setMatchMaking] = useState(false);
     const [player2, setPlayer2] = useState<User | null>(null);
+    const [acceptInvite, setAcceptInvite] = useState(false);
 
     const submit = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -55,7 +56,6 @@ const Game = () =>
             // sockets[0].emit("moveUpToServer");
             // // move paddle down
             // sockets[0].emit("moveDownToServer");
-
         }
     }
 
@@ -71,15 +71,19 @@ const Game = () =>
         setPlace("game");
     }
 
+    const queue = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        setPlace("queue");
+    }
+
     if (place === "option")
     {
         return(
             <Wrapper>
                  <div style={{ width: "878px", height: "776px", backgroundImage: `url(${background})` }}>
-                    <form onSubmit={options}>
                     <input style={{
                         background: "linear-gradient(81.4deg, #BC8F8F 0%, #CD5C5C 100%)",
-                        margin: '250px 30px',
+                        // margin: '250px 30px',
                         padding: "13px 0",
                         width: "100px",
                         height: "50px",
@@ -94,7 +98,7 @@ const Game = () =>
                     }} placeholder="invitedUser" onChange={e => setInvitedUser(e.target.value)}/>
                     <input style={{
                         background: "linear-gradient(81.4deg, #BC8F8F 0%, #CD5C5C 100%)",
-                        margin: '250px 30px',
+                        // margin: '250px 30px',
                         padding: "13px 0",
                         width: "100px",
                         height: "50px",
@@ -123,7 +127,7 @@ const Game = () =>
                     }} placeholder="paddleSpeed" size={19} required defaultValue={1} onChange={e => setPaddleSpeed(parseInt(e.target.value))}/>
                     <input style={{
                         background: "linear-gradient(81.4deg, #BC8F8F 0%, #CD5C5C 100%)",
-                        margin: '150px 30px',
+                        // margin: '150px 30px',
                         padding: "13px 0",
                         width: "100px",
                         height: "50px",
@@ -136,6 +140,8 @@ const Game = () =>
                         fontWeight: "bold",
                         fontFamily: "Optima, sans-serif"
                     }} placeholder="ballSpeed" size={19} required defaultValue={1} onChange={e => setBallSpeed(parseInt(e.target.value))}/>
+                    <div>
+                    <form onSubmit={options}>
                         <button style={{
                             background: "linear-gradient(81.4deg, #BC8F8F 0%, #CD5C5C 100%)",
                             padding: "13px 0",
@@ -147,29 +153,60 @@ const Game = () =>
                             color: "white",
                             fontWeight: "bold",
                             fontFamily: "Optima, sans-serif"
-                        }} type="submit">Start Game</button>
+                        }} type="submit">Start Game With Invited User</button>
                     </form>
+                    <form onSubmit={queue}>
+                        <button style={{
+                                background: "linear-gradient(81.4deg, #BC8F8F 0%, #CD5C5C 100%)",
+                                padding: "13px 0",
+                                width: "200px",
+                                height: "100px",
+                                border: "ridge",
+                                borderColor: "gray",
+                                borderRadius: "20px",
+                                color: "white",
+                                fontWeight: "bold",
+                                fontFamily: "Optima, sans-serif"
+                        }} type="submit">Join Queue And Start Game</button>
+                    </form>
+                    </div>
             </div>
             </Wrapper>
         )
     }
 
     if (place === "game")
-    {  
+    {
         // send invite to other player
-        // game loop starts, but game dont start before invited user accept invite.
+        // game loop starts when opponent accept invite, otherwise user is waiting.
 
+        if (acceptInvite === false)
+        {
+            return(
+                <Wrapper>
+                    <p>Waiting other user to accept invite</p>
+                </Wrapper>
+            )
+        }
+        else
+        {
+            return(
+                <Wrapper>
+                    <p>game starts</p>
+                </Wrapper>
+            )
+        }
+    }
+
+    if (place === "queue")
+    {
+        // looking for other player and game start when there is 2 or more in queue
+        
         return(
             <Wrapper>
-                
-                <p>paddleSize: {paddleSize}</p>
-                <p>paddleSpeed: {paddleSpeed}</p>
-                <p>ballSpeed: {ballSpeed}</p>
-                <p>invitedUser: {invitedUser}</p>
+                <p>game starts wiht matchmaking system</p>
             </Wrapper>
         )
-        //return <GameLoop />
-        //return <Navigate to={'/gameloop'} />
     }
 
     return(
