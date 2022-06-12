@@ -75,7 +75,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   ///////// CHAT PART /////////////
 
-  @SubscribeMessage('join')
+  @SubscribeMessage('joinToServer')
   async joinRoom(@ConnectedSocket() client: Socket, @MessageBody() channelData: SetPasswordDto)
   {
     try
@@ -88,11 +88,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('leave')
+  @SubscribeMessage('leaveToServer')
   async leaveChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
   {
-    console.log('lol');
-    return ;
     try
     {
       const user = await this.authService.getUserFromSocket(client);
@@ -100,8 +98,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const name = channel.name;
       await this.chatService.leaveChannel(id, user);
       client.leave(name);
-      client.emit('leave', 'You left from the channel');
-      this.wss.to(name).emit('leave', `User: ${user.username} just left from the channel`);
+      this.wss.to(name).emit('leaveToClient', `User: ${user.username} left from the channel`)
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -129,7 +126,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   ///////// GAME PART /////////////
 
-  @SubscribeMessage('addInvite')
+  @SubscribeMessage('addInviteToServer')
   async invitePlayer(@ConnectedSocket() client: Socket, @MessageBody() id: number)
   {
     try
@@ -142,12 +139,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         invitedUser
       });
       const socket = this.wss.sockets.sockets.get(invitedUser.socketId);
-      socket.emit('addInvite', 'You have been invited to game');
+      socket.emit('addInviteToClient', `User: ${user.username} has invited you to game`);
     }
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('acceptInvite')
+  @SubscribeMessage('acceptInviteToServer')
   async acceptInvite(@ConnectedSocket() client: Socket, sender: UserEntity)
   {
     try
@@ -156,7 +153,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const index = this.invites.indexOf({sender, invitedUser});
       if (index === -1)
       {
-        client.emit('acceptInvite', 'Invite doesnt exists');
+        client.emit('acceptInviteToClient', 'Invite doesnt exists');
         return ;
       }
       // remove invited user from invites
@@ -169,7 +166,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('leaveGame')
+  @SubscribeMessage('leaveGameToServer')
   async leaveGame(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
     try
@@ -182,7 +179,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('JoinQueue')
+  @SubscribeMessage('JoinQueueToServer')
   async joinQueue(@ConnectedSocket() client: Socket)
   {
     try
@@ -201,7 +198,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('leaveQueue')
+  @SubscribeMessage('leaveQueueToServer')
   async leaveQueue(@ConnectedSocket() client: Socket)
   {
     try
@@ -209,12 +206,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const user = await this.authService.getUserFromSocket(client);
       // user leaves from queue
       this.queue.filter(player => player.id !== user.id);
-      this.wss.emit('leaveQueue', user);
+      this.wss.emit('leaveQueueToClient', user);
     }
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('addSpectator')
+  @SubscribeMessage('newSpectatorToServer')
   async addSpectator(@ConnectedSocket() client: Socket, @MessageBody() room: string)
   {
     try
@@ -222,12 +219,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const user = await this.authService.getUserFromSocket(client);
       // user joins to game as a spectator
       client.join(room);
-      this.wss.to(room).emit('newSpectator', user);
+      this.wss.to(room).emit('newSpectatorToClient', user);
     }
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('moveUp')
+  @SubscribeMessage('moveUpToServer')
   async handleMoveUp(@ConnectedSocket() client: Socket)
   {
     try
@@ -251,7 +248,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     catch { throw new WsException('Something went wrong'); }
   }
 
-  @SubscribeMessage('moveDown')
+  @SubscribeMessage('moveDownToServer')
   async handleMoveDown(@ConnectedSocket() client: Socket)
   {
     try
@@ -304,7 +301,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     // players join to game room
     socket1.join(room);
     socket2.join(room);
-    this.wss.to(room).emit('gameStarts', `Game between ${player1.username} and ${player2.username} starts now`);
+    this.wss.to(room).emit('gameStartsToClient', `Game between ${player1.username} and ${player2.username} starts now`);
   }
 
   startGame(player1: Player, player2: Player)
@@ -383,7 +380,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       name: game.name,
       sounds: game.sounds
     };
-    this.wss.to(game.name).emit('gameUpdate', gameUpdate);
+    this.wss.to(game.name).emit('gameUpdateToClient', gameUpdate);
   }
 
   private error(@ConnectedSocket() socket: Socket, error: object, disconnect: boolean = false)

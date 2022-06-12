@@ -6,7 +6,6 @@ import { Navigate } from "react-router";
 import Profile from "../Profile";
 import { User } from "../../models/user";
 import axios from "axios";
-import { setInterval } from "timers/promises";
 import GameLoop from "./GameLoop";
 import { sockets, user } from "../../components/Wrapper";
 
@@ -25,12 +24,38 @@ const Game = () =>
         setPlace("option");
     }
 
+    // use useState later, this is temporary for testing
+    var setPasswordDto = { name: "name", password: "password" };
+    var createMessageToChatDto = { name: "name", message: "message" };
+    var gameRoom = { room: "room" };
+
     if (sockets[0] !== undefined && user[0] !== undefined)
     {
-        for (var i=0; i < sockets.length; i++)
+        if (sockets[0].id === user[0].socketId)
         {
-            if (sockets[i].id === user[0].socketId)
-                sockets[i].emit("leave", { id: 4 });
+            // // user joins to chat room
+            // sockets[0].emit("joinToServer", setPasswordDto);
+            // // user leaves from the chat room
+            // sockets[0].emit("leaveToServer", 1);
+            // // send message to channel
+            // sockets[0].emit("msgToServer", createMessageToChatDto);
+            // // invite user to play game
+            // sockets[0].emit("addInviteToServer", 1);
+            // // accept invite from player and start game
+            // sockets[0].emit("acceptInviteToServer", /* invited user */);
+            // // leave and end game
+            // sockets[0].emit("leaveGameToServer", gameRoom);
+            // // join queue
+            // sockets[0].emit("JoinQueueToServer");
+            // // leave queue
+            // sockets[0].emit("leaveQueueToServer");
+            // // join to gameroom as spectator
+            // sockets[0].emit("newSpectatorToServer", gameRoom);
+            // // move paddle up
+            // sockets[0].emit("moveUpToServer");
+            // // move paddle down
+            // sockets[0].emit("moveDownToServer");
+
         }
     }
 
@@ -143,8 +168,8 @@ const Game = () =>
                 <p>invitedUser: {invitedUser}</p>
             </Wrapper>
         )
-        // return <GameLoop/>
-      //  return <Navigate to={'/gameloop'} />
+        //return <GameLoop />
+        //return <Navigate to={'/gameloop'} />
     }
 
     return(
