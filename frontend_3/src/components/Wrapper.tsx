@@ -9,12 +9,12 @@ type Props = {
     children: JSX.Element | JSX.Element[] | string,
 };
 
-const sockets: Socket[] = [];
+export const sockets: Socket[] = [];
 
 const Wrapper = ({children}: Props) =>
 {
     const [redirect, setRedirect] = useState(false);
-
+    
     useEffect(() => {
         (
             async () => {

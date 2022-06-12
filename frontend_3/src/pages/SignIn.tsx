@@ -14,7 +14,8 @@ const SingIn = () =>
         
         const interval = setInterval(async () => {
             try {
-                await axios.get('user');
+                const {data} = await axios.get('user');
+                await axios.patch('user/nullsocket', {data});
                 myWindow?.close();
                 setRedirect(true);
                 clearInterval(interval);

@@ -91,6 +91,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('leave')
   async leaveChannel(@ConnectedSocket() client: Socket, @MessageBody() id: number)
   {
+    console.log('lol');
+    return ;
     try
     {
       const user = await this.authService.getUserFromSocket(client);

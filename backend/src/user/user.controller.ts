@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Query, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { join } from 'path';
@@ -48,7 +48,7 @@ export class UserController
     }
 
     @Get('get/user')
-    async getUserByName(@Body('username') username: string)
+    async getUserByName(@Query('username') username: string)
     {
         return this.userService.getUserByName(username);
     }
@@ -75,6 +75,12 @@ export class UserController
             throw new UnauthorizedException('Wrong authentication code');
         }
         await this.userService.turnOnTfa(user.id);
+    }
+
+    @Patch('nullsocket')
+    async nullSocketId(@User() user)
+    {
+        return this.userService.updateUserSocketId(null, user);
     }
 
     @Post('friend/:id')

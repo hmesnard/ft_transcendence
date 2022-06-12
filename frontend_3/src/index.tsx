@@ -8,9 +8,17 @@ import axios from 'axios';
 axios.defaults.baseURL = 'http://localhost:3000/';
 axios.defaults.withCredentials = true;
 
+// const keyInput = ({}) => {
+//   const PLAYER_UP   = 38  // up arrow
+//   const PLAYER_DOWN = 40  // down arrow
+//   const OPPONENT_UP    = 90; /* z */
+//   const OPPONENT_DOWN    = 98; /* x */
+// }
+
 const root = ReactDOM.createRoot
 (
-  document.getElementById('root') as HTMLElement
+  document.getElementById('root') as HTMLElement,
+  // document.onkeydown = this.keyInput
 );
 root.render(
     <App />
