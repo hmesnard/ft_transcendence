@@ -13,8 +13,8 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Game/>}></Route>
-          <Route path="/profile" element={<Profile/>}></Route>
+          <Route path="/game" element={<Game/>}></Route>
+          <Route path="/" element={<Profile/>}></Route>
           <Route path="/users" element={<Users/>}></Route>
           <Route path="/signin" element={<SingIn/>}></Route>
           <Route path="/channels" element={<Channels/>}></Route>
