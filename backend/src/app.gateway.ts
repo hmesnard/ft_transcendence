@@ -138,6 +138,17 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   ///////// GAME PART /////////////
 
+  @SubscribeMessage('getGamesToServer')
+  async getGames(@ConnectedSocket() client: Socket)
+  {
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      client.emit('getGamesToClient', this.games);
+    }
+    catch { throw new WsException('Something went wrong'); }
+  }
+
   @SubscribeMessage('addInviteToServer')
   async invitePlayer(@ConnectedSocket() client: Socket, @MessageBody() id: number)
   {

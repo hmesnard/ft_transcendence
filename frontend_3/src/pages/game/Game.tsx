@@ -7,6 +7,7 @@ import Profile from "../Profile";
 import { User } from "../../models/user";
 import axios from "axios";
 import { sockets } from "../../components/Wrapper";
+import { GameClass } from "../../models/game";
 
 const Game = () =>
 {
@@ -18,76 +19,125 @@ const Game = () =>
     const [matchMaking, setMatchMaking] = useState(false);
     const [player2, setPlayer2] = useState<User | null>(null);
     const [acceptInvite, setAcceptInvite] = useState(false);
+    const [games, setGames] = useState<GameClass | null>(null);
+
+    useEffect(() => {
+        (
+          async () => {
+            for (var i = 0; i < sockets.length; i++)
+            {
+                sockets[i].on('addInviteToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('acceptInviteToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('leaveGameToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('JoinQueueToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('leaveQueueToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('newSpectatorToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('moveUpToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('moveDownToServer', (data) => {
+                    console.log(data);
+                });
+                sockets[i].on('getGamesToServer', (data) => {
+                    console.log(data);
+                });
+            }
+          }
+        )();
+      }, []);
+
+    const emit = async (event: string) =>
+    {
+        const response = await axios.get('user');
+        for (var i=0; i < sockets.length; i++)
+            if (sockets[0].id === response.data.socketId)
+                console.log('emit event: ' + event);
+    }
 
     const submit = async (e: SyntheticEvent) => {
         e.preventDefault();
         setPlace("option");
     }
 
-    // use useState later, this is temporary for testing
-    var setPasswordDto = { name: "name", password: "password" };
-    var createMessageToChatDto = { name: "name", message: "message" };
-    var gameRoom = { room: "room" };
-
-    // if (sockets[0] !== undefined && user !== null)
-    // {
-    //     if (sockets[0].id === user.socketId)
-    //     {
-    //         console.log('emit here');
-            // // user joins to chat room
-            // sockets[0].emit("joinToServer", setPasswordDto);
-            // // user leaves from the chat room
-            // sockets[0].emit("leaveToServer", 1);
-            // // send message to channel
-            // sockets[0].emit("msgToServer", createMessageToChatDto);
-            // // invite user to play game
-            // sockets[0].emit("addInviteToServer", 1);
-            // // accept invite from player and start game
-            // sockets[0].emit("acceptInviteToServer", /* invited user */);
-            // // leave and end game
-            // sockets[0].emit("leaveGameToServer", gameRoom);
-            // // join queue
-            // sockets[0].emit("JoinQueueToServer");
-            // // leave queue
-            // sockets[0].emit("leaveQueueToServer");
-            // // join to gameroom as spectator
-            // sockets[0].emit("newSpectatorToServer", gameRoom);
-            // // move paddle up
-            // sockets[0].emit("moveUpToServer");
-            // // move paddle down
-            // sockets[0].emit("moveDownToServer");
-    //     }
-    // }
+    const submit_spectator = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        emit('getGamesToServer');
+        setPlace("matches_list");
+    }
 
     const options = async (e: SyntheticEvent) => {
         e.preventDefault();
-        // if (sockets[0].id === response.data.socketId)
-        //     console.log('emit here');
         const {data} = await axios.get(`http://localhost:3000/user/get/user?username=${invitedUser}`);
         if (data === '')
         {
-            // user not exists alert
+            window.alert(`User: (${invitedUser}) doesn't exists, try again`);
             setPlace(null);
             return ;
         }
-        const response = await axios.get('user');
-        for (var i=0; i < sockets.length; i++)
-        {
-            if (sockets[0].id === response.data.socketId)
-                console.log('emit invite to game');
-        }
+        emit('addInviteToServer');
         setPlace("game");
     }
 
     const queue = async (e: SyntheticEvent) => {
         e.preventDefault();
-        const response = await axios.get('user');
-        for (var i=0; i < sockets.length; i++)
-        {
-            if (sockets[0].id === response.data.socketId)
-                console.log('emit join queue');
-        }
+        emit('JoinQueueToServer');
         setPlace("queue");
+    }
+
+    if (place === "game")
+    {
+        // send invite to other player
+        // game loop starts when opponent accept invite, otherwise user is waiting.
+
+        if (acceptInvite === false)
+        {
+            return(
+                <Wrapper>
+                    <p>Waiting other user to accept invite</p>
+                </Wrapper>
+            )
+        }
+        else
+        {
+            return(
+                <Wrapper>
+                    <p>game starts</p>
+                </Wrapper>
+            )
+        }
+    }
+
+    if (place === "queue")
+    {
+        // looking for other player and game start when there is 2 or more in queue
+        
+        return(
+            <Wrapper>
+                <p>game starts wiht matchmaking system</p>
+            </Wrapper>
+        )
+    }
+
+    if (place === "matches_list")
+    {
+        // All the games what is going on, and you can choose what game to spectate
+        return(
+            <Wrapper>
+                <p>list of all going games</p>
+            </Wrapper>
+        )
     }
 
     if (place === "option")
@@ -189,40 +239,6 @@ const Game = () =>
         )
     }
 
-    if (place === "game")
-    {
-        // send invite to other player
-        // game loop starts when opponent accept invite, otherwise user is waiting.
-
-        if (acceptInvite === false)
-        {
-            return(
-                <Wrapper>
-                    <p>Waiting other user to accept invite</p>
-                </Wrapper>
-            )
-        }
-        else
-        {
-            return(
-                <Wrapper>
-                    <p>game starts</p>
-                </Wrapper>
-            )
-        }
-    }
-
-    if (place === "queue")
-    {
-        // looking for other player and game start when there is 2 or more in queue
-        
-        return(
-            <Wrapper>
-                <p>game starts wiht matchmaking system</p>
-            </Wrapper>
-        )
-    }
-
     return(
         <Wrapper>
             <div style={{ width: "878px", height: "776px", backgroundImage: `url(${background})` }}>
@@ -230,7 +246,6 @@ const Game = () =>
                     <form onSubmit={submit}>
                         <button style={{
                             background: "linear-gradient(81.4deg, #BC8F8F 0%, #CD5C5C 100%)",
-                            margin: '30vh 25vw',
                             padding: "13px 0",
                             width: "200px",
                             height: "100px",
@@ -241,6 +256,20 @@ const Game = () =>
                             fontWeight: "bold",
                             fontFamily: "Optima, sans-serif"
                         }} type="submit">Game Options</button>
+                    </form>
+                    <form onSubmit={submit_spectator}>
+                        <button style={{
+                            background: "linear-gradient(81.4deg, #BC8F8F 0%, #CD5C5C 100%)",
+                            padding: "13px 0",
+                            width: "200px",
+                            height: "100px",
+                            border: "ridge",
+                            borderColor: "gray",
+                            borderRadius: "20px",
+                            color: "white",
+                            fontWeight: "bold",
+                            fontFamily: "Optima, sans-serif"
+                        }} type="submit">On Going Games</button>
                     </form>
                 </div>
             </div>
