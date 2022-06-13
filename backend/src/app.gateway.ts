@@ -50,8 +50,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(client.id, user);
-      this.userService.updateStatus(user.id, UserStatus.online);
-      this.wss.emit('updateStatus', 'online');
+      this.userService.updateStatus(user, UserStatus.online);
       this.logger.log(`client connected:    ${client.id}`);
     }
     catch (e) { this.error(client, e, true); }
@@ -63,14 +62,27 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       await this.userService.updateUserSocketId(null, user);
-      this.userService.updateStatus(user.id, UserStatus.offline);
-      this.wss.emit('updateStatus', 'offline');
+      this.userService.updateStatus(user, UserStatus.offline);
       this.logger.log(`client disconnected: ${client.id}`);
       // if player is on queue, remove that player from there
       this.queue.filter(player => player.id !== user.id);
       client.disconnect();
     }
     catch (e) { this.error(client, e, true); }
+  }
+
+  ///////// USER PART /////////////
+
+  @SubscribeMessage('getUsersToServer')
+  async getUsers(@ConnectedSocket() client: Socket, @MessageBody() page: number)
+  {
+    try
+    {
+      const user = await this.authService.getUserFromSocket(client);
+      const allUsers = await this.userService.paginate(page);
+      this.wss.emit('getUsersToClient', allUsers);
+    }
+    catch { throw new WsException('Something went wrong'); }
   }
 
   ///////// CHAT PART /////////////
@@ -81,9 +93,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.joinChannel(channelData, user);
+      // await this.chatService.joinChannel(channelData, user);
       client.join(channelData.name);
-      this.wss.to(channelData.name).emit('joinRoom', `User: ${user.username} joined to channel`);
+      this.wss.to(channelData.name).emit('joinToClient', `User: ${user.username} joined to channel`);
     }
     catch { throw new WsException('Something went wrong'); }
   }

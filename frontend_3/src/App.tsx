@@ -6,7 +6,6 @@ import SingIn from './pages/SignIn';
 import Profile from './pages/Profile';
 import Channels from './pages/chat/Channels';
 import Game from './pages/game/Game';
-import GameLoop from './pages/game/GameLoop';
 
 function App() {
   return (
@@ -18,7 +17,6 @@ function App() {
           <Route path="/users" element={<Users/>}></Route>
           <Route path="/signin" element={<SingIn/>}></Route>
           <Route path="/channels" element={<Channels/>}></Route>
-          <Route path="/gameloop" element={<GameLoop/>}></Route>
         </Routes>
       </BrowserRouter>
     </div>

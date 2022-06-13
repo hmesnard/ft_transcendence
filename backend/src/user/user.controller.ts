@@ -8,7 +8,7 @@ import { diskStorage } from 'multer';
 import { of } from 'rxjs';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/decorators/user.decorator';
-import { UserEntity } from './entities/user.entity';
+import { UserEntity, UserStatus } from './entities/user.entity';
 
 export const storage = {
     storage: diskStorage({

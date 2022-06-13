@@ -10,59 +10,22 @@ type Props = {
     children: JSX.Element | JSX.Element[] | string,
 };
 
-export var user: User[] = [];
-export var user2: User | null = null;
 export var sockets: Socket[] = [];
 
 const Wrapper = ({children}: Props) =>
 {
     const [redirect, setRedirect] = useState(false);
+
     
     useEffect(() => {
         (
             async () => {
                 try {
                     const {data} = await axios.get('user');
-                    if (data.socketId !== null && user[0] === undefined)
-                    {
-                        user.push(data);
-                        user2 = data;
-                        console.log(user2);
-                    }
-                      //  user.push(data);
                     if (data.socketId === null)
                     {
                         const newSocket = io(`http://localhost:3000`, {withCredentials: true, transports: ['websocket']});
                         sockets.push(newSocket);
-
-                        // Add events what client will listen
-                        // sockets[0].on('joinToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('leaveToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('msgToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('addInviteToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('acceptInviteToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('gameStartsToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('gameUpdateToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('leaveQueueToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
-                        // sockets[0].on('newSpectatorToClient', (msg) => {
-                        //     console.log(msg);
-                        // });
                     }
                 } catch (e) {
                     setRedirect(true);

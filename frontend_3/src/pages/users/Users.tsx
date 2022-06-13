@@ -2,23 +2,47 @@ import axios from "axios";
 import React, { Component, useEffect, useState } from "react";
 import Wrapper from "../../components/Wrapper";
 import { User } from "../../models/user";
+import { sockets } from "../../components/Wrapper";
 
 const Users = () =>
 {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(0);
+  const [response, setResponse] = useState<null | string>(null);
 
   useEffect(() => {
     (
       async () => {
+        
         const {data} = await axios.get(`user/allusers?page=${page}`);
 
+        /* Testing how socket works */
+        // sockets[0].emit('getUsersToServer', 1);
+        // sockets[0].once('getUsersToClient', (msg) => {
+        //   setResponse(msg);
+        //   console.log(msg);
+        // });
+
+        
+        
         setUsers(data.data);
         setLastPage(data.meta.last_page);
       }
     )();
   }, [page]);
+
+  // const updateUserStatus = (data: any) => 
+  // {
+  //   for (var i=0; i < users.length; i++)
+  //   {
+  //     if (data.user === users[i])
+  //     {
+  //       users.slice(i, 1);
+  //       setUsers(data.user);
+  //     }
+  //   }
+  // }
 
   const next = () =>
   {
@@ -49,6 +73,7 @@ const Users = () =>
           </thead>
           <tbody>
           {users.map((user: User) => {
+              
               return (
                 <tr key={user.id}>
                   <td>{user.id}</td>

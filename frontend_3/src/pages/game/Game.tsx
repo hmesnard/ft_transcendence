@@ -6,8 +6,7 @@ import { Navigate } from "react-router";
 import Profile from "../Profile";
 import { User } from "../../models/user";
 import axios from "axios";
-import GameLoop from "./GameLoop";
-import { sockets, user } from "../../components/Wrapper";
+import { sockets } from "../../components/Wrapper";
 
 const Game = () =>
 {
@@ -30,10 +29,11 @@ const Game = () =>
     var createMessageToChatDto = { name: "name", message: "message" };
     var gameRoom = { room: "room" };
 
-    if (sockets[0] !== undefined && user[0] !== undefined)
-    {
-        if (sockets[0].id === user[0].socketId)
-        {
+    // if (sockets[0] !== undefined && user !== null)
+    // {
+    //     if (sockets[0].id === user.socketId)
+    //     {
+    //         console.log('emit here');
             // // user joins to chat room
             // sockets[0].emit("joinToServer", setPasswordDto);
             // // user leaves from the chat room
@@ -56,11 +56,13 @@ const Game = () =>
             // sockets[0].emit("moveUpToServer");
             // // move paddle down
             // sockets[0].emit("moveDownToServer");
-        }
-    }
+    //     }
+    // }
 
     const options = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // if (sockets[0].id === response.data.socketId)
+        //     console.log('emit here');
         const {data} = await axios.get(`http://localhost:3000/user/get/user?username=${invitedUser}`);
         if (data === '')
         {
@@ -68,11 +70,23 @@ const Game = () =>
             setPlace(null);
             return ;
         }
+        const response = await axios.get('user');
+        for (var i=0; i < sockets.length; i++)
+        {
+            if (sockets[0].id === response.data.socketId)
+                console.log('emit invite to game');
+        }
         setPlace("game");
     }
 
     const queue = async (e: SyntheticEvent) => {
         e.preventDefault();
+        const response = await axios.get('user');
+        for (var i=0; i < sockets.length; i++)
+        {
+            if (sockets[0].id === response.data.socketId)
+                console.log('emit join queue');
+        }
         setPlace("queue");
     }
 
