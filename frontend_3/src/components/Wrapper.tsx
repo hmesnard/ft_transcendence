@@ -10,8 +10,9 @@ type Props = {
     children: JSX.Element | JSX.Element[] | string,
 };
 
-export const user: User[] = [];
-export const sockets: Socket[] = [];
+export var user: User[] = [];
+export var user2: User | null = null;
+export var sockets: Socket[] = [];
 
 const Wrapper = ({children}: Props) =>
 {
@@ -23,7 +24,12 @@ const Wrapper = ({children}: Props) =>
                 try {
                     const {data} = await axios.get('user');
                     if (data.socketId !== null && user[0] === undefined)
+                    {
                         user.push(data);
+                        user2 = data;
+                        console.log(user2);
+                    }
+                      //  user.push(data);
                     if (data.socketId === null)
                     {
                         const newSocket = io(`http://localhost:3000`, {withCredentials: true, transports: ['websocket']});
