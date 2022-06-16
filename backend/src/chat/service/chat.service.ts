@@ -41,8 +41,7 @@ export class ChatService
     async createPublicChannel(channelName: string, user: UserEntity)
     {
         const channel = await this.chatRepository.findOne({ name: channelName });
-        if (this.chatUtilService.channelIsDirect(channel, channelName) === false)
-            return;
+        this.chatUtilService.channelIsDirect(channel, channelName);
         const newJoinedUserStatus = await this.chatUtilService.createNewJoinedUserStatus(true, true, null, null, channel, user);
         return await this.chatUtilService.createNewChannel(channelName, ChannelStatus.public, null, newJoinedUserStatus, user);
     }

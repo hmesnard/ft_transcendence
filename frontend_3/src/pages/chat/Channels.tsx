@@ -29,6 +29,7 @@ const Channels = ({socket}: Props) =>
       await axios.post('chat/protected', { name, password });
     else if (status === ChannelStatus.private)
       await axios.post('chat/private', { name });
+    window.location.reload();
   }
 
   const join = async (e: SyntheticEvent) =>
@@ -90,7 +91,7 @@ const Channels = ({socket}: Props) =>
         setLastPage(data.meta.last_page);
       }
     )();
-  }, [page, channels]);
+  }, [page]);
 
   const next = () =>
   {
