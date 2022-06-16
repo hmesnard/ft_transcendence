@@ -8,7 +8,7 @@ import { User } from "../../models/user";
 import axios from "axios";
 import { GameClass } from "../../models/game";
 import { mySocket } from '../SignIn';
-
+import './Game.css';
 
 type Props = {
     socket: Socket | null,
@@ -88,6 +88,7 @@ const Game = ({socket}: Props) =>
         }
     }
 
+    useEffect(() => {
     if (place === "queue")
     {
         // looking for other player and game start when there is 2 or more in queue
@@ -109,9 +110,33 @@ const Game = ({socket}: Props) =>
                 });
             }
         }
-
+        return () => 
+        {
+            if (socket !== null && socket.connected === true)
+                socket.off('JoinQueueToClient');
+            else
+                if (mySocket !== null)
+                    mySocket.off('JoinQueueToClient');
+        }
+    }
+    });
+    
+    if (place === "queue")
+    {
         return(
             <Wrapper>
+                <div className="board">
+                    <div className='ball'>
+                        <div className="ball_effect"></div>
+                    </div>
+                    <div className="paddle_1 paddle"></div>
+                    <div className="paddle_2  paddle"></div>
+                    <h1 className="player_1_score">0</h1>
+                    <h1 className="player_2_score">0</h1>
+                    <h1 className="message">
+                        Score board
+                    </h1>
+                </div>
                 <p>game starts wiht matchmaking system</p>
             </Wrapper>
         )

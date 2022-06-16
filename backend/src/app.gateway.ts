@@ -209,20 +209,19 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
-      console.log(this.wss.sockets.sockets);
       // testing
-      var interval = setInterval(() => {
-        this.wss.emit('JoinQueueToClient', new Date);
-      }, 2000);
-      // // user joins to queue
-      // this.queue.push(user);
-      // // add players to game until there queue has only 0 or 1 users
-      // while (this.queue.length >= 2)
-      // {
-      //   const player1: Player = { player: this.queue.shift() };
-      //   const player2: Player = { player: this.queue.shift() };
-      //   this.startGame(player1, player2);
-      // }
+      // var interval = setInterval(() => {
+      //   this.wss.emit('JoinQueueToClient', new Date);
+      // }, 2000);
+      // user joins to queue
+      this.queue.push(user);
+      // add players to game until there queue has only 0 or 1 users
+      while (this.queue.length >= 2)
+      {
+        const player1: Player = { player: this.queue.shift() };
+        const player2: Player = { player: this.queue.shift() };
+        this.startGame(player1, player2);
+      }
     }
     catch { throw new WsException('Something went wrong'); }
   }

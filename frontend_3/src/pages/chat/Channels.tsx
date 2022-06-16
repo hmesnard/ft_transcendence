@@ -71,7 +71,6 @@ const Channels = () =>
                 <th scope="col">name</th>
                 <th scope="col">status</th>
                 <th scope="col">join</th>
-                <th scope="col">delete</th>
               </tr>
             </thead>
             <tbody>
@@ -84,11 +83,6 @@ const Channels = () =>
                     <td>
                       {/* <form onSubmit={join}> */}
                         <button type="submit">Join</button>
-                      {/* </form> */}
-                    </td>
-                    <td>
-                      {/* <form onSubmit={join}> */}
-                        <button type="submit">Delete</button>
                       {/* </form> */}
                     </td>
                   </tr>  
