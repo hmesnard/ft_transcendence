@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Wrapper from "../components/Wrapper";
+import { mySocket } from '../pages/SignIn';
 
 export default class Profile extends Component
 {

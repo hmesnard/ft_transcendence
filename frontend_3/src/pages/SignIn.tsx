@@ -1,11 +1,24 @@
 import axios from "axios";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import { Navigate } from "react-router";
+import { io, Socket } from "socket.io-client";
 import background from "../assets/the_pong.png";
 
-const SingIn = () =>
+export var mySocket: Socket | null = null;
+
+type Props = {
+    socket: Socket | null,
+};
+
+const SingIn = ({socket}: Props) =>
 {
     const [redirect, setRedirect] = useState(false);
+
+    if (redirect === false)
+    {
+        mySocket?.disconnect();
+        socket?.disconnect();
+    }
 
     const submit = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -18,6 +31,7 @@ const SingIn = () =>
                 await axios.patch('user/nullsocket', {data});
                 myWindow?.close();
                 setRedirect(true);
+                mySocket = io(`http://localhost:3000`, {withCredentials: true, transports: ['websocket']});
                 clearInterval(interval);
             } catch (e) {}
         }, 1000);

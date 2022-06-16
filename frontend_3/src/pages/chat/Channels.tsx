@@ -23,19 +23,17 @@ const Channels = () =>
       await axios.post('chat/protected', { name, password });
     else if (status === ChannelStatus.private)
       await axios.post('chat/private', { name });
-    window.location.reload();
   }
 
   useEffect(() => {
     (
       async () => {
         const {data} = await axios.get(`chat/all?page=${page}`);
-
         setChannels(data.data);
         setLastPage(data.meta.last_page);
       }
     )();
-  }, [page]);
+  }, [page, channels]);
 
   const next = () =>
   {

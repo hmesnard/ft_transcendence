@@ -264,6 +264,13 @@ export class UserService
     async updateUserSocketId(socketId: string, user: UserEntity)
     {
       user.socketId = socketId;
+    //  user.socketId.push(socketId);
       await this.userRepository.save(user);
     }
+
+    // async removeUserSocketId(socketId: string, user: UserEntity)
+    // {
+    //   user.socketId.filter(id => id !== socketId)
+    //   await this.userRepository.save(user);
+    // }
 }

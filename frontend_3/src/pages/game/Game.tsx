@@ -6,10 +6,15 @@ import { Navigate } from "react-router";
 import Profile from "../Profile";
 import { User } from "../../models/user";
 import axios from "axios";
-import { sockets } from "../../components/Wrapper";
 import { GameClass } from "../../models/game";
+import { mySocket } from '../SignIn';
 
-const Game = () =>
+
+type Props = {
+    socket: Socket | null,
+};
+
+const Game = ({socket}: Props) =>
 {
     const [place, setPlace] = useState<string | null>(null);
     const [paddleSize, setPaddleSize] = useState(4);
@@ -21,49 +26,10 @@ const Game = () =>
     const [acceptInvite, setAcceptInvite] = useState(false);
     const [games, setGames] = useState<GameClass | null>(null);
 
-    useEffect(() => {
-        (
-          async () => {
-            for (var i = 0; i < sockets.length; i++)
-            {
-                sockets[i].on('addInviteToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('acceptInviteToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('leaveGameToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('JoinQueueToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('leaveQueueToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('newSpectatorToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('moveUpToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('moveDownToServer', (data) => {
-                    console.log(data);
-                });
-                sockets[i].on('getGamesToServer', (data) => {
-                    console.log(data);
-                });
-            }
-          }
-        )();
-      }, []);
-
     const emit = async (event: string) =>
     {
+        console.log('emit event: ' + event);
         const response = await axios.get('user');
-        for (var i=0; i < sockets.length; i++)
-            if (sockets[0].id === response.data.socketId)
-                console.log('emit event: ' + event);
     }
 
     const submit = async (e: SyntheticEvent) => {
@@ -111,6 +77,9 @@ const Game = () =>
         }
         else
         {
+            // sockets[0].on('JoinQueueToClient', (data) => {
+            //     console.log(data);
+            // });
             return(
                 <Wrapper>
                     <p>game starts</p>
@@ -122,7 +91,25 @@ const Game = () =>
     if (place === "queue")
     {
         // looking for other player and game start when there is 2 or more in queue
-        
+
+        if (socket !== null && socket.connected === true)
+        {
+            socket.emit('JoinQueueToServer');
+            socket.on('JoinQueueToClient', (data) => {
+                console.log(data);
+            });
+        }
+        else
+        {
+            if (mySocket !== null)
+            {
+                mySocket.emit('JoinQueueToServer');
+                mySocket.on('JoinQueueToClient', (data) => {
+                    console.log(data);
+                });
+            }
+        }
+
         return(
             <Wrapper>
                 <p>game starts wiht matchmaking system</p>
