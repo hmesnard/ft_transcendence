@@ -29,7 +29,7 @@ function App() {
           <Route path="/" element={<Profile/>}></Route>
           <Route path="/users" element={<Users socket={socket}/>}></Route>
           <Route path="/signin" element={<SingIn socket={socket}/>}></Route>
-          <Route path="/channels" element={<Channels/>}></Route>
+          <Route path="/channels" element={<Channels socket={socket}/>}></Route>
         </Routes>
       </BrowserRouter>
     </div>

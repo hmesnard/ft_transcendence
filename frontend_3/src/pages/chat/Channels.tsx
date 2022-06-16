@@ -3,8 +3,13 @@ import React, { SyntheticEvent, useEffect, useState } from "react";
 import Wrapper from "../../components/Wrapper";
 import { Channel, ChannelStatus } from "../../models/channel";
 import io, { Socket } from 'socket.io-client';
+import { mySocket } from '../SignIn';
 
-const Channels = () =>
+type Props = {
+  socket: Socket | null,
+};
+
+const Channels = ({socket}: Props) =>
 {
   const [channels, setChannels] = useState([]);
   const [page, setPage] = useState(1);
@@ -12,6 +17,7 @@ const Channels = () =>
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState(ChannelStatus.public);
+  const [place, setPlace] = useState<string | null>(null);
 
   const submit = async (e: SyntheticEvent) =>
   {
@@ -23,6 +29,57 @@ const Channels = () =>
       await axios.post('chat/protected', { name, password });
     else if (status === ChannelStatus.private)
       await axios.post('chat/private', { name });
+  }
+
+  const join = async (e: SyntheticEvent) =>
+  {
+    e.preventDefault();
+    setPlace("chat");
+  }
+
+  const emit = (event1: string, event2: string) => 
+  {
+    if (socket !== null && socket.connected === true)
+    {
+        socket.emit(event1, { name });
+        socket.on(event2, (data) => {
+            console.log(data);
+        });
+    }
+    else
+    {
+        if (mySocket !== null)
+        {
+            mySocket.emit(event1, { name });
+            mySocket.on(event2, (data) => {
+                console.log(data);
+            });
+        }
+    }
+  }
+
+  const eventOff = (event: string) =>
+  {
+    if (socket !== null && socket.connected === true)
+        socket.off(event);
+    else
+        if (mySocket !== null)
+            mySocket.off(event);
+  }
+
+  if (place === "chat")
+  {
+    useEffect(() => {
+      emit('joinToServer', 'joinToClient');
+      return () => {
+        eventOff('joinToClient');
+      }
+    });
+    return (
+      <Wrapper>
+        <p>This is the chat area</p>
+      </Wrapper>
+    )
   }
 
   useEffect(() => {
@@ -81,9 +138,9 @@ const Channels = () =>
                     <td>{channel.name}</td>
                     <td>{channel.status}</td>
                     <td>
-                      {/* <form onSubmit={join}> */}
-                        <button type="submit">Join</button>
-                      {/* </form> */}
+                      <form onSubmit={join}>
+                        <button onClick={e => setName(channel.name)} type="submit">Join</button>
+                      </form>
                     </td>
                   </tr>  
                 )

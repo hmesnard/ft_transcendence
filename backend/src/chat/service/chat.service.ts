@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { WsException } from '@nestjs/websockets';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
@@ -40,7 +41,8 @@ export class ChatService
     async createPublicChannel(channelName: string, user: UserEntity)
     {
         const channel = await this.chatRepository.findOne({ name: channelName });
-        this.chatUtilService.channelIsDirect(channel, channelName);
+        if (this.chatUtilService.channelIsDirect(channel, channelName) === false)
+            return;
         const newJoinedUserStatus = await this.chatUtilService.createNewJoinedUserStatus(true, true, null, null, channel, user);
         return await this.chatUtilService.createNewChannel(channelName, ChannelStatus.public, null, newJoinedUserStatus, user);
     }
@@ -112,12 +114,13 @@ export class ChatService
 
     async joinChannel(channelData: SetPasswordDto, user: UserEntity)
     {
+
         const channel = await this.chatUtilService.getChannelByName(channelData.name);
         this.chatUtilService.channelIsPrivate(channel);
         if (channel.status === ChannelStatus.direct && (channel.name.includes("direct_with_") === false || channel.name.includes(`${user.id}`) === false))
-            throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'This is a direct channel, you dont have access to join here'}, HttpStatus.FORBIDDEN);
+            throw new WsException('you dont have acceess to join here');
         if (await this.chatUtilService.clientIsMember(user, channel) === true)
-            throw new HttpException({status: HttpStatus.BAD_REQUEST, error: 'You are already member of this channel'}, HttpStatus.BAD_REQUEST);
+            return ;
         const userStatus = await this.joinedUserStatusRepository.findOne({ user, channel });
         if (userStatus)
         {
@@ -125,7 +128,7 @@ export class ChatService
             {
                 const time = new Date;
                 if (userStatus.banned > time)
-                    throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'You are banned from this channel, you dont have access to join here'}, HttpStatus.FORBIDDEN);
+                    throw new WsException('you dont have acceess to join here');
                 userStatus.banned = null;
                 await this.joinedUserStatusRepository.save(userStatus);
             }
@@ -138,7 +141,7 @@ export class ChatService
             await this.chatRepository.save(channel);
             return ;
         }
-        throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'Wrong password, please try again'}, HttpStatus.FORBIDDEN);
+        throw new WsException('wrong password, try again');
     }
 
     async muteUser(data: JoinedUserStatusDto, user: UserEntity)
