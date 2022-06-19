@@ -20,6 +20,30 @@ function App() {
     newSocket.on('JoinQueueToClient', (data) => {
       console.log(data);
     });
+    newSocket.on('leaveToClient', (data) => {
+      console.log(data);
+    });
+    newSocket.on('msgToClient', (data) => {
+      console.log(data);
+    });
+    newSocket.on('getGamesToClient', (data) => {
+      console.log(data);
+    });
+    newSocket.on('addInviteToClient', (data) => {
+      console.log(data);
+    });
+    newSocket.on('leaveQueueToClient', (data) => {
+      console.log(data);
+    });
+    newSocket.on('newSpectatorToClient', (data) => {
+      console.log(data);
+    });
+    newSocket.on('gameStartsToClient', (data) => {
+      console.log(data);
+    });
+    newSocket.on('gameUpdateToClient', (data) => {
+      console.log(data);
+    });
     setSocket(newSocket);
 
     return () => {
