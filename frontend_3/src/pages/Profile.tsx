@@ -1,15 +1,20 @@
-import React, { Component } from "react";
+import React from "react";
+import { Socket } from "socket.io-client";
 import Wrapper from "../components/Wrapper";
-import { mySocket } from '../pages/SignIn';
 
-export default class Profile extends Component
+type Props = {
+    socket: Socket | null,
+};
+
+const Profile = ({socket}: Props) =>
 {
-    render()
-    {
-        return(
-            <Wrapper>
-                Your data here
-            </Wrapper>
-        );
-    }
+    if (socket?.connected === false)
+        socket?.connect();
+    return(
+        <Wrapper>
+            Your data here
+        </Wrapper>
+    );
 }
+
+export default Profile;

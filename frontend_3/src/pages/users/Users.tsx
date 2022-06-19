@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import Wrapper from "../../components/Wrapper";
 import { User } from "../../models/user";
@@ -21,6 +21,8 @@ const Users = ({socket}: Props) =>
       setUsers(data.data);
       setLastPage(data.meta.last_page);
     }, 40);
+    
+
   }, [page]);
 
   const next = () =>

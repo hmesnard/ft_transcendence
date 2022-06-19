@@ -2,14 +2,14 @@ import axios from "axios";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import Wrapper from "../../components/Wrapper";
 import { Channel, ChannelStatus } from "../../models/channel";
-import io, { Socket } from 'socket.io-client';
-import { mySocket } from '../SignIn';
+import { Socket } from 'socket.io-client';
 
 type Props = {
   socket: Socket | null,
+  joinMsg: string,
 };
 
-const Channels = ({socket}: Props) =>
+const Channels = ({socket, joinMsg}: Props) =>
 {
   const [channels, setChannels] = useState([]);
   const [page, setPage] = useState(1);
@@ -18,6 +18,14 @@ const Channels = ({socket}: Props) =>
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState(ChannelStatus.public);
   const [place, setPlace] = useState<string | null>(null);
+  const [newMessage, setNewMessage] = useState('');
+
+  const newMsg = async (e: SyntheticEvent) =>
+  {
+    e.preventDefault();
+
+
+  }
 
   const submit = async (e: SyntheticEvent) =>
   {
@@ -38,49 +46,21 @@ const Channels = ({socket}: Props) =>
     setPlace("chat");
   }
 
-  const emit = (event1: string, event2: string) => 
-  {
-    if (socket !== null && socket.connected === true)
-    {
-        socket.emit(event1, { name });
-        socket.on(event2, (data) => {
-            console.log(data);
-        });
-    }
-    else
-    {
-        if (mySocket !== null)
-        {
-            mySocket.emit(event1, { name });
-            mySocket.on(event2, (data) => {
-                console.log(data);
-            });
-        }
-    }
-  }
-
-  const eventOff = (event: string) =>
-  {
-    if (socket !== null && socket.connected === true)
-        socket.off(event);
-    else
-        if (mySocket !== null)
-            mySocket.off(event);
-  }
-
   if (place === "chat")
   {
-    useEffect(() => {
-      emit('joinToServer', 'joinToClient');
-      return () => {
-        eventOff('joinToClient');
-      }
-    });
-    return (
-      <Wrapper>
-        <p>This is the chat area</p>
-      </Wrapper>
-    )
+      console.log(joinMsg);      
+      useEffect(() => {
+        socket?.emit('joinToServer', { name });
+      });
+      return (
+        <Wrapper>
+          <form onSubmit={newMsg}>
+              <input placeholder="message" size={19} required onChange={e => setNewMessage(e.target.value)}/>
+              <button type="submit">Send</button>
+          </form>
+          <p>This is the chat area</p>
+        </Wrapper>
+      )
   }
 
   useEffect(() => {

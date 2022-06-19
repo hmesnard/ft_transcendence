@@ -1,7 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router";
-import { Socket } from "socket.io-client";
 import { Menu } from "./Menu";
 import Nav from "./Nav";
 
@@ -27,7 +26,6 @@ const Wrapper = ({children}: Props) =>
 
     if (redirect)
     {
-        //window.location.reload();
         return <Navigate to={'/signin'} />;
     }
 

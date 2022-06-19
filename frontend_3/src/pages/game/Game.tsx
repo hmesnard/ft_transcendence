@@ -1,13 +1,10 @@
-import React, { Component, SyntheticEvent, useEffect, useState } from "react";
+import React, { SyntheticEvent, useEffect, useState } from "react";
 import Wrapper from "../../components/Wrapper";
-import io, { Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import background from "../../assets/pong.png";
-import { Navigate } from "react-router";
-import Profile from "../Profile";
 import { User } from "../../models/user";
 import axios from "axios";
 import { GameClass } from "../../models/game";
-import { mySocket } from '../SignIn';
 import './Game.css';
 
 type Props = {
@@ -77,9 +74,6 @@ const Game = ({socket}: Props) =>
         }
         else
         {
-            // sockets[0].on('JoinQueueToClient', (data) => {
-            //     console.log(data);
-            // });
             return(
                 <Wrapper>
                     <p>game starts</p>
@@ -93,31 +87,7 @@ const Game = ({socket}: Props) =>
     {
         // looking for other player and game start when there is 2 or more in queue
 
-        if (socket !== null && socket.connected === true)
-        {
-            socket.emit('JoinQueueToServer');
-            socket.on('JoinQueueToClient', (data) => {
-                console.log(data);
-            });
-        }
-        else
-        {
-            if (mySocket !== null)
-            {
-                mySocket.emit('JoinQueueToServer');
-                mySocket.on('JoinQueueToClient', (data) => {
-                    console.log(data);
-                });
-            }
-        }
-        return () => 
-        {
-            if (socket !== null && socket.connected === true)
-                socket.off('JoinQueueToClient');
-            else
-                if (mySocket !== null)
-                    mySocket.off('JoinQueueToClient');
-        }
+        socket?.emit('JoinQueueToServer');
     }
     });
     

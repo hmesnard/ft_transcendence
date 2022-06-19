@@ -26,11 +26,6 @@ export const Menu = () => {
                     Channels
                   </NavLink>
                 </li> 
-                {/* <li className="nav-item">
-                  <Link to={'/game'} className="nav-link active">
-                    Game
-                  </Link>
-                </li> */}
               </ul>
             </div>
           </nav>

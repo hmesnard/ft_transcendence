@@ -31,6 +31,7 @@ export class AuthController {
 	{
 		const { user, jwt } = await this.authService.treatFtOauth(user42);
         res.cookie('access_token', jwt);
+		console.log(jwt);
 		return ;
 	}
 
