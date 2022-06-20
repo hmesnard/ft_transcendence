@@ -3,13 +3,13 @@ import React, { SyntheticEvent, useEffect, useState } from "react";
 import Wrapper from "../../components/Wrapper";
 import { Channel, ChannelStatus } from "../../models/channel";
 import { Socket } from 'socket.io-client';
+import { Navigate } from "react-router";
 
 type Props = {
   socket: Socket | null,
-  joinMsg: string,
 };
 
-const Channels = ({socket, joinMsg}: Props) =>
+const Channels = ({socket}: Props) =>
 {
   const [channels, setChannels] = useState([]);
   const [page, setPage] = useState(1);
@@ -17,15 +17,7 @@ const Channels = ({socket, joinMsg}: Props) =>
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState(ChannelStatus.public);
-  const [place, setPlace] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState('');
-
-  const newMsg = async (e: SyntheticEvent) =>
-  {
-    e.preventDefault();
-
-
-  }
+  const [place, setPlace] = useState(false);
 
   const submit = async (e: SyntheticEvent) =>
   {
@@ -43,24 +35,15 @@ const Channels = ({socket, joinMsg}: Props) =>
   const join = async (e: SyntheticEvent) =>
   {
     e.preventDefault();
-    setPlace("chat");
+    setPlace(true);
   }
 
-  if (place === "chat")
+  if (place === true)
   {
-      console.log(joinMsg);      
-      useEffect(() => {
-        socket?.emit('joinToServer', { name });
-      });
-      return (
-        <Wrapper>
-          <form onSubmit={newMsg}>
-              <input placeholder="message" size={19} required onChange={e => setNewMessage(e.target.value)}/>
-              <button type="submit">Send</button>
-          </form>
-          <p>This is the chat area</p>
-        </Wrapper>
-      )
+    useEffect(() => {
+      socket?.emit('joinToServer', { name });
+    });
+    return <Navigate to={'/chat'} />;
   }
 
   useEffect(() => {

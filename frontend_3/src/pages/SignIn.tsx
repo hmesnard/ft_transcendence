@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { SyntheticEvent, useState } from "react";
 import { Navigate } from "react-router";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import background from "../assets/the_pong.png";
 
 type Props = {
