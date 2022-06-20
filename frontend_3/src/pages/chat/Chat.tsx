@@ -19,14 +19,8 @@ const Chat = ({socket, joinMsg}: Props) =>
     }
 
     useEffect(() => {
-        if (joinMsg !== '')
-            console.log(joinMsg);
-    }, [joinMsg]);
-
-    useEffect(() => {
         return () => {
             // leave channel emit here
-            console.log('user left channel');
           }
     }, []);
 

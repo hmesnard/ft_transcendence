@@ -30,6 +30,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   private queue: UserEntity[] = [];
   private invites: Invites[] = [];
   private games: Game[] = [];
+  private _sockets = [];
   
   private readonly defaultGameOptions: GameOptions = {
     paddleSize: 4,
@@ -49,6 +50,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
+      client.data.user = user;
+      this._sockets.push(client);
       await this.userService.updateUserSocketId(client.id, user);
       this.userService.updateStatus(user, UserStatus.online);
       this.logger.log(`client connected:    ${client.id}`);
@@ -61,14 +64,23 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
-      await this.userService.updateUserSocketId(null, user);
       this.userService.updateStatus(user, UserStatus.offline);
       this.logger.log(`client disconnected: ${client.id}`);
       // if player is on queue, remove that player from there
       this.queue.filter(player => player.id !== user.id);
+      const index = this._sockets.findIndex(e => e.id === client.id);
+      this._sockets.splice(index, 1);
+      await this.userService.updateUserSocketId(null, user);
       client.disconnect();
     }
     catch (e) { this.error(client, e, true); }
+  }
+
+  find_and_emit(user: UserEntity)
+  {
+    for (var i = 0; i < this._sockets.length; i++)
+      if (this._sockets[i].data.user.username === user.username)
+        console.log(this._sockets[i]);
   }
 
   ///////// USER PART /////////////
@@ -80,7 +92,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     {
       const user = await this.authService.getUserFromSocket(client);
       const allUsers = await this.userService.paginate(page);
-      console.log(allUsers);
       this.wss.emit('getUsersToClient', allUsers);
     }
     catch { throw new WsException('Something went wrong'); }
@@ -94,6 +105,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = await this.authService.getUserFromSocket(client);
+      // const lol = this.wss.sockets.sockets;
+      // console.log(lol.values());
+      // if (user.username === client.data.user.username)
+      //   console.log('LOL');
       await this.chatService.joinChannel(channelData, user);
       client.join(channelData.name);
       this.wss.to(channelData.name).emit('joinToClient', `User: ${user.username} joined to channel`);

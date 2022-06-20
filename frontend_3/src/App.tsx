@@ -15,7 +15,10 @@ function App() {
 
   useEffect(() => {
     const newSocket = io(`http://localhost:3000`, {withCredentials: true, transports: ['websocket']});
+    // newSocket.auth = { username: 'minummin' };
+    // console.log(newSocket);
     newSocket.on('joinToClient', (data) => {
+      console.log(data);
       setJoinMsg(data);
     });
     newSocket.on('JoinQueueToClient', (data) => {
