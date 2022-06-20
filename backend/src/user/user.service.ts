@@ -104,9 +104,6 @@ export class UserService
     {
       user.status = status
       this.userRepository.save(user);
-      // return this.userRepository.update(id, {
-      //   status
-      // });
     }
 
     async requestFriend(user: UserEntity, id: number)
@@ -260,17 +257,4 @@ export class UserService
       await this.userRepository.save(updatedUser);
       return updatedUser;
     }
-
-    async updateUserSocketId(socketId: string, user: UserEntity)
-    {
-      user.socketId = socketId;
-    //  user.socketId.push(socketId);
-      await this.userRepository.save(user);
-    }
-
-    // async removeUserSocketId(socketId: string, user: UserEntity)
-    // {
-    //   user.socketId.filter(id => id !== socketId)
-    //   await this.userRepository.save(user);
-    // }
 }
