@@ -10,6 +10,9 @@ type Props = {
 const Chat = ({socket, joinMsg}: Props) =>
 {
     const [newMessage, setNewMessage] = useState('');
+    const [infoMsg, setInfoMsg] = useState(joinMsg);
+
+    
 
     const newMsg = async (e: SyntheticEvent) =>
     {
@@ -19,19 +22,20 @@ const Chat = ({socket, joinMsg}: Props) =>
     }
 
     useEffect(() => {
+        setInfoMsg(joinMsg);
         return () => {
             // leave channel emit here
           }
-    }, []);
+    }, [joinMsg]);
 
     return (
         <Wrapper>
+            <div>{infoMsg}</div>
+            <div>{newMessage}</div>
             <form onSubmit={newMsg}>
                 <input placeholder="message" size={19} required onChange={e => setNewMessage(e.target.value)}/>
                 <button type="submit">Send</button>
             </form>
-            <div>{newMessage}</div>
-            <p>This is the chat area</p>
         </Wrapper>
     );
 }

@@ -91,7 +91,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const user = client.data.user;
       await this.chatService.joinChannel(channelData, user);
       client.join(channelData.name);
-      this.wss.to(channelData.name).emit('joinToClient', `User: ${user.username} joined to channel`);
+      this.wss.to(channelData.name).emit('joinToClient', `${user.username} joined to channel at ${new Date}`);
     }
     catch { throw new WsException('Something went wrong'); }
   }
