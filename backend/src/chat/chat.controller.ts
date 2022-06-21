@@ -21,6 +21,12 @@ export class ChatController
     //    return this.chatUtilService.getAllChannels();
     }
 
+    // @Get('/channel/:id')
+    // getChannelById(@Param('id') id: number)
+    // {
+    //     return this.chatUtilService.getChannelById(id);
+    // }
+
     @Get()
     getChannelByName(@Body('name') channelName: string)
     {

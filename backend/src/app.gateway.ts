@@ -91,7 +91,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const user = client.data.user;
       await this.chatService.joinChannel(channelData, user);
       client.join(channelData.name);
-      this.wss.to(channelData.name).emit('joinToClient', `${user.username} joined to channel at ${new Date}`);
+      const allMessages = await this.chatService.getMessagesFromChannel(channelData.name, user);
+      this.wss.to(channelData.name).emit('joinToClient', { msg: `${user.username} joined to channel at ${new Date}`, channel: channelData.name, messages: allMessages });
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -119,15 +120,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       const user = client.data.user;
       const channel = await this.chatUtilService.getChannelByName(data.name);
       const message = await this.chatService.createMessageToChannel(data, user);
+      const allMessages = await this.chatService.getMessagesFromChannel(data.name, user);
       for (const member of channel.members)
-      {
         if (await this.userService.isblocked_true(user, member) === false)
-        {
-          this.find_and_emit(member);
-          // emit this:
-          //   socket.to(data.name).emit('msgToClient', message);
-        }
-      }
+          for (var i = 0; i < this._sockets.length; i++)
+            if (this._sockets[i].data.user.username === user.username)
+              this._sockets[i].emit('msgToClient', allMessages);
     }
     catch { throw new WsException('Something went wrong'); }
   }
