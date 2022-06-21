@@ -1,4 +1,5 @@
 import React, { SyntheticEvent, useEffect, useState } from "react";
+import { Navigate } from "react-router";
 import { Socket } from "socket.io-client";
 import Wrapper from "../../components/Wrapper";
 import { MessageI } from "../../models/message";
@@ -7,16 +8,15 @@ type Props = {
     socket: Socket | null,
     joinMsg: string,
     channelName: string,
-    message: MessageI | null,
     messages: MessageI[],
 };
 
-const Chat = ({socket, joinMsg, channelName, message, messages}: Props) =>
+const Chat = ({socket, joinMsg, channelName, messages}: Props) =>
 {
-    const [allMessages, setAllMessages] = useState<MessageI[]>(messages);
     const [newMessage, setNewMessage] = useState('');
     const [infoMsg, setInfoMsg] = useState(joinMsg);
-
+    const [redirect, setRedirect] = useState(false);
+    
     const newMsg = async (e: SyntheticEvent) =>
     {
         e.preventDefault();
@@ -24,11 +24,19 @@ const Chat = ({socket, joinMsg, channelName, message, messages}: Props) =>
     }
 
     useEffect(() => {
+        if (socket === null)
+            setRedirect(true);
         setInfoMsg(joinMsg);
         return () => {
             // leave channel emit here
           }
-    }, [joinMsg]);
+    }, [joinMsg, socket]);
+
+    if (redirect === true)
+    {
+        // leave channel emit here
+        return <Navigate to={'/channels'} />;
+    }
 
     return (
         <Wrapper>

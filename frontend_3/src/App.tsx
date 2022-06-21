@@ -8,13 +8,11 @@ import Channels from './pages/chat/Channels';
 import Game from './pages/game/Game';
 import { io, Socket } from 'socket.io-client';
 import Chat from './pages/chat/Chat';
-import { MessageI } from './models/message';
 
 function App() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [joinMsg, setJoinMsg] = useState('');
   const [channelName, setChannelName] = useState('');
-  const [message, setMessage] = useState<MessageI | null>(null);
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -67,7 +65,7 @@ function App() {
           <Route path="/users" element={<Users socket={socket}/>}></Route>
           <Route path="/signin" element={<SingIn socket={socket}/>}></Route>
           <Route path="/channels" element={<Channels socket={socket}/>}></Route>
-          <Route path="/chat" element={<Chat socket={socket} joinMsg={joinMsg} channelName={channelName} message={message} messages={messages}/>}></Route>
+          <Route path="/chat" element={<Chat socket={socket} joinMsg={joinMsg} channelName={channelName} messages={messages}/>}></Route>
         </Routes>
       </BrowserRouter>
     </div>
