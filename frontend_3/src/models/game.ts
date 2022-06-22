@@ -14,6 +14,7 @@ export enum Dir
 export class GameClass
 {
     constructor(
+        public id: number,
         public options: GameOptions,
         public players: Player[],
         public spectators: User,

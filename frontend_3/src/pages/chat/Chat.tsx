@@ -49,7 +49,7 @@ const Chat = ({socket, joinMsg, channelName, messages}: Props) =>
             {messages.map((message: MessageI) => {
                 return (
                     <li key={message.id}>
-                        {message.content}
+                       {message.content}
                     </li>
                 )
             })}

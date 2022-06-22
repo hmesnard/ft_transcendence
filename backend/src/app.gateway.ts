@@ -124,8 +124,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       for (const member of channel.members)
         if (await this.userService.isblocked_true(user, member) === false)
           for (var i = 0; i < this._sockets.length; i++)
-            if (this._sockets[i].data.user.username === user.username)
-              this._sockets[i].emit('msgToClient', allMessages);
+            // if (this._sockets[i].data.user.username === user.username)
+            this._sockets[i].emit('msgToClient', allMessages);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -202,10 +202,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     try
     {
       const user = client.data.user;
-      // testing
-      // var interval = setInterval(() => {
-      //   this.wss.emit('JoinQueueToClient', new Date);
-      // }, 2000);
       // user joins to queue
       this.queue.push(user);
       // add players to game until there queue has only 0 or 1 users
@@ -213,7 +209,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       {
         const player1: Player = { player: this.queue.shift() };
         const player2: Player = { player: this.queue.shift() };
-        this.startGame(player1, player2);
+        if (player1.player.username !== player2.player.username)
+          this.startGame(player1, player2);
       }
     }
     catch { throw new WsException('Something went wrong'); }
@@ -317,12 +314,14 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   addPlayersToGame(player1: UserEntity, player2: UserEntity, room: string)
   {
-    // const socket1 = this.wss.sockets.sockets.get(player1.socketId);
-    // const socket2 = this.wss.sockets.sockets.get(player2.socketId);
-    // // players join to game room
-    // socket1.join(room);
-    // socket2.join(room);
-    // this.wss.to(room).emit('gameStartsToClient', `Game between ${player1.username} and ${player2.username} starts now`);
+    for (var i = 0; i < this._sockets.length; i++)
+    {
+        if (this._sockets[i].data.user.username === player1.username)
+            this._sockets[i].join(room);
+        if (this._sockets[i].data.user.username === player2.username)
+            this._sockets[i].join(room);
+    }
+    this.wss.to(room).emit('gameStartsToClient', `Game between ${player1.username} and ${player2.username} starts now`);
   }
 
   startGame(player1: Player, player2: Player)
@@ -374,7 +373,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       }
       this.sendGameUpdate(game);
       game.sounds = this.gameService.initSound();
-    }, 16);
+    }, 2000); // change it to 16 later
   }
 
   sendGameUpdate(game: Game)

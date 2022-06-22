@@ -6,12 +6,14 @@ import { User } from "../../models/user";
 import axios from "axios";
 import { GameClass } from "../../models/game";
 import './Game.css';
+import { Navigate } from "react-router";
 
 type Props = {
     socket: Socket | null,
+    games: GameClass[],
 };
 
-const Game = ({socket}: Props) =>
+const Game = ({socket, games}: Props) =>
 {
     const [place, setPlace] = useState<string | null>(null);
     const [paddleSize, setPaddleSize] = useState(4);
@@ -21,12 +23,19 @@ const Game = ({socket}: Props) =>
     const [matchMaking, setMatchMaking] = useState(false);
     const [player2, setPlayer2] = useState<User | null>(null);
     const [acceptInvite, setAcceptInvite] = useState(false);
-    const [games, setGames] = useState<GameClass | null>(null);
+    const [allGames, setAllGames] = useState<GameClass | null>(null);
+    const [name, setName] = useState('');
 
     const emit = async (event: string) =>
     {
         console.log('emit event: ' + event);
         const response = await axios.get('user');
+    }
+
+    const spectatorJoin = async (e: SyntheticEvent) =>
+    {
+      e.preventDefault();
+      setPlace("queue"); // change it later, go to spectating game
     }
 
     const submit = async (e: SyntheticEvent) => {
@@ -36,7 +45,8 @@ const Game = ({socket}: Props) =>
 
     const submit_spectator = async (e: SyntheticEvent) => {
         e.preventDefault();
-        emit('getGamesToServer');
+        socket?.emit('getGamesToServer');
+        // emit('getGamesToServer');
         setPlace("matches_list");
     }
 
@@ -55,7 +65,8 @@ const Game = ({socket}: Props) =>
 
     const queue = async (e: SyntheticEvent) => {
         e.preventDefault();
-        emit('JoinQueueToServer');
+        socket?.emit('JoinQueueToServer');
+        // emit('JoinQueueToServer');
         setPlace("queue");
     }
 
@@ -89,35 +100,43 @@ const Game = ({socket}: Props) =>
 
         socket?.emit('JoinQueueToServer');
     }
-    });
+    }, []);
     
     if (place === "queue")
     {
-        return(
-            <Wrapper>
-                <div className="board">
-                    <div className='ball'>
-                        <div className="ball_effect"></div>
-                    </div>
-                    <div className="paddle_1 paddle"></div>
-                    <div className="paddle_2  paddle"></div>
-                    <h1 className="player_1_score">0</h1>
-                    <h1 className="player_2_score">0</h1>
-                    <h1 className="message">
-                        Score board
-                    </h1>
-                </div>
-                <p>game starts wiht matchmaking system</p>
-            </Wrapper>
-        )
+        return <Navigate to={'/gamearea'} />;
     }
 
     if (place === "matches_list")
     {
-        // All the games what is going on, and you can choose what game to spectate
         return(
             <Wrapper>
-                <p>list of all going games</p>
+                <div>
+                <table className="table table-striped table-sm"> 
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">name</th>
+                        <th scope="col">join</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {games.map((game: GameClass) => {
+                        return (
+                        <tr key={game.id}>
+                            <td>{game.id}</td>
+                            <td>{game.name}</td>
+                            <td>
+                            <form onSubmit={spectatorJoin}>
+                                <button onClick={e => setName(game.name)} type="submit">Join as spectator</button>
+                            </form>
+                            </td>
+                        </tr>  
+                        )
+                    })}
+                    </tbody>
+                </table>
+                </div>
             </Wrapper>
         )
     }

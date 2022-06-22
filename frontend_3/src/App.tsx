@@ -8,12 +8,15 @@ import Channels from './pages/chat/Channels';
 import Game from './pages/game/Game';
 import { io, Socket } from 'socket.io-client';
 import Chat from './pages/chat/Chat';
+import GameArea from './pages/game/GameArea';
 
 function App() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [joinMsg, setJoinMsg] = useState('');
   const [channelName, setChannelName] = useState('');
   const [messages, setMessages] = useState([]);
+  const [games, setGames] = useState([]);
+  const [gameStart, setGameStart] = useState<string | null>(null);
 
   useEffect(() => {
     const newSocket = io(`http://localhost:3000`, {withCredentials: true, transports: ['websocket']});
@@ -22,9 +25,6 @@ function App() {
       setChannelName(data.channel);
       setMessages(data.messages);
     });
-    newSocket.on('JoinQueueToClient', (data) => {
-      console.log(data);
-    });
     newSocket.on('leaveToClient', (data) => {
       console.log(data);
     });
@@ -32,7 +32,7 @@ function App() {
       setMessages(data);
     });
     newSocket.on('getGamesToClient', (data) => {
-      console.log(data);
+      setGames(data);
     });
     newSocket.on('addInviteToClient', (data) => {
       console.log(data);
@@ -44,7 +44,7 @@ function App() {
       console.log(data);
     });
     newSocket.on('gameStartsToClient', (data) => {
-      console.log(data);
+      setGameStart(data);
     });
     newSocket.on('gameUpdateToClient', (data) => {
       console.log(data);
@@ -60,12 +60,13 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/game" element={<Game socket={socket}/>}></Route>
+          <Route path="/game" element={<Game socket={socket} games={games} />}></Route>
           <Route path="/" element={<Profile socket={socket}/>}></Route>
           <Route path="/users" element={<Users socket={socket}/>}></Route>
           <Route path="/signin" element={<SingIn socket={socket}/>}></Route>
           <Route path="/channels" element={<Channels socket={socket}/>}></Route>
           <Route path="/chat" element={<Chat socket={socket} joinMsg={joinMsg} channelName={channelName} messages={messages}/>}></Route>
+          <Route path="/gamearea" element={<GameArea socket={socket} gameStart={gameStart}/>}></Route>
         </Routes>
       </BrowserRouter>
     </div>
