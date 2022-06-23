@@ -1,15 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import Wrapper from "../../components/Wrapper";
+import { gameUpdate } from "../../models/game";
 import '../game/Game.css';
 
 type Props = {
     socket: Socket | null,
     gameStart: string | null,
+    gameUpdate: gameUpdate | null,
 };
 
-const GameArea = ({socket, gameStart}: Props) =>
+const GameArea = ({socket, gameStart, gameUpdate}: Props) =>
 {
+    // const [ballx, setBallx] = useState(0);
+
+    // useEffect(() => {
+    //     if (gameUpdate !== null)
+    //         setBallx(gameUpdate.ball.x)
+    // }, [gameUpdate]);
+
     if (gameStart === null)
     {
         return(
@@ -18,6 +27,8 @@ const GameArea = ({socket, gameStart}: Props) =>
             </Wrapper>
         )
     }
+
+    
 
     return(
         <Wrapper>
@@ -33,6 +44,9 @@ const GameArea = ({socket, gameStart}: Props) =>
                     Score board
                 </h1>
             </div>
+            {/* <div>
+                {ballx}
+            </div> */}
             <p>game starts wiht matchmaking system</p>
         </Wrapper>
     );

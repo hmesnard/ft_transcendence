@@ -11,18 +11,49 @@ export enum Dir
     DOWNRIGHT = 6
 }
 
+export class gameUpdate
+{
+    constructor(
+        public player1: PlayerClass,
+        public player2: PlayerClass,
+        public ball: BallClass,
+        public options: GameOptions,
+        public name: string,
+        public sounds: Sound,
+    ) {}
+}
+
+export class PlayerClass
+{
+    constructor(
+        public user: User,
+        public x: number,
+        public y: number,
+        public score: number,
+    ) {}
+}
+
+export class BallClass
+{
+    constructor(
+        public x: number,
+        public y: number,
+        public size: number,
+    ) {}
+}
+
 export class GameClass
 {
     constructor(
         public id: number,
-        public options: GameOptions,
-        public players: Player[],
+        public options: GameOptions, //
+        public players: Player[], //
         public spectators: User,
         public finished: boolean,
         public winner: Player,
-        public name: string,
-        public ball: Ball,
-        public sounds: Sound,
+        public name: string, //
+        public ball: Ball, //
+        public sounds: Sound, //
     ){}
 }
 

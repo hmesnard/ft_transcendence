@@ -209,7 +209,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       {
         const player1: Player = { player: this.queue.shift() };
         const player2: Player = { player: this.queue.shift() };
-        if (player1.player.username !== player2.player.username)
+        // if (player1.player.username !== player2.player.username)
           this.startGame(player1, player2);
       }
     }
@@ -352,6 +352,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     let pause = true;
     setTimeout(() => {
       pause = false;
+      game.ball.direction = this.gameService.setRandomBallDirection(Math.round((Math.random() * 100) % 2) + 1);
     }, 5000);
     // create game loop with 60fps
     game.intervalId = setInterval(async () => 
@@ -366,6 +367,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
           pause = true;
           setTimeout(() => {
             pause = false;
+            game.ball.direction = this.gameService.setRandomBallDirection(Math.round((Math.random() * 100) % 2) + 1);
           }, 1000);
           if (game.finished === true)
             this.endGame(game);

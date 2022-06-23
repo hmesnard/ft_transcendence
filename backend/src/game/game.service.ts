@@ -156,6 +156,7 @@ export class GameService
 
     moveBall(ball: Ball)
     {
+        // console.log(ball.direction);
         switch (ball.direction)
         {
             case Dir.STOP:
