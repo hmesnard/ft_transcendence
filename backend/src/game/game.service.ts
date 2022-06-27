@@ -15,11 +15,13 @@ export class GameService
     // when player hits the ball
     setRandomBallDirection(x: number)
     {
+
         var direction: Dir;
         if (x === 1) // home player
-            direction = Math.round((Math.random() * 100) % 3) + 4;
+            direction = Math.floor(Math.random() * 3) + 4;
         if (x === 2) // away player
-            direction = Math.round((Math.random() * 100) % 3) + 1;
+            direction = Math.floor(Math.random() * 3) + 1;
+        console.log("dir: " + direction + " x: " + x);    
         return direction;
     }
 

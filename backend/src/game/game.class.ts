@@ -80,3 +80,9 @@ export class Invites
     sender: UserEntity;
     invitedUser: UserEntity;
 }
+
+export class gameNames
+{
+    id: number;
+    name: string;
+}

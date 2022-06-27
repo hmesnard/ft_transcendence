@@ -34,6 +34,7 @@ function App() {
       setMessages(data);
     });
     newSocket.on('getGamesToClient', (data) => {
+      console.log(data);
       setGames(data);
     });
     newSocket.on('addInviteToClient', (data) => {
@@ -49,7 +50,7 @@ function App() {
       setGameStart(data);
     });
     newSocket.on('gameUpdateToClient', (data) => {
-      console.log(data);
+      // console.log(data);
       setGameUpdate(data);
     });
     setSocket(newSocket);

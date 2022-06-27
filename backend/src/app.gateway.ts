@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
-import { Game, GameOptions, Invites, Paddle, Player } from './game/game.class';
+import { Game, GameOptions, Invites, Paddle, Player, gameNames } from './game/game.class';
 import { MatchDto } from './match/dto/match.dto';
 import { UserEntity, UserStatus } from './user/entities/user.entity';
 import { UserService } from './user/user.service';
@@ -137,7 +137,13 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   {
     try
     {
-      client.emit('getGamesToClient', this.games);
+      const gameNames: gameNames[] = [];
+      for (var i = 0; i < this.games.length; i++)
+      {
+        const gameName = {id: i, name: this.games[i].name}
+        gameNames.push(gameName);
+      }
+      client.emit('getGamesToClient', gameNames);
     }
     catch { throw new WsException('Something went wrong'); }
   }
@@ -260,7 +266,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       let player2 = this.games[index].players[1];
       if (player1.player.id === user.id)
         this.gameService.movePlayerUp(player1);
-      else
+      else if (player2.player.id === user.id)
         this.gameService.movePlayerUp(player2);
     }
     catch { throw new WsException('Something went wrong'); }
@@ -284,7 +290,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       let player2 = this.games[index].players[1];
       if (player1.player.id === user.id)
         this.gameService.movePlayerDown(player1);
-      else
+      else if (player2.player.id === user.id)
         this.gameService.movePlayerDown(player2);
     }
     catch { throw new WsException('Something went wrong'); }
@@ -347,13 +353,14 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         ball,
         sounds
     };
-    this.games.push(game);
+    
     // Wait 5 seconds to start the game
     let pause = true;
     setTimeout(() => {
       pause = false;
-      game.ball.direction = this.gameService.setRandomBallDirection(Math.round((Math.random() * 100) % 2) + 1);
     }, 5000);
+    game.ball.direction = this.gameService.setRandomBallDirection(Math.floor(Math.random() * 2) + 1);
+    this.games.push(game);
     // create game loop with 60fps
     game.intervalId = setInterval(async () => 
     {
@@ -367,7 +374,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
           pause = true;
           setTimeout(() => {
             pause = false;
-            game.ball.direction = this.gameService.setRandomBallDirection(Math.round((Math.random() * 100) % 2) + 1);
+            game.ball.direction = this.gameService.setRandomBallDirection(Math.floor(Math.random() * 2) + 1);
           }, 1000);
           if (game.finished === true)
             this.endGame(game);
@@ -375,7 +382,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       }
       this.sendGameUpdate(game);
       game.sounds = this.gameService.initSound();
-    }, 2000); // change it to 16 later
+    }, 1000); // change it to 16 later
   }
 
   sendGameUpdate(game: Game)
@@ -402,6 +409,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       name: game.name,
       sounds: game.sounds
     };
+    // console.log(game.sounds);
     this.wss.to(game.name).emit('gameUpdateToClient', gameUpdate);
   }
 

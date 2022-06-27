@@ -118,3 +118,11 @@ export class Canvas
         public w: number,
     ) {}
 }
+
+export class gameNames
+{
+    constructor(
+        public id: number,
+        public name: string,
+    ) {}
+}

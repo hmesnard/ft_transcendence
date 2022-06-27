@@ -4,13 +4,13 @@ import { Socket } from 'socket.io-client';
 import background from "../../assets/pong.png";
 import { User } from "../../models/user";
 import axios from "axios";
-import { GameClass } from "../../models/game";
+import { GameClass, gameNames } from "../../models/game";
 import './Game.css';
 import { Navigate } from "react-router";
 
 type Props = {
     socket: Socket | null,
-    games: GameClass[],
+    games: gameNames[],
 };
 
 const Game = ({socket, games}: Props) =>
@@ -121,7 +121,7 @@ const Game = ({socket, games}: Props) =>
                     </tr>
                     </thead>
                     <tbody>
-                    {games.map((game: GameClass) => {
+                    {games.map((game: gameNames) => {
                         return (
                         <tr key={game.id}>
                             <td>{game.id}</td>
